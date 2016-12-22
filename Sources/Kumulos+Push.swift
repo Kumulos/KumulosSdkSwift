@@ -85,16 +85,15 @@ public extension Kumulos{
 
     fileprivate static func getTokenType() -> Int {
         let releaseMode = MobileProvision.releaseMode()
-
-        if ([
+        
+        if let index =  [
             UIApplicationReleaseMode.adHoc,
             UIApplicationReleaseMode.dev,
             UIApplicationReleaseMode.wildcard
-            ].index(of: releaseMode)! > -1) {
+            ].index(of: releaseMode), index > -1 {
             return releaseMode.rawValue + 1;
         }
-
+        
         return Kumulos.sharedInstance.pushNotificationProductionTokenType
     }
-
 }
