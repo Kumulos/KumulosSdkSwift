@@ -75,34 +75,33 @@ public class KumulosPushChannels {
         return operation
     }
     
-    public func createChannel(uuid: String, name: String, showInPortal: Bool, meta: [String:AnyObject]?) -> KumulosPushChannelOperation
+    public func createChannel(uuid: String, name: String, showInPortal: Bool, meta: [String:AnyObject] = [:]) -> KumulosPushChannelOperation
     {
         let operation = KumulosPushChannelOperation()
         let url =  "\(sdkInstance.basePushUrl)channels"
         
-        let parameters = [
+        var parameters = [
             "uuid": uuid,
             "name": name,
-            "showInPortal": showInPortal,
-            "meta": meta
+            "showInPortal": showInPortal
         ] as [String: Any];
         
+        if (meta.count > 0) {
+            parameters["meta"] = meta
+        }
         
-        let request = sdkInstance.makeNetworkRequest(.post, url: url, parameters: parameters as [String : AnyObject], headers: ["Accept":"application/json", "Content-Type": "application/json"])
-            .responseData { response in
-                print(response)
-            }
-//            .validate(statusCode: 200..<300)
+        let request = sdkInstance.makeJsonNetworkRequest(.post, url: url, parameters: parameters as [String : AnyObject])
+            .validate(statusCode: 200..<300)
             .validate(contentType: ["application/json"])
             .responseJSON { response in
                 switch response.result {
                 case .success:
                     if let successBlock = operation.successBlock {
-                        //successBlock?(self.readChannelsFromResponse(jsonResponse: (response.result.value as! [[String : AnyObject]])))
+                        successBlock?([self.getChannelFromPayload(payload: (response.result.value as! [String : AnyObject]))])
                     }
                 case .failure(let error):
                     if let failureBlock = operation.failureBlock {
-                        //failureBlock?(error)
+                        failureBlock?(error)
                     }
                 }
         }
@@ -114,20 +113,23 @@ public class KumulosPushChannels {
         var channels = [PushChannel]();
         
         for item in jsonResponse {
-            let channel = PushChannel()
-            channel.name = item["name"] as! String
-            channel.uuid = item["uuid"] as! String
-            channel.isSubscribed = item["subscribed"] as! Bool
-            
-            if let meta = item["meta"] as? Dictionary<String, AnyObject> {
-                channel.meta = meta
-            }
-            
-            channels.append(channel);
+            channels.append(getChannelFromPayload(payload: item))
         }
         
+        return channels
+    }
+    
+    private func getChannelFromPayload(payload: [String:AnyObject]) -> PushChannel {
+        let channel = PushChannel()
+        channel.name = payload["name"] as! String
+        channel.uuid = payload["uuid"] as! String
+        channel.isSubscribed = payload["subscribed"] as! Bool
         
-        return channels;
+        if let meta = payload["meta"] as? Dictionary<String, AnyObject> {
+            channel.meta = meta
+        }
+        
+        return channel
     }
     
     public func subscribe(uuids: [String]) -> KumulosPushChannelSubscriptionOperation {
