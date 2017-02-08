@@ -1,5 +1,5 @@
 //
-//  Kumulos+PushChannels.swift
+//  KumulosPushChannels.swift
 //  KumulosSDK
 //
 //  Created by Andy on 07/02/2017.
@@ -12,16 +12,16 @@ import Alamofire
 public typealias PushChannelSubscriptionSuccessBlock = (()->Void)?
 public typealias PushChannelSubscriptionFailureBlock = ((Error?)->Void)?
 
-public class KumulosPushChannelSubscriptionOperation {
+public class KumulosPushChannelSubscriptionRequest {
     var successBlock:PushChannelSubscriptionSuccessBlock?
     var failureBlock:PushChannelSubscriptionFailureBlock?
     
-    open func success(_ success:PushChannelSubscriptionSuccessBlock) -> KumulosPushChannelSubscriptionOperation {
+    open func success(_ success:PushChannelSubscriptionSuccessBlock) -> KumulosPushChannelSubscriptionRequest {
         successBlock = success
         return self
     }
     
-    open func failure(_ failure:PushChannelSubscriptionFailureBlock) -> KumulosPushChannelSubscriptionOperation {
+    open func failure(_ failure:PushChannelSubscriptionFailureBlock) -> KumulosPushChannelSubscriptionRequest {
         failureBlock = failure
         return self
     }
@@ -30,16 +30,16 @@ public class KumulosPushChannelSubscriptionOperation {
 public typealias PushChannelSuccessBlock = (([PushChannel])->Void)?
 public typealias PushChannelFailureBlock = ((Error?)->Void)?
 
-public class KumulosPushChannelOperation {
+public class KumulosPushChannelRequest {
     var successBlock:PushChannelSuccessBlock?
     var failureBlock:PushChannelFailureBlock?
     
-    open func success(_ success:PushChannelSuccessBlock) -> KumulosPushChannelOperation {
+    open func success(_ success:PushChannelSuccessBlock) -> KumulosPushChannelRequest {
         successBlock = success
         return self
     }
     
-    open func failure(_ failure:PushChannelFailureBlock) -> KumulosPushChannelOperation {
+    open func failure(_ failure:PushChannelFailureBlock) -> KumulosPushChannelRequest {
         failureBlock = failure
         return self
     }
@@ -53,8 +53,8 @@ public class KumulosPushChannels {
         self.sdkInstance = sdkInstance;
     }
     
-    public func listChannels() -> KumulosPushChannelOperation {
-        let operation = KumulosPushChannelOperation()
+    public func listChannels() -> KumulosPushChannelRequest {
+        let request = KumulosPushChannelRequest()
         let url =  "\(sdkInstance.basePushUrl)app-installs/\(Kumulos.installId)/channels"
         
         _ = sdkInstance.makeNetworkRequest(.get, url: url, parameters: [:])
@@ -63,21 +63,21 @@ public class KumulosPushChannels {
             .responseJSON { response in
                 switch response.result {
                 case .success:
-                    if let successBlock = operation.successBlock {
+                    if let successBlock = request.successBlock {
                         successBlock?(self.readChannelsFromResponse(jsonResponse: (response.result.value as! [[String : AnyObject]])))
                     }
                 case .failure(let error):
-                    if let failureBlock = operation.failureBlock {
+                    if let failureBlock = request.failureBlock {
                         failureBlock?(error)
                     }
                 }
         }
-        return operation
+        return request
     }
     
-    public func createChannel(uuid: String, name: String, showInPortal: Bool, meta: [String:AnyObject] = [:]) -> KumulosPushChannelOperation
+    public func createChannel(uuid: String, name: String, showInPortal: Bool, meta: [String:AnyObject] = [:]) -> KumulosPushChannelRequest
     {
-        let operation = KumulosPushChannelOperation()
+        let request = KumulosPushChannelRequest()
         let url =  "\(sdkInstance.basePushUrl)channels"
         
         var parameters = [
@@ -90,22 +90,22 @@ public class KumulosPushChannels {
             parameters["meta"] = meta
         }
         
-        let request = sdkInstance.makeJsonNetworkRequest(.post, url: url, parameters: parameters as [String : AnyObject])
+            sdkInstance.makeJsonNetworkRequest(.post, url: url, parameters: parameters as [String : AnyObject])
             .validate(statusCode: 200..<300)
             .validate(contentType: ["application/json"])
             .responseJSON { response in
                 switch response.result {
                 case .success:
-                    if let successBlock = operation.successBlock {
+                    if let successBlock = request.successBlock {
                         successBlock?([self.getChannelFromPayload(payload: (response.result.value as! [String : AnyObject]))])
                     }
                 case .failure(let error):
-                    if let failureBlock = operation.failureBlock {
+                    if let failureBlock = request.failureBlock {
                         failureBlock?(error)
                     }
                 }
         }
-        return operation
+        return request
 
     }
     
@@ -132,7 +132,7 @@ public class KumulosPushChannels {
         return channel
     }
     
-    public func subscribe(uuids: [String]) -> KumulosPushChannelSubscriptionOperation {
+    public func subscribe(uuids: [String]) -> KumulosPushChannelSubscriptionRequest {
         let parameters = [
             "uuids": uuids
         ];
@@ -140,7 +140,7 @@ public class KumulosPushChannels {
         return makeSubscriptionNetworkCall(.post, parameters: parameters as [String:AnyObject])
     }
     
-    public func unsubscribe(uuids: [String]) -> KumulosPushChannelSubscriptionOperation {
+    public func unsubscribe(uuids: [String]) -> KumulosPushChannelSubscriptionRequest {
         let parameters = [
             "uuids": uuids
         ];
@@ -148,7 +148,7 @@ public class KumulosPushChannels {
         return makeSubscriptionNetworkCall(.delete, parameters: parameters as [String:AnyObject])
     }
     
-    public func setSubscriptions(uuids: [String]) -> KumulosPushChannelSubscriptionOperation {
+    public func setSubscriptions(uuids: [String]) -> KumulosPushChannelSubscriptionRequest {
         let parameters = [
             "uuids": uuids
         ];
@@ -157,32 +157,32 @@ public class KumulosPushChannels {
     }
 
     private func makeSubscriptionNetworkCall(_ method: Alamofire.HTTPMethod, parameters: [String:AnyObject])
-        -> KumulosPushChannelSubscriptionOperation
+        -> KumulosPushChannelSubscriptionRequest
     {
         let url =  "\(sdkInstance.basePushUrl)/app-installs/\(Kumulos.installId)/channels/subscriptions"
         
         return makeNetworkCall(method: method, url: url, parameters: parameters)
     }
     
-    private func makeNetworkCall(method: Alamofire.HTTPMethod, url: URLConvertible, parameters: [String : AnyObject]) -> KumulosPushChannelSubscriptionOperation{
+    private func makeNetworkCall(method: Alamofire.HTTPMethod, url: URLConvertible, parameters: [String : AnyObject]) -> KumulosPushChannelSubscriptionRequest{
         
-        let operation = KumulosPushChannelSubscriptionOperation()
+        let request = KumulosPushChannelSubscriptionRequest()
         
         _ = sdkInstance.makeNetworkRequest(.post, url: url, parameters: parameters as [String : AnyObject])
             .validate(statusCode: 200..<300)
             .responseData { response in
                 switch response.result {
                 case .success:
-                    if let successBlock = operation.successBlock {
+                    if let successBlock = request.successBlock {
                         successBlock?()
                     }
                 case .failure(let error):
-                    if let failureBlock = operation.failureBlock {
+                    if let failureBlock = request.failureBlock {
                         failureBlock?(error)
                     }
                 }
         }
-        return operation
+        return request
     }
 }
 
