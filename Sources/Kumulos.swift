@@ -38,6 +38,11 @@ open class Kumulos {
             return instance!
         }
     }
+    
+    public static func getInstance() -> Kumulos
+    {
+        return sharedInstance;
+    }
 
     fileprivate(set) var apiKey: String
     fileprivate(set) var secretKey: String
