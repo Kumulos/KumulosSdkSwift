@@ -121,9 +121,13 @@ public class KumulosPushChannels {
     
     private func getChannelFromPayload(payload: [String:AnyObject]) -> PushChannel {
         let channel = PushChannel()
-        channel.name = payload["name"] as! String
+                
         channel.uuid = payload["uuid"] as! String
         channel.isSubscribed = payload["subscribed"] as! Bool
+        
+        if let name = payload["name"] as? String {
+            channel.name = name
+        }
         
         if let meta = payload["meta"] as? Dictionary<String, AnyObject> {
             channel.meta = meta
