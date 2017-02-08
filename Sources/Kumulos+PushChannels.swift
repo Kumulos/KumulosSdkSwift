@@ -58,23 +58,13 @@ public class KumulosPushChannels {
         let url =  "\(sdkInstance.basePushUrl)app-installs/\(Kumulos.installId)/channels"
         
         _ = sdkInstance.makeNetworkRequest(.get, url: url, parameters: [:])
-            .responseData { response in
-        
-         
-                print("Request: \(response.request)")
-                print("Response: \(response.response)")
-                //print("Error: \(response.error)")
-                
-                if let data = response.data, let utf8Text = String(data: data, encoding: .utf8) {
-                    print("Data: \(utf8Text)")
-                }
-                
-    }
+            .validate(statusCode: 200..<300)
+            .validate(contentType: ["application/json"])
             .responseJSON { response in
                 switch response.result {
                 case .success:
                     if let successBlock = operation.successBlock {
-                        successBlock?(self.readChannelsFromResponse(jsonResponse: (response.result.value as? Dictionary<String,AnyObject>)!))
+                        successBlock?(self.readChannelsFromResponse(jsonResponse: (response.result.value as! [[String : AnyObject]])))
                     }
                 case .failure(let error):
                     if let failureBlock = operation.failureBlock {
@@ -85,12 +75,24 @@ public class KumulosPushChannels {
         return operation
     }
     
-    private func readChannelsFromResponse(jsonResponse: Dictionary<String,AnyObject>) -> [PushChannel] {
+    private func readChannelsFromResponse(jsonResponse: [[String : AnyObject]]) -> [PushChannel] {
+        var channels = [PushChannel]();
         
-            print(jsonResponse)
+        for item in jsonResponse {
+            let channel = PushChannel()
+            channel.name = item["name"] as! String
+            channel.uuid = item["uuid"] as! String
+            channel.isSubscribed = item["subscribed"] as! Bool
+            
+            if let meta = item["meta"] as? Dictionary<String, AnyObject> {
+                channel.meta = meta
+            }
+            
+            channels.append(channel);
+        }
         
         
-        return [PushChannel]();
+        return channels;
     }
     
     public func subscribe(uuids: [String]) -> KumulosPushChannelSubscriptionOperation {
@@ -130,6 +132,7 @@ public class KumulosPushChannels {
         let operation = KumulosPushChannelSubscriptionOperation()
         
         _ = sdkInstance.makeNetworkRequest(.post, url: url, parameters: parameters as [String : AnyObject])
+            .validate(statusCode: 200..<300)
             .responseData { response in
                 switch response.result {
                 case .success:
