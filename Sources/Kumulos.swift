@@ -148,12 +148,16 @@ open class Kumulos {
         sessionToken = UUID().uuidString
     }
 
-    internal func makeNetworkRequest(_ method: Alamofire.HTTPMethod, url: URLConvertible, parameters: [String : AnyObject]?) -> Alamofire.DataRequest {
-        let headers: HTTPHeaders = [
+    internal func makeNetworkRequest(_ method: Alamofire.HTTPMethod, url: URLConvertible, parameters: [String : AnyObject]?, headers: [String: String] = [:]) -> Alamofire.DataRequest {
+        var requestHeaders: HTTPHeaders = [
             "Authorization": getAuth()
         ];
-
-        return Alamofire.request(url, method: method, parameters: parameters, headers: headers)
+        
+        for header in headers {
+            requestHeaders[header.key] = header.value
+        }
+        
+        return Alamofire.request(url, method: method, parameters: parameters, headers: requestHeaders)
     }
 
     fileprivate func getAuth()-> String {
