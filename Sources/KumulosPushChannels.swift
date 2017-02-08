@@ -75,7 +75,7 @@ public class KumulosPushChannels {
         return request
     }
     
-    public func createChannel(uuid: String, name: String, showInPortal: Bool, meta: [String:AnyObject] = [:]) -> KumulosPushChannelRequest
+    public func createChannel(uuid: String, name: String, showInPortal: Bool, meta: [String:AnyObject]? = nil) -> KumulosPushChannelRequest
     {
         let request = KumulosPushChannelRequest()
         let url =  "\(sdkInstance.basePushUrl)channels"
@@ -86,15 +86,15 @@ public class KumulosPushChannels {
             "showInPortal": showInPortal
         ] as [String: Any];
         
-        if (meta.count > 0) {
+        if (meta != nil) {
             parameters["meta"] = meta
         }
         
-            sdkInstance.makeJsonNetworkRequest(.post, url: url, parameters: parameters as [String : AnyObject])
-            .validate(statusCode: 200..<300)
-            .validate(contentType: ["application/json"])
-            .responseJSON { response in
-                switch response.result {
+        sdkInstance.makeJsonNetworkRequest(.post, url: url, parameters: parameters as [String : AnyObject])
+        .validate(statusCode: 200..<300)
+        .validate(contentType: ["application/json"])
+        .responseJSON { response in
+            switch response.result {
                 case .success:
                     if let successBlock = request.successBlock {
                         successBlock?([self.getChannelFromPayload(payload: (response.result.value as! [String : AnyObject]))])
@@ -103,7 +103,7 @@ public class KumulosPushChannels {
                     if let failureBlock = request.failureBlock {
                         failureBlock?(error)
                     }
-                }
+            }
         }
         return request
 
@@ -172,10 +172,10 @@ public class KumulosPushChannels {
         
         let request = KumulosPushChannelSubscriptionRequest()
         
-        _ = sdkInstance.makeNetworkRequest(.post, url: url, parameters: parameters as [String : AnyObject])
-            .validate(statusCode: 200..<300)
-            .responseData { response in
-                switch response.result {
+        sdkInstance.makeNetworkRequest(.post, url: url, parameters: parameters as [String : AnyObject])
+        .validate(statusCode: 200..<300)
+        .responseData { response in
+            switch response.result {
                 case .success:
                     if let successBlock = request.successBlock {
                         successBlock?()
@@ -184,7 +184,7 @@ public class KumulosPushChannels {
                     if let failureBlock = request.failureBlock {
                         failureBlock?(error)
                     }
-                }
+            }
         }
         return request
     }
