@@ -53,6 +53,10 @@ public class KumulosPushChannels {
         self.sdkInstance = sdkInstance;
     }
     
+    /**
+        Get a list of all push channels that are available for subscription or already subscribed to
+        by this installation.
+     */
     public func listChannels() -> KumulosPushChannelRequest {
         let request = KumulosPushChannelRequest()
         let url =  "\(sdkInstance.basePushUrl)app-installs/\(Kumulos.installId)/channels"
@@ -75,11 +79,29 @@ public class KumulosPushChannels {
         return request
     }
     
+    /**
+        Create a push channel for subscribing to, it will not be available via the Kumulos portal
+     
+        - Parameters:
+            - uuid: Unique idenfitifer for the channel
+            - subscribe: Subscribe the current installation as part of the creation
+            - name: Optional descriptive name for the channel
+            - meta: Optional custom meta-data to associate with this push channel
+     */
     public func createChannel(uuid: String, subscribe: Bool, name: String? = nil, meta: [String:AnyObject]? = nil) -> KumulosPushChannelRequest {
         return doCreateChannel(uuid: uuid, subscribe: subscribe, name: name, showInPortal: false, meta: meta)
     }
     
-    
+    /**
+        Create a push channel for subscribing to, it will not be available via the Kumulos portal
+     
+        - Parameters:
+            - uuid: Unique idenfitifer for the channel
+            - subscribe: Subscribe the current installation as part of the creation
+            - name: Descriptive name for the channel
+            - showInPortal: Should the channel show up in the portal for targeting?
+            - meta: Optional custom meta-data to associate with this push channel
+     */
     public func createChannel(uuid: String, subscribe: Bool, name: String, showInPortal: Bool, meta: [String:AnyObject]? = nil) -> KumulosPushChannelRequest {
         return doCreateChannel(uuid: uuid, subscribe: subscribe, name: name, showInPortal: showInPortal, meta: meta)
     }
@@ -153,6 +175,16 @@ public class KumulosPushChannels {
         return channel
     }
     
+    /**
+        Subscribes the current installation to the push channels specified by their unique identifiers.
+     
+        Note that channels must exist prior to subscription requests.
+        Duplicate subscription requests will be ignored.
+     
+        - Parameters
+            - uuids: The unique push channel identifiers to subscribe to
+     
+    */
     public func subscribe(uuids: [String]) -> KumulosPushChannelSubscriptionRequest {
         let parameters = [
             "uuids": uuids
@@ -161,6 +193,14 @@ public class KumulosPushChannels {
         return makeSubscriptionNetworkCall(.post, parameters: parameters as [String:AnyObject])
     }
     
+    /**
+        Unsubscribes the current installation from the push channels specified by their unique identifiers.
+     
+     
+        - Parameters
+            - uuids: The unique push channel identifiers to unsubscribe from
+     
+    */
     public func unsubscribe(uuids: [String]) -> KumulosPushChannelSubscriptionRequest {
         let parameters = [
             "uuids": uuids
@@ -169,6 +209,14 @@ public class KumulosPushChannels {
         return makeSubscriptionNetworkCall(.delete, parameters: parameters as [String:AnyObject])
     }
     
+    /**
+        Subscribe the current installation to the given push channels.
+     
+        Any other existing channel subscriptions will be removed.
+     
+        - Parameters
+            - uuids: The unique push channel identifiers to subscribe to
+    */
     public func setSubscriptions(uuids: [String]) -> KumulosPushChannelSubscriptionRequest {
         let parameters = [
             "uuids": uuids
