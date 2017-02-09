@@ -224,6 +224,14 @@ public class KumulosPushChannels {
         
         return makeSubscriptionNetworkCall(.put, parameters: parameters as [String:AnyObject]);
     }
+    
+    /**
+        Unsubscribe the existing installation from all push channel subscriptions.
+    */
+    public func clearSubscriptions() -> KumulosPushChannelSubscriptionRequest
+    {
+        return makeSubscriptionNetworkCall(.put, parameters: [:])
+    }
 
     private func makeSubscriptionNetworkCall(_ method: Alamofire.HTTPMethod, parameters: [String:AnyObject])
         -> KumulosPushChannelSubscriptionRequest
