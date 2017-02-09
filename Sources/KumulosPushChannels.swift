@@ -85,7 +85,7 @@ public class KumulosPushChannels {
         - Parameters:
             - uuid: Unique idenfitifer for the channel
             - subscribe: Subscribe the current installation as part of the creation
-            - name: Optional descriptive name for the channel
+            - name: Optional descriptive name for the channel, if provided the channel will be publicly available to all requesting apps
             - meta: Optional custom meta-data to associate with this push channel
      */
     public func createChannel(uuid: String, subscribe: Bool, name: String? = nil, meta: [String:AnyObject]? = nil) -> KumulosPushChannelRequest {
@@ -93,12 +93,12 @@ public class KumulosPushChannels {
     }
     
     /**
-        Create a push channel for subscribing to, it will not be available via the Kumulos portal
+        Create a push channel for subscribing to
      
         - Parameters:
             - uuid: Unique idenfitifer for the channel
             - subscribe: Subscribe the current installation as part of the creation
-            - name: Descriptive name for the channel
+            - name: Descriptive name for the channel, if provided the channel will be publicly available to all requesting apps
             - showInPortal: Should the channel show up in the portal for targeting?
             - meta: Optional custom meta-data to associate with this push channel
      */
