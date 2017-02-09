@@ -16,12 +16,12 @@ public class KumulosPushChannelSubscriptionRequest {
     var successBlock:PushChannelSubscriptionSuccessBlock?
     var failureBlock:PushChannelSubscriptionFailureBlock?
     
-    open func success(_ success:PushChannelSubscriptionSuccessBlock) -> KumulosPushChannelSubscriptionRequest {
+    @discardableResult open func success(_ success:PushChannelSubscriptionSuccessBlock) -> KumulosPushChannelSubscriptionRequest {
         successBlock = success
         return self
     }
     
-    open func failure(_ failure:PushChannelSubscriptionFailureBlock) -> KumulosPushChannelSubscriptionRequest {
+    @discardableResult open func failure(_ failure:PushChannelSubscriptionFailureBlock) -> KumulosPushChannelSubscriptionRequest {
         failureBlock = failure
         return self
     }
@@ -34,12 +34,12 @@ public class KumulosPushChannelRequest {
     var successBlock:PushChannelSuccessBlock?
     var failureBlock:PushChannelFailureBlock?
     
-    open func success(_ success:PushChannelSuccessBlock) -> KumulosPushChannelRequest {
+    @discardableResult open func success(_ success:PushChannelSuccessBlock) -> KumulosPushChannelRequest {
         successBlock = success
         return self
     }
     
-    open func failure(_ failure:PushChannelFailureBlock) -> KumulosPushChannelRequest {
+    @discardableResult open func failure(_ failure:PushChannelFailureBlock) -> KumulosPushChannelRequest {
         failureBlock = failure
         return self
     }

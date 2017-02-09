@@ -70,7 +70,7 @@ open class KSAPIOperation: Operation {
         }
         ```
     */
-    open func success(_ success:KSAPIOperationSuccessBlock) -> KSAPIOperation {
+    @discardableResult open func success(_ success:KSAPIOperationSuccessBlock) -> KSAPIOperation {
         successBlock = success
         return self
     }
@@ -81,7 +81,7 @@ open class KSAPIOperation: Operation {
         - Parameters:
             - failure: A block object to be executed upon the failure of the operation. This block has no return value and takes two arguments: the completed operation and the resulting error.
     */
-    open func failure(_ failure:KSAPIOperationFailureBlock) -> KSAPIOperation {
+    @discardableResult open func failure(_ failure:KSAPIOperationFailureBlock) -> KSAPIOperation {
         failureBlock = failure
         return self
     }
