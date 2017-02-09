@@ -57,11 +57,11 @@ public class KumulosPushChannels {
         let request = KumulosPushChannelRequest()
         let url =  "\(sdkInstance.basePushUrl)app-installs/\(Kumulos.installId)/channels"
         
-        _ = sdkInstance.makeNetworkRequest(.get, url: url, parameters: [:])
-            .validate(statusCode: 200..<300)
-            .validate(contentType: ["application/json"])
-            .responseJSON { response in
-                switch response.result {
+        sdkInstance.makeNetworkRequest(.get, url: url, parameters: [:])
+        .validate(statusCode: 200..<300)
+        .validate(contentType: ["application/json"])
+        .responseJSON { response in
+            switch response.result {
                 case .success:
                     if let successBlock = request.successBlock {
                         successBlock?(self.readChannelsFromResponse(jsonResponse: (response.result.value as! [[String : AnyObject]])))
@@ -70,24 +70,41 @@ public class KumulosPushChannels {
                     if let failureBlock = request.failureBlock {
                         failureBlock?(error)
                     }
-                }
+            }
         }
         return request
     }
     
-    public func createChannel(uuid: String, name: String, showInPortal: Bool, meta: [String:AnyObject]? = nil) -> KumulosPushChannelRequest
+    public func createChannel(uuid: String, subscribe: Bool, name: String? = nil, meta: [String:AnyObject]? = nil) -> KumulosPushChannelRequest {
+        return doCreateChannel(uuid: uuid, subscribe: subscribe, name: name, showInPortal: false, meta: meta)
+    }
+    
+    
+    public func createChannel(uuid: String, subscribe: Bool, name: String, showInPortal: Bool, meta: [String:AnyObject]? = nil) -> KumulosPushChannelRequest {
+        return doCreateChannel(uuid: uuid, subscribe: subscribe, name: name, showInPortal: showInPortal, meta: meta)
+    }
+    
+    
+    private func doCreateChannel(uuid: String, subscribe: Bool, name: String? = nil, showInPortal: Bool, meta: [String:AnyObject]? = nil) -> KumulosPushChannelRequest
     {
         let request = KumulosPushChannelRequest()
         let url =  "\(sdkInstance.basePushUrl)channels"
         
         var parameters = [
             "uuid": uuid,
-            "name": name,
             "showInPortal": showInPortal
         ] as [String: Any];
+
+        if (name != nil) {
+            parameters["name"] = name
+        }
         
         if (meta != nil) {
             parameters["meta"] = meta
+        }
+        
+        if (subscribe == true) {
+            parameters["installId"] = Kumulos.installId
         }
         
         sdkInstance.makeJsonNetworkRequest(.post, url: url, parameters: parameters as [String : AnyObject])
