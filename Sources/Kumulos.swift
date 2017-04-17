@@ -149,7 +149,7 @@ open class Kumulos {
     }
 
     internal func makeNetworkRequest(_ method: Alamofire.HTTPMethod, url: URLConvertible, parameters: [String : AnyObject]?) -> Alamofire.DataRequest {
-        var requestHeaders: HTTPHeaders = [
+        let requestHeaders: HTTPHeaders = [
             "Authorization": getAuth()
         ];
         
@@ -157,7 +157,7 @@ open class Kumulos {
     }
     
     internal func makeJsonNetworkRequest(_ method: Alamofire.HTTPMethod, url: URLConvertible, parameters: [String : AnyObject]?) -> Alamofire.DataRequest {
-        var requestHeaders: HTTPHeaders = [
+        let requestHeaders: HTTPHeaders = [
             "Authorization": getAuth(),
             "Accept": "application/json",
             "Content-Type": "application/json"
