@@ -2,25 +2,57 @@
 
 Kumulos provides tools to build and host backend storage for apps, send push notifications, view audience and behavior analytics, and report on adoption, engagement and performance.
 
-To get started, add a dependency to your `Cartfile`:
+Select an installation method below to get started.
+
+## Get Started with CocoaPods
+
+Add the following line to your app's target in your `Podfile`:
 
 ```
-github "Kumulos/KumulosSdkSwift" ~> 1.2
+pod 'KumulosSdkSwift', '~> 1.3'
+```
+
+Run `pod install` to install your dependencies.
+
+After installation, you can now import & initialize the SDK with:
+
+```swift
+import KumulosSDK
+
+Kumulos.initialize("YOUR_API_KEY", secretKey: "YOUR_SECRET_KEY")
 ```
 
 For more information on integrating the Swift SDK with your project, please see the [Kumulos Swift integration guide](https://docs.kumulos.com/integration/swift).
 
-### Requirements
+## Get Started with Carthage
 
-- iOS9+
-- Swift3
+Add the following line to your `Cartfile`:
+
+```
+github "Kumulos/KumulosSdkSwift" ~> 1.3
+```
+
+Run `carthage update` to install your dependencies then follow the [Carthage integration steps](https://github.com/Carthage/Carthage#getting-started) to link the framework with your project.
+
+After installation, you can now import & initialize the SDK with:
+
+```swift
+import KumulosSDK
+
+Kumulos.initialize("YOUR_API_KEY", secretKey: "YOUR_SECRET_KEY")
+```
+
+For more information on integrating the Swift SDK with your project, please see the [Kumulos Swift integration guide](https://docs.kumulos.com/integration/swift).
 
 ## Contributing
 
 Pull requests are welcome for any improvements you might wish to make. If it's something big and you're not sure about it yet, we'd be happy to discuss it first. You can either file an issue or drop us a line to [support@kumulos.com](mailto:support@kumulos.com).
 
-To get started with development, simply clone this repo, run a `carthage update` and open the workspace to kick things off.
-
 ## License
 
 This project is licensed under the MIT license with portions licensed under the BSD 2-Clause license. See our LICENSE file and individual source files for more information.
+
+## Requirements
+
+- iOS9+
+- Swift3
