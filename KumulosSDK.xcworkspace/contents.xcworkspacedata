@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:Carthage/Checkouts/KSCrash/iOS/KSCrash-iOS.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "container:KumulosSDK.xcodeproj">
    </FileRef>
    <FileRef

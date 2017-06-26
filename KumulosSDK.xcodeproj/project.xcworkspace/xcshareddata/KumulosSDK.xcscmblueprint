@@ -1,16 +1,18 @@
 {
-  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "CF894C31425950FBE8E26C59B5F1342F215F8E62",
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "836CBCF866A8E72BD0B8906AB4EBF61323209738",
   "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
 
   },
   "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
     "CF894C31425950FBE8E26C59B5F1342F215F8E62" : 0,
+    "836CBCF866A8E72BD0B8906AB4EBF61323209738" : 9223372036854775807,
     "67620B5EFA902936DF04070AF595B76AB0333747" : 0
   },
   "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "F3862DE3-9FBE-4872-8D08-BF7D98876FB1",
   "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
     "CF894C31425950FBE8E26C59B5F1342F215F8E62" : "sdk-swift-public\/",
-    "67620B5EFA902936DF04070AF595B76AB0333747" : "sdk-swift-public\/Carthage\/Checkouts\/Alamofire\/"
+    "836CBCF866A8E72BD0B8906AB4EBF61323209738" : "KumulosSdkSwift\/",
+    "67620B5EFA902936DF04070AF595B76AB0333747" : "KumulosSdkSwift\/Carthage\/Checkouts\/Alamofire\/"
   },
   "DVTSourceControlWorkspaceBlueprintNameKey" : "KumulosSDK",
   "DVTSourceControlWorkspaceBlueprintVersion" : 204,
@@ -20,6 +22,11 @@
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/Alamofire\/Alamofire.git",
       "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "67620B5EFA902936DF04070AF595B76AB0333747"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/Kumulos\/KumulosSdkSwift.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "836CBCF866A8E72BD0B8906AB4EBF61323209738"
     },
     {
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "code.waracle.net:kumulos\/sdk-swift.git",
