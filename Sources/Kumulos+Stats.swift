@@ -59,17 +59,17 @@ struct Platform {
     }()
 }
 
-internal extension Kumulos{
+public extension Kumulos{
 
-    func sendLocationInformation(location: CLLocation) {
-        let url = "\(self.baseStatsUrl)app-installs/\(Kumulos.installId)/location"
+    public static func sendLocationUpdate(location: CLLocation) {
+        let url = "\(sharedInstance.baseStatsUrl)app-installs/\(Kumulos.installId)/location"
         
         let parameters = [
-            "latitude" : location.coordinate.latitude,
-            "longitude" : location.coordinate.longitude
+            "lat" : location.coordinate.latitude,
+            "lng" : location.coordinate.longitude
         ]
         
-        _ = self.makeNetworkRequest(.put, url: url, parameters: parameters as [String: AnyObject])
+        _ = sharedInstance.makeNetworkRequest(.put, url: url, parameters: parameters as [String: AnyObject])
     }
     
     func sendDeviceInformation() {
