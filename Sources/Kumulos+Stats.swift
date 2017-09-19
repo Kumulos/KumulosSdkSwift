@@ -72,7 +72,7 @@ public extension Kumulos{
         _ = sharedInstance.makeNetworkRequest(.put, url: url, parameters: parameters as [String: AnyObject])
     }
     
-    func sendDeviceInformation() {
+    internal func sendDeviceInformation() {
 
         var target = TargetType.targetTypeRelease
 
