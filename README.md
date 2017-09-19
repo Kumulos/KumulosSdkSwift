@@ -29,7 +29,7 @@ For more information on integrating the Swift SDK with your project, please see 
 Add the following line to your `Cartfile`:
 
 ```
-github "Kumulos/KumulosSdkSwift" ~> 1.3
+github "Kumulos/KumulosSdkSwift" ~> 1.4
 ```
 
 Run `carthage update` to install your dependencies then follow the [Carthage integration steps](https://github.com/Carthage/Carthage#getting-started) to link the framework with your project.
