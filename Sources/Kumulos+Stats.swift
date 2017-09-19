@@ -82,6 +82,7 @@ public extension Kumulos{
         #endif
 
         var app = [String : AnyObject]()
+        app["bundle"] = Bundle.main.infoDictionary!["CFBundleIdentifier"] as AnyObject?
         app["version"] = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as AnyObject?
         app["target"] = target.rawValue as AnyObject?
 
