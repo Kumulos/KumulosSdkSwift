@@ -122,7 +122,11 @@ internal extension Kumulos{
             os["version"] = UIDevice.current.systemVersion as AnyObject?
         }
 
-
+        if (NSLocale.preferredLanguages.count >= 1) {
+            device["locale"] = NSLocale.preferredLanguages[0] as AnyObject
+        }
+        
+        
         device["isSimulator"] = Platform.isSimulator as AnyObject?
 
         let finalParameters = [
