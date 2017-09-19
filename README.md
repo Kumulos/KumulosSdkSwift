@@ -9,7 +9,7 @@ Select an installation method below to get started.
 Add the following line to your app's target in your `Podfile`:
 
 ```
-pod 'KumulosSdkSwift', '~> 1.3'
+pod 'KumulosSdkSwift', '~> 1.4'
 ```
 
 Run `pod install` to install your dependencies.
