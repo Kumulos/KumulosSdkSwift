@@ -88,7 +88,7 @@ public extension Kumulos{
 
 
         var sdk = [String : AnyObject]()
-        sdk["id"] = SDKTypeID.sdkTypeObjC.rawValue
+        sdk["id"] = SDKTypeID.sdkTypeSwift.rawValue
 
         let frameworkBundle = Bundle(for: Kumulos.self)
         let sdkVersion = frameworkBundle.infoDictionary!["CFBundleShortVersionString"]
