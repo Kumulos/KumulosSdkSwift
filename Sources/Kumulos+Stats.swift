@@ -5,6 +5,7 @@
 
 import Foundation
 import Alamofire
+import CoreLocation
 
 #if os(iOS) || os(watchOS) || os(tvOS)
     import UIKit
@@ -60,6 +61,17 @@ struct Platform {
 
 internal extension Kumulos{
 
+    func sendLocationInformation(location: CLLocation) {
+        let url = "\(self.baseStatsUrl)app-installs/\(Kumulos.installId)/location"
+        
+        let parameters = [
+            "latitude" : location.coordinate.latitude,
+            "longitude" : location.coordinate.longitude
+        ]
+        
+        _ = self.makeNetworkRequest(.put, url: url, parameters: parameters as [String: AnyObject])
+    }
+    
     func sendDeviceInformation() {
 
         var target = TargetType.targetTypeRelease
