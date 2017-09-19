@@ -127,7 +127,6 @@ public extension Kumulos{
             device["locale"] = NSLocale.preferredLanguages[0] as AnyObject
         }
         
-        
         device["isSimulator"] = Platform.isSimulator as AnyObject?
 
         let finalParameters = [
