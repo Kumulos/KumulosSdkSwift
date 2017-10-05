@@ -47,7 +47,7 @@ open class Kumulos {
 
     fileprivate(set) var apiKey: String
     fileprivate(set) var secretKey: String
-
+    
     open static var apiKey:String {
         get {
             return sharedInstance.apiKey
@@ -101,45 +101,23 @@ open class Kumulos {
     }
 
     /**
-        Initialize the KumulosSDK - attempting to read the apiKey and secretKey from your project plist.
-    */
-    open static func initialize() {
-        initWithKeysFromPlist()
-    }
-
-    /**
         Initialize the KumulosSDK.
 
         - Parameters:
-            - apiKey: Your app's API key available from the Kumulos Konsole
-            - secretKey: Your app's secret key available from the Kumulos Konsole
+              - config: An instance of KSConfig
     */
-    open static func initialize(_ apiKey: String, secretKey: String) {
+    open static func initialize(config: KSConfig) {
         if (instance !== nil) {
             assertionFailure("The KumulosSDK has already been initialized")
         }
 
-        instance = Kumulos(apiKey: apiKey, secretKey: secretKey)
-
-        instance!.sendDeviceInformation()
-    }
-
-    fileprivate static func initWithKeysFromPlist() {
-        let path = Bundle.main.path(forResource: "Info", ofType: "plist"),
-            dict = NSDictionary(contentsOfFile: path!) as? [String: AnyObject],
-            kumulosDict = dict!["Kumulos"] as? [String: AnyObject]
-
-        if(kumulosDict == nil) {
-            assertionFailure("Kumulos Plist dictionary not found")
+        instance = Kumulos(apiKey: config.ApiKey, secretKey: config.SecretKey)
+        
+        if (config.EnableCrash) {
+            instance!.trackAndReportCrashes()
         }
 
-        let apiKey = kumulosDict!["apiKey"] as? String,
-            secretKey = kumulosDict!["SecretKey"] as? String
-
-        assert(!(apiKey ?? "").isEmpty, "API key not found")
-        assert(!(secretKey ?? "").isEmpty, "API key not found")
-
-        initialize(apiKey!, secretKey: secretKey!)
+        instance!.sendDeviceInformation()
     }
 
     fileprivate init(apiKey: String, secretKey: String){

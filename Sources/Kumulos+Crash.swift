@@ -9,12 +9,12 @@
 import Foundation
 import KSCrash
 
-public extension Kumulos{
+public extension Kumulos {
     
     /**
-     Helper method for logging crashes to the API if logged.
+     Send any pending reports to the API
      */
-    public static func trackAndReportCrashes() {
+    func trackAndReportCrashes() {
         
         let sdkInstance = Kumulos.getInstance()
         let url =  "\(sdkInstance.baseCrashUrl)track/\(Kumulos.apiKey)/kscrash/\(Kumulos.installId)"
@@ -23,7 +23,7 @@ public extension Kumulos{
         installation?.url = URL(string: url)
                 
         installation?.install()
-        
+                
         installation?.sendAllReports { (reports, completed, error) -> Void in
             if(completed) {
                 print("Sent \(String(describing: reports?.count)) reports")

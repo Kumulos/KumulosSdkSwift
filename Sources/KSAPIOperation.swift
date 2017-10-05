@@ -117,7 +117,7 @@ open class KSAPIOperation: Operation {
                             // error?
                             let responseMessage = results["responseMessage"] as? String
                             let userInfo: [AnyHashable: Any] = [NSLocalizedDescriptionKey :  responseMessage!]
-                            let error = NSError(domain: "Kumulos", code: responseCode as! Int, userInfo: userInfo)
+                            let error = NSError(domain: "Kumulos", code: responseCode as! Int, userInfo: userInfo as? [String : Any])
 
                             self.delegate?.didFail(self, error: error)
                         }
@@ -172,7 +172,7 @@ open class KSAPIOperation: Operation {
     fileprivate func onRequestError() {
         let userInfo: [AnyHashable: Any] = [NSLocalizedDescriptionKey :  NSLocalizedString("Response Error", value: "Could not parse the Kumulos response", comment: ""),
                                                 NSLocalizedFailureReasonErrorKey : NSLocalizedString("Response Error", value: "Could not parse the Kumulos response", comment: "")]
-        let error = NSError(domain: "KumulosResponseErrorDomain", code: 0, userInfo: userInfo)
+        let error = NSError(domain: "KumulosResponseErrorDomain", code: 0, userInfo: userInfo as? [String : Any])
 
         self.delegate?.didFail(self, error: error)
     }

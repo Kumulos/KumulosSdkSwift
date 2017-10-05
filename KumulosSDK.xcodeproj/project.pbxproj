@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		127B22B11D9BE39400D9C94B /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 127B22B01D9BE39400D9C94B /* Alamofire.framework */; };
 		127B22D91D9BE59E00D9C94B /* CwlSysctl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 127B22CE1D9BE59E00D9C94B /* CwlSysctl.swift */; };
 		127B22DB1D9BE59E00D9C94B /* KSAPIOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 127B22D01D9BE59E00D9C94B /* KSAPIOperation.swift */; };
 		127B22DC1D9BE59E00D9C94B /* KSResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 127B22D11D9BE59E00D9C94B /* KSResponse.swift */; };
@@ -26,11 +25,10 @@
 		A13430BE1F014FD400D185FD /* KSCrash.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A13430B31F014C1500D185FD /* KSCrash.framework */; };
 		A16790821E49D8BD00C276AF /* KumulosPushChannels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A16790811E49D8BD00C276AF /* KumulosPushChannels.swift */; };
 		A16790841E49DCDE00C276AF /* PushChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A16790831E49DCDE00C276AF /* PushChannel.swift */; };
+		A1D97A4D1F866D06002CFB42 /* KSConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1D97A4C1F866D06002CFB42 /* KSConfig.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		127B22AE1D9BE37B00D9C94B /* Alamofire.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Alamofire.framework; path = "Carthage/Checkouts/Alamofire/build/Debug-iphoneos/Alamofire.framework"; sourceTree = "<group>"; };
-		127B22B01D9BE39400D9C94B /* Alamofire.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Alamofire.framework; path = "Carthage/Checkouts/Alamofire/build/Debug-iphoneos/Alamofire.framework"; sourceTree = "<group>"; };
 		127B22CE1D9BE59E00D9C94B /* CwlSysctl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CwlSysctl.swift; path = Sources/CwlSysctl.swift; sourceTree = "<group>"; };
 		127B22CF1D9BE59E00D9C94B /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Sources/Info.plist; sourceTree = "<group>"; };
 		127B22D01D9BE59E00D9C94B /* KSAPIOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = KSAPIOperation.swift; path = Sources/KSAPIOperation.swift; sourceTree = "<group>"; };
@@ -50,6 +48,7 @@
 		A13430BC1F014E9100D185FD /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		A16790811E49D8BD00C276AF /* KumulosPushChannels.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = KumulosPushChannels.swift; path = Sources/KumulosPushChannels.swift; sourceTree = "<group>"; };
 		A16790831E49DCDE00C276AF /* PushChannel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PushChannel.swift; path = Sources/PushChannel.swift; sourceTree = "<group>"; };
+		A1D97A4C1F866D06002CFB42 /* KSConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSConfig.swift; sourceTree = "<group>"; };
 		DB481C1A1D3BC9D30021C627 /* KumulosSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = KumulosSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -63,7 +62,6 @@
 				A13430BB1F014E8200D185FD /* libc++.tbd in Frameworks */,
 				A13430B91F014E6500D185FD /* MessageUI.framework in Frameworks */,
 				A13430B71F014E5D00D185FD /* SystemConfiguration.framework in Frameworks */,
-				127B22B11D9BE39400D9C94B /* Alamofire.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,8 +76,6 @@
 				A13430B81F014E6500D185FD /* MessageUI.framework */,
 				A13430B61F014E5D00D185FD /* SystemConfiguration.framework */,
 				A13430B31F014C1500D185FD /* KSCrash.framework */,
-				127B22B01D9BE39400D9C94B /* Alamofire.framework */,
-				127B22AE1D9BE37B00D9C94B /* Alamofire.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -101,6 +97,7 @@
 				A16790811E49D8BD00C276AF /* KumulosPushChannels.swift */,
 				A16790831E49DCDE00C276AF /* PushChannel.swift */,
 				A13430A01F013D6E00D185FD /* Kumulos+Crash.swift */,
+				A1D97A4C1F866D06002CFB42 /* KSConfig.swift */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
@@ -162,12 +159,12 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0730;
-				LastUpgradeCheck = 0800;
+				LastUpgradeCheck = 0900;
 				ORGANIZATIONNAME = Kumulos;
 				TargetAttributes = {
 					DB481C191D3BC9D30021C627 = {
 						CreatedOnToolsVersion = 7.3.1;
-						LastSwiftMigration = 0800;
+						LastSwiftMigration = 0900;
 					};
 				};
 			};
@@ -212,6 +209,7 @@
 				127B22DD1D9BE59E00D9C94B /* Kumulos.swift in Sources */,
 				127B22DC1D9BE59E00D9C94B /* KSResponse.swift in Sources */,
 				A16790841E49DCDE00C276AF /* PushChannel.swift in Sources */,
+				A1D97A4D1F866D06002CFB42 /* KSConfig.swift in Sources */,
 				A16790821E49D8BD00C276AF /* KumulosPushChannels.swift in Sources */,
 				127B22E31D9BE59E00D9C94B /* MobileProvision.m in Sources */,
 			);
@@ -229,14 +227,20 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -281,14 +285,20 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -345,7 +355,8 @@
 				PROVISIONING_PROFILE = "";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -375,7 +386,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};
