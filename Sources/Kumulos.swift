@@ -113,11 +113,11 @@ open class Kumulos {
 
         instance = Kumulos(apiKey: config.apiKey, secretKey: config.secretKey)
         
+        instance!.sendDeviceInformation()
+        
         if (config.enableCrash) {
             instance!.trackAndReportCrashes()
         }
-
-        instance!.sendDeviceInformation()
     }
 
     fileprivate init(apiKey: String, secretKey: String){

@@ -14,7 +14,7 @@ public extension Kumulos {
     /**
      Send any pending reports to the API
      */
-    func trackAndReportCrashes() {
+    internal func trackAndReportCrashes() {
         
         let sdkInstance = Kumulos.getInstance()
         let url =  "\(sdkInstance.baseCrashUrl)track/\(Kumulos.apiKey)/kscrash/\(Kumulos.installId)"

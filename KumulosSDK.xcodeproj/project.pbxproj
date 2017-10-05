@@ -90,18 +90,18 @@
 				127B22CE1D9BE59E00D9C94B /* CwlSysctl.swift */,
 				127B22CF1D9BE59E00D9C94B /* Info.plist */,
 				127B22D01D9BE59E00D9C94B /* KSAPIOperation.swift */,
+				A1D97A4C1F866D06002CFB42 /* KSConfig.swift */,
 				127B22D11D9BE59E00D9C94B /* KSResponse.swift */,
 				127B22D21D9BE59E00D9C94B /* Kumulos.swift */,
 				127B22D31D9BE59E00D9C94B /* Kumulos+API.swift */,
+				A13430A01F013D6E00D185FD /* Kumulos+Crash.swift */,
 				127B22D41D9BE59E00D9C94B /* Kumulos+Push.swift */,
 				127B22D51D9BE59E00D9C94B /* Kumulos+Stats.swift */,
+				A16790811E49D8BD00C276AF /* KumulosPushChannels.swift */,
 				127B22D61D9BE59E00D9C94B /* KumulosSDK.h */,
 				127B22D71D9BE59E00D9C94B /* MobileProvision.h */,
 				127B22D81D9BE59E00D9C94B /* MobileProvision.m */,
-				A16790811E49D8BD00C276AF /* KumulosPushChannels.swift */,
 				A16790831E49DCDE00C276AF /* PushChannel.swift */,
-				A13430A01F013D6E00D185FD /* Kumulos+Crash.swift */,
-				A1D97A4C1F866D06002CFB42 /* KSConfig.swift */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
