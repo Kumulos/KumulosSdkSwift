@@ -5,6 +5,7 @@
 
 import Foundation
 import Alamofire
+import CoreLocation
 
 #if os(iOS) || os(watchOS) || os(tvOS)
     import UIKit
@@ -47,7 +48,7 @@ struct Platform {
         #endif
         return isSim
     }()
-
+    
     static let isMacintosh: Bool = {
         var isMac = false
         // check architechture for mac
@@ -58,61 +59,76 @@ struct Platform {
     }()
 }
 
-internal extension Kumulos{
-
-    func sendDeviceInformation() {
-
+public extension Kumulos{
+    
+    public static func sendLocationUpdate(location: CLLocation) {
+        let url = "\(sharedInstance.baseStatsUrl)app-installs/\(Kumulos.installId)/location"
+        
+        let parameters = [
+            "lat" : location.coordinate.latitude,
+            "lng" : location.coordinate.longitude
+        ]
+        
+        _ = sharedInstance.makeNetworkRequest(.put, url: url, parameters: parameters as [String: AnyObject])
+    }
+    
+    internal func sendDeviceInformation() {
+        
         var target = TargetType.targetTypeRelease
-
+        
         //http://stackoverflow.com/questions/24111854/in-absence-of-preprocessor-macros-is-there-a-way-to-define-practical-scheme-spe
         #if DEBUG
             target = TargetType.targetTypeDebug
         #endif
-
+        
         var app = [String : AnyObject]()
+        app["bundle"] = Bundle.main.infoDictionary!["CFBundleIdentifier"] as AnyObject?
         app["version"] = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as AnyObject?
         app["target"] = target.rawValue as AnyObject?
-
-
+        
+        
         var sdk = [String : AnyObject]()
-        sdk["id"] = SDKTypeID.sdkTypeObjC.rawValue
-
+        sdk["id"] = SDKTypeID.sdkTypeSwift.rawValue
+        
         let frameworkBundle = Bundle(for: Kumulos.self)
         let sdkVersion = frameworkBundle.infoDictionary!["CFBundleShortVersionString"]
-
+        
         sdk["version"] = sdkVersion as AnyObject?
-
+        
         var runtime = [String : AnyObject]()
         var os = [String : AnyObject]()
         var device = [String : AnyObject]()
-
+        
         runtime["id"] = RuntimeType.runtimeTypeNative.rawValue
-
+        
         let timeZone = TimeZone.autoupdatingCurrent
         let tzName = timeZone.identifier
         device["tz"] = tzName as AnyObject?
         device["name"] = Sysctl.model as AnyObject?
-
+        
         if Platform.isMacintosh {
             runtime["version"] = ProcessInfo.processInfo.operatingSystemVersionString as AnyObject?
-
+            
             os["id"] = OSTypeID.osTypeIDOSX.rawValue
             os["version"] = ProcessInfo.processInfo.operatingSystemVersionString as AnyObject?
-
+            
             device["isSimulator"] = false as AnyObject?
             device["name"] = Sysctl.model as AnyObject?
-
+            
         }
         else {
             runtime["version"] = UIDevice.current.systemVersion as AnyObject?
-
+            
             os["id"] = OSTypeID.osTypeIDiOS.rawValue
             os["version"] = UIDevice.current.systemVersion as AnyObject?
         }
-
-
+        
+        if (NSLocale.preferredLanguages.count >= 1) {
+            device["locale"] = NSLocale.preferredLanguages[0] as AnyObject
+        }
+        
         device["isSimulator"] = Platform.isSimulator as AnyObject?
-
+        
         let finalParameters = [
             "app" : app,
             "sdk" : sdk,
@@ -120,10 +136,11 @@ internal extension Kumulos{
             "os" : os,
             "device" : device
         ]
-
+        
         let url = "\(self.baseStatsUrl)app-installs/\(Kumulos.installId)"
-
+        
         _ = self.makeNetworkRequest(.put, url: url, parameters: finalParameters as [String : AnyObject]?)
     }
-
+    
 }
+
