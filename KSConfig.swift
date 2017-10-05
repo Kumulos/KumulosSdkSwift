@@ -43,12 +43,12 @@ open class KSConfigBuilder: NSObject {
         _enableCrash = false
     }
     
-    public func EnableCrash() -> KSConfigBuilder {
+    public func enableCrash() -> KSConfigBuilder {
         _enableCrash = true
         return self;
     }
     
-    public func Build() -> KSConfig {
+    public func build() -> KSConfig {
         return KSConfig(apiKey: _apiKey, secretKey: _secretKey, enableCrash: _enableCrash)
     }
 }
