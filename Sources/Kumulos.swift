@@ -47,7 +47,7 @@ open class Kumulos {
 
     fileprivate(set) var apiKey: String
     fileprivate(set) var secretKey: String
-    
+
     open static var apiKey:String {
         get {
             return sharedInstance.apiKey
