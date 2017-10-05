@@ -19,15 +19,15 @@ open class KSConfig: NSObject {
     private var _secretKey: String
     private var _enableCrash: Bool
     
-    var ApiKey: String {
+    var apiKey: String {
         get { return _apiKey }
     }
     
-    var SecretKey: String {
+    var secretKey: String {
         get { return _secretKey }
     }
     
-    var EnableCrash: Bool {
+    var enableCrash: Bool {
         get { return _enableCrash }
     }
 }

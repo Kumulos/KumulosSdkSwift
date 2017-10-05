@@ -26,6 +26,7 @@
 		A16790821E49D8BD00C276AF /* KumulosPushChannels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A16790811E49D8BD00C276AF /* KumulosPushChannels.swift */; };
 		A16790841E49DCDE00C276AF /* PushChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A16790831E49DCDE00C276AF /* PushChannel.swift */; };
 		A1D97A4D1F866D06002CFB42 /* KSConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1D97A4C1F866D06002CFB42 /* KSConfig.swift */; };
+		A1D97A561F8682EF002CFB42 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1D97A571F8682EF002CFB42 /* Alamofire.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -49,6 +50,7 @@
 		A16790811E49D8BD00C276AF /* KumulosPushChannels.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = KumulosPushChannels.swift; path = Sources/KumulosPushChannels.swift; sourceTree = "<group>"; };
 		A16790831E49DCDE00C276AF /* PushChannel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PushChannel.swift; path = Sources/PushChannel.swift; sourceTree = "<group>"; };
 		A1D97A4C1F866D06002CFB42 /* KSConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSConfig.swift; sourceTree = "<group>"; };
+		A1D97A571F8682EF002CFB42 /* Alamofire.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Alamofire.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DB481C1A1D3BC9D30021C627 /* KumulosSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = KumulosSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -57,6 +59,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1D97A561F8682EF002CFB42 /* Alamofire.framework in Frameworks */,
 				A13430BE1F014FD400D185FD /* KSCrash.framework in Frameworks */,
 				A13430BD1F014E9100D185FD /* libz.tbd in Frameworks */,
 				A13430BB1F014E8200D185FD /* libc++.tbd in Frameworks */,
@@ -71,6 +74,7 @@
 		127B22AD1D9BE37A00D9C94B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A1D97A571F8682EF002CFB42 /* Alamofire.framework */,
 				A13430BC1F014E9100D185FD /* libz.tbd */,
 				A13430BA1F014E8200D185FD /* libc++.tbd */,
 				A13430B81F014E6500D185FD /* MessageUI.framework */,
@@ -340,10 +344,6 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Carthage/Checkouts/KSCrash/iOS/build/Debug-iphoneos",
-				);
 				INFOPLIST_FILE = Sources/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -355,7 +355,6 @@
 				PROVISIONING_PROFILE = "";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
 				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
@@ -372,10 +371,6 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Carthage/Checkouts/KSCrash/iOS/build/Debug-iphoneos",
-				);
 				INFOPLIST_FILE = Sources/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -386,7 +381,6 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SKIP_INSTALL = YES;
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
 				SWIFT_VERSION = 4.0;
 			};
 			name = Release;

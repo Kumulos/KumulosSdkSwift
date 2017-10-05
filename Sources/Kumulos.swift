@@ -111,9 +111,9 @@ open class Kumulos {
             assertionFailure("The KumulosSDK has already been initialized")
         }
 
-        instance = Kumulos(apiKey: config.ApiKey, secretKey: config.SecretKey)
+        instance = Kumulos(apiKey: config.apiKey, secretKey: config.secretKey)
         
-        if (config.EnableCrash) {
+        if (config.enableCrash) {
             instance!.trackAndReportCrashes()
         }
 

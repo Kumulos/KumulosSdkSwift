@@ -49,10 +49,10 @@
         
         NSScanner *scanner = [NSScanner scannerWithString:binaryString];
         BOOL ok = [scanner scanUpToString:@"<plist" intoString:nil];
-        if (!ok) { NSLog(@"unable to find beginning of plist"); return UIApplicationReleaseUnknown; }
+        if (!ok) { NSLog(@"unable to find beginning of plist"); return nil; }
         NSString *plistString;
         ok = [scanner scanUpToString:@"</plist>" intoString:&plistString];
-        if (!ok) { NSLog(@"unable to find end of plist"); return UIApplicationReleaseUnknown; }
+        if (!ok) { NSLog(@"unable to find end of plist"); return nil; }
         plistString = [NSString stringWithFormat:@"%@</plist>",plistString];
         // juggle latin1 back to utf-8!
         NSData *plistdata_latin1 = [plistString dataUsingEncoding:NSISOLatin1StringEncoding];
