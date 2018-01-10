@@ -7,6 +7,28 @@
 
 import Foundation
 import CoreData
+import Alamofire
+
+struct EventsParameterEncoding : ParameterEncoding {
+    private let events : [[String : Any?]]
+    
+    init(events: [[String : Any?]]) {
+        self.events = events
+    }
+    
+    func encode(_ urlRequest: URLRequestConvertible, with parameters: Parameters?) throws -> URLRequest {
+        var urlRequest = try urlRequest.asURLRequest()
+        let data = try JSONSerialization.data(withJSONObject: events, options: [])
+        
+        if urlRequest.value(forHTTPHeaderField: "Content-Type") == nil {
+            urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        }
+        
+        urlRequest.httpBody = data
+        
+        return urlRequest
+    }
+}
 
 class AnalyticsHelper {
     private var kumulos : Kumulos
@@ -52,7 +74,7 @@ class AnalyticsHelper {
             try storeCoordinator.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: nil, at: storeUrl, options: nil)
         }
         catch {
-            print("Failed to set up persistent store")
+            print("Failed to set up persistent store: " + error.localizedDescription)
             return
         }
         
@@ -107,7 +129,93 @@ class AnalyticsHelper {
     }
     
     private func syncEvents() {
+        let results = fetchEventsBatch()
         
+        if results.count > 0 {
+            syncEventsBatch(events: results)
+        }
+        else if bgTask != UIBackgroundTaskInvalid {
+            UIApplication.shared.endBackgroundTask(bgTask)
+            bgTask = UIBackgroundTaskInvalid
+        }
+    }
+    
+    private func syncEventsBatch(events: [NSManagedObject]) {
+        var data = [] as [[String : Any?]]
+        
+        for event in events {
+            var jsonProps = nil as Any?
+            if let props = event.value(forKey: "properties") as? Data {
+                jsonProps = try? JSONSerialization.jsonObject(with: props, options: JSONSerialization.ReadingOptions.init(rawValue: 0))
+            }
+            
+            data.append([
+                "type": event.value(forKey: "eventType"),
+                "uuid": event.value(forKey: "uuid"),
+                "timestamp": event.value(forKey: "happenedAt"),
+                "data": jsonProps
+            ])
+        }
+        
+        let url = "\(kumulos.baseStatsUrl)app-installs/\(Kumulos.installId)/events"
+        let encoding = EventsParameterEncoding(events: data)
+        let request = kumulos.makeJsonNetworkRequest(.post, url: url, parameters: nil, encoding: encoding)
+        
+        request.validate(statusCode: 200..<300).responseJSON { response in
+            switch response.result {
+
+            case .success:
+                if let err = self.pruneEventsBatch(events) {
+                    print("Failed to prune events batch: " + err.localizedDescription)
+                    return
+                }
+                self.syncEvents()
+
+            case .failure:
+                // Failed so assume will be retried some other time
+                if self.bgTask != UIBackgroundTaskInvalid {
+                    UIApplication.shared.endBackgroundTask(self.bgTask)
+                    self.bgTask = UIBackgroundTaskInvalid
+                }
+            }
+        }
+    }
+    
+    private func pruneEventsBatch(_ events: [NSManagedObject]) -> Error? {
+        let ids = events.map { (event) -> NSManagedObjectID in
+            return event.objectID
+        }
+        
+        let request = NSBatchDeleteRequest(objectIDs: ids)
+        
+        do {
+            try self.analyticsContext?.execute(request)
+        }
+        catch {
+            return error
+        }
+        
+        return nil
+    }
+    
+    private func fetchEventsBatch() -> [NSManagedObject] {
+        guard let context = analyticsContext else {
+            return []
+        }
+        
+        let request = NSFetchRequest<NSManagedObject>(entityName: "Event")
+        request.returnsObjectsAsFaults = false
+        request.sortDescriptors = [ NSSortDescriptor(key: "happenedAt", ascending: true) ]
+        request.fetchLimit = 100
+        
+        do {
+            let results = try context.fetch(request)
+            return results
+        }
+        catch {
+            print("Failed to fetch events batch: " + error.localizedDescription)
+            return []
+        }
     }
     
 }
