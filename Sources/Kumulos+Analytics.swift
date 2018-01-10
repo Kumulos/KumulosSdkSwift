@@ -17,7 +17,7 @@ public extension Kumulos {
      - properties: Optional meta-data about the event
      */
     public static func trackEvent(eventType: String, properties: AnyObject?) {
-        // TODO
+        getInstance().analyticsHelper?.trackEvent(eventType: eventType, properties: properties)
     }
     
     /**
