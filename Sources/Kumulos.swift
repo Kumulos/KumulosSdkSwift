@@ -45,8 +45,10 @@ open class Kumulos {
         return sharedInstance;
     }
 
+    fileprivate(set) var config : KSConfig
     fileprivate(set) var apiKey: String
     fileprivate(set) var secretKey: String
+    fileprivate(set) var analyticsHelper: AnalyticsHelper? = nil
 
     open static var apiKey:String {
         get {
@@ -111,20 +113,23 @@ open class Kumulos {
             assertionFailure("The KumulosSDK has already been initialized")
         }
 
-        instance = Kumulos(apiKey: config.apiKey, secretKey: config.secretKey)
-        
-        instance!.sendDeviceInformation()
-        
-        if (config.enableCrash) {
-            instance!.trackAndReportCrashes()
-        }
+        instance = Kumulos(config: config)
     }
 
-    fileprivate init(apiKey: String, secretKey: String){
-        self.apiKey = apiKey
-        self.secretKey = secretKey
+    fileprivate init(config: KSConfig) {
+        self.config = config
+        self.apiKey = config.apiKey
+        self.secretKey = config.secretKey
 
         sessionToken = UUID().uuidString
+        
+        analyticsHelper = AnalyticsHelper(kumulos: self)
+        
+        sendDeviceInformation()
+        
+        if (config.enableCrash) {
+            trackAndReportCrashes()
+        }
     }
 
     internal func makeNetworkRequest(_ method: Alamofire.HTTPMethod, url: URLConvertible, parameters: [String : AnyObject]?) -> Alamofire.DataRequest {
