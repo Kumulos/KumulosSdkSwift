@@ -151,7 +151,7 @@ open class Kumulos {
             "Content-Type": "application/json"
         ];
         
-        return Alamofire.request(url, method: method, parameters: parameters, encoding: JSONEncoding.default, headers: requestHeaders)
+        return Alamofire.request(url, method: method, parameters: parameters, encoding: encoding, headers: requestHeaders)
     }
 
     fileprivate func getAuth()-> String {
