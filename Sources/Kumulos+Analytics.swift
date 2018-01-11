@@ -16,7 +16,7 @@ public extension Kumulos {
      - eventType: Unique identifier for the type of event
      - properties: Optional meta-data about the event
      */
-    public static func trackEvent(eventType: String, properties: AnyObject?) {
+    public static func trackEvent(eventType: String, properties: [String:Any]?) {
         getInstance().analyticsHelper?.trackEvent(eventType: eventType, properties: properties)
     }
     

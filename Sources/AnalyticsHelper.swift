@@ -10,20 +10,15 @@ import CoreData
 import Alamofire
 
 struct EventsParameterEncoding : ParameterEncoding {
-    private let events : [[String : Any?]]
-    
-    init(events: [[String : Any?]]) {
-        self.events = events
-    }
     
     func encode(_ urlRequest: URLRequestConvertible, with parameters: Parameters?) throws -> URLRequest {
         var urlRequest = try urlRequest.asURLRequest()
-        let data = try JSONSerialization.data(withJSONObject: events, options: [])
-        
-        if urlRequest.value(forHTTPHeaderField: "Content-Type") == nil {
-            urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        guard let events = parameters?["events"] else {
+            return urlRequest
         }
         
+        let data = try JSONSerialization.data(withJSONObject: events, options: [])
+
         urlRequest.httpBody = data
         
         return urlRequest
@@ -88,11 +83,11 @@ class AnalyticsHelper {
 
     // MARK: Event Tracking
 
-    func trackEvent(eventType: String, properties: AnyObject?) {
+    func trackEvent(eventType: String, properties: [String:Any]?) {
         trackEvent(eventType: eventType, happenedAt: Date(), properties: properties)
     }
     
-    func trackEvent(eventType: String, happenedAt: Date, properties: AnyObject?) {
+    func trackEvent(eventType: String, happenedAt: Date, properties: [String:Any]?) {
         if eventType == "" || (properties != nil && !JSONSerialization.isValidJSONObject(properties as Any)) {
             print("Ignoring invalid event with empty type or non-serializable properties")
             return
@@ -112,12 +107,15 @@ class AnalyticsHelper {
             let happenedAtMillis = happenedAt.timeIntervalSince1970 * 1000
             let uuid = UUID().uuidString.lowercased()
             
-            let propsJson = try? JSONSerialization.data(withJSONObject: properties as Any, options: JSONSerialization.WritingOptions(rawValue: 0))
-            
             event.setValue(uuid, forKey: "uuid")
             event.setValue(happenedAtMillis, forKey: "happenedAt")
             event.setValue(eventType, forKey: "eventType")
-            event.setValue(propsJson, forKey: "properties")
+
+            if properties != nil {
+                let propsJson = try? JSONSerialization.data(withJSONObject: properties as Any, options: JSONSerialization.WritingOptions(rawValue: 0))
+
+                event.setValue(propsJson, forKey: "properties")
+            }
             
             do {
                 try context.save()
@@ -158,8 +156,8 @@ class AnalyticsHelper {
         }
         
         let url = "\(kumulos.baseStatsUrl)app-installs/\(Kumulos.installId)/events"
-        let encoding = EventsParameterEncoding(events: data)
-        let request = kumulos.makeJsonNetworkRequest(.post, url: url, parameters: nil, encoding: encoding)
+        
+        let request = kumulos.makeJsonNetworkRequest(.post, url: url, parameters: ["events": data], encoding: EventsParameterEncoding())
         
         request.validate(statusCode: 200..<300).responseJSON { response in
             switch response.result {
