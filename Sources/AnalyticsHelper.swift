@@ -30,6 +30,7 @@ class AnalyticsHelper {
     private var analyticsContext : NSManagedObjectContext?
     private var startNewSession : Bool
     private var sessionIdleTimer : Timer?
+    private var becameInactiveAt : Date?
     private var bgTask : UIBackgroundTaskIdentifier
     
     // MARK: Initialization
@@ -40,6 +41,7 @@ class AnalyticsHelper {
         sessionIdleTimer = nil
         bgTask = UIBackgroundTaskInvalid
         analyticsContext = nil
+        becameInactiveAt = nil
         
         initContext()
         registerListeners()
@@ -78,16 +80,22 @@ class AnalyticsHelper {
     }
     
     private func registerListeners() {
-        // TODO
+        NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appBecameActive), name: .UIApplicationDidBecomeActive, object: nil)
+
+        NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appBecameInactive), name: .UIApplicationWillResignActive, object: nil)
+
+        NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appBecameBackground), name: .UIApplicationDidEnterBackground, object: nil)
+
+        NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appWillTerminate), name: .UIApplicationWillTerminate, object: nil)
     }
 
     // MARK: Event Tracking
 
     func trackEvent(eventType: String, properties: [String:Any]?) {
-        trackEvent(eventType: eventType, happenedAt: Date(), properties: properties)
+        trackEvent(eventType: eventType, atTime: Date(), properties: properties)
     }
     
-    func trackEvent(eventType: String, happenedAt: Date, properties: [String:Any]?) {
+    func trackEvent(eventType: String, atTime: Date, properties: [String:Any]?) {
         if eventType == "" || (properties != nil && !JSONSerialization.isValidJSONObject(properties as Any)) {
             print("Ignoring invalid event with empty type or non-serializable properties")
             return
@@ -104,7 +112,7 @@ class AnalyticsHelper {
             
             let event = NSManagedObject(entity: entity, insertInto: context)
             
-            let happenedAtMillis = happenedAt.timeIntervalSince1970 * 1000
+            let happenedAtMillis = atTime.timeIntervalSince1970 * 1000
             let uuid = UUID().uuidString.lowercased()
             
             event.setValue(uuid, forKey: "uuid")
@@ -213,6 +221,59 @@ class AnalyticsHelper {
         catch {
             print("Failed to fetch events batch: " + error.localizedDescription)
             return []
+        }
+    }
+    
+    // MARK: App lifecycle delegates
+    
+    @objc private func appBecameActive() {
+        if startNewSession {
+            trackEvent(eventType: "k.fg", properties: nil)
+            startNewSession = false
+            return
+        }
+        
+        if sessionIdleTimer != nil {
+            sessionIdleTimer?.invalidate()
+            sessionIdleTimer = nil
+        }
+        
+        if bgTask != UIBackgroundTaskInvalid {
+            UIApplication.shared.endBackgroundTask(bgTask)
+            bgTask = UIBackgroundTaskInvalid
+        }
+    }
+    
+    @objc private func appBecameInactive() {
+        becameInactiveAt = Date()
+
+        // TODO config value
+        sessionIdleTimer = Timer(timeInterval: 10, target: self, selector: #selector(AnalyticsHelper.sessionDidEnd), userInfo: nil, repeats: false)
+    }
+    
+    @objc private func appBecameBackground() {
+        bgTask = UIApplication.shared.beginBackgroundTask(withName: "sync", expirationHandler: {
+            UIApplication.shared.endBackgroundTask(self.bgTask)
+            self.bgTask = UIBackgroundTaskInvalid
+        })
+    }
+    
+    @objc private func appWillTerminate() {
+        if sessionIdleTimer != nil {
+            sessionIdleTimer?.invalidate()
+            sessionDidEnd()
+        }
+    }
+
+    @objc private func sessionDidEnd() {
+        startNewSession = true
+        sessionIdleTimer = nil
+        
+        trackEvent(eventType: "k.bg", atTime: becameInactiveAt!, properties: nil)
+        becameInactiveAt = nil
+        
+        DispatchQueue.global(qos: .background).async {
+            self.syncEvents()
         }
     }
     
