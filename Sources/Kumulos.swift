@@ -118,8 +118,8 @@ open class Kumulos {
 
     fileprivate init(config: KSConfig) {
         self.config = config
-        self.apiKey = config.apiKey
-        self.secretKey = config.secretKey
+        apiKey = config.apiKey
+        secretKey = config.secretKey
 
         sessionToken = UUID().uuidString
         
