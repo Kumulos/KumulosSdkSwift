@@ -71,7 +71,9 @@ public extension Kumulos {
         k.networkRequestsInProgress += inProgressCallChange
 
         #if os(iOS) || os(watchOS) || os(tvOS)
-            UIApplication.shared.isNetworkActivityIndicatorVisible = (k.networkRequestsInProgress > 0)
+            DispatchQueue.main.async {
+                UIApplication.shared.isNetworkActivityIndicatorVisible = (k.networkRequestsInProgress > 0)
+            }
         #endif
     }
 }
