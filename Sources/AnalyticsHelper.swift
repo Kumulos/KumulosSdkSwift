@@ -25,11 +25,33 @@ struct EventsParameterEncoding : ParameterEncoding {
     }
 }
 
+class SessionIdleTimer {
+    private let helper : AnalyticsHelper
+    private var invalidated : Bool
+    
+    init(_ helper : AnalyticsHelper) {
+        self.invalidated = false
+        self.helper = helper
+        
+        DispatchQueue.global(qos: .default).asyncAfter(deadline: .now() + .seconds(10)) {
+            if self.invalidated {
+                return
+            }
+            
+            helper.sessionDidEnd()
+        }
+    }
+    
+    internal func invalidate() {
+        self.invalidated = true
+    }
+}
+
 class AnalyticsHelper {
     private var kumulos : Kumulos
     private var analyticsContext : NSManagedObjectContext?
     private var startNewSession : Bool
-    private var sessionIdleTimer : Timer?
+    private var sessionIdleTimer : SessionIdleTimer?
     private var becameInactiveAt : Date?
     private var bgTask : UIBackgroundTaskIdentifier
     
@@ -95,18 +117,20 @@ class AnalyticsHelper {
         trackEvent(eventType: eventType, atTime: Date(), properties: properties)
     }
     
-    func trackEvent(eventType: String, atTime: Date, properties: [String:Any]?) {
+    func trackEvent(eventType: String, atTime: Date, properties: [String:Any]?, asynchronously : Bool = true) {
         if eventType == "" || (properties != nil && !JSONSerialization.isValidJSONObject(properties as Any)) {
             print("Ignoring invalid event with empty type or non-serializable properties")
             return
         }
         
-        analyticsContext?.perform {
+        let work = {
             guard let context = self.analyticsContext else {
+                print("No context, aborting")
                 return
             }
             
             guard let entity = NSEntityDescription.entity(forEntityName: "Event", in: context) else {
+                print("Can't create entity, aborting")
                 return
             }
             
@@ -131,6 +155,13 @@ class AnalyticsHelper {
             catch {
                 print("Failed to record event")
             }
+        }
+        
+        if asynchronously {
+            analyticsContext?.perform(work)
+        }
+        else {
+            analyticsContext?.performAndWait(work)
         }
     }
     
@@ -246,9 +277,9 @@ class AnalyticsHelper {
     
     @objc private func appBecameInactive() {
         becameInactiveAt = Date()
-
+        
         // TODO config value
-        sessionIdleTimer = Timer(timeInterval: 10, target: self, selector: #selector(AnalyticsHelper.sessionDidEnd), userInfo: nil, repeats: false)
+        sessionIdleTimer = SessionIdleTimer(self)
     }
     
     @objc private func appBecameBackground() {
@@ -265,11 +296,11 @@ class AnalyticsHelper {
         }
     }
 
-    @objc private func sessionDidEnd() {
+    fileprivate func sessionDidEnd() {
         startNewSession = true
         sessionIdleTimer = nil
         
-        trackEvent(eventType: "k.bg", atTime: becameInactiveAt!, properties: nil)
+        trackEvent(eventType: "k.bg", atTime: becameInactiveAt!, properties: nil, asynchronously: false)
         becameInactiveAt = nil
         
         DispatchQueue.global(qos: .background).async {
