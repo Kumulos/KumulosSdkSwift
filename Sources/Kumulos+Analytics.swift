@@ -27,7 +27,14 @@ public extension Kumulos {
      - userIdentifier: Unique identifier for the current user
      */
     public static func associateUserWithInstall(userIdentifier: String) {
-        // TODO
+        if userIdentifier == "" {
+            print("User identifier cannot be empty, aborting!")
+            return
+        }
+
+        let params = ["id": userIdentifier]
+        let url = "\(getInstance().baseStatsUrl)app-installs/\(Kumulos.installId)/user-id"
+        _ = getInstance().makeJsonNetworkRequest(.put, url: url, parameters: params as [String : AnyObject])
     }
     
 }
