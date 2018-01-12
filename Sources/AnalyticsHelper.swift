@@ -29,11 +29,11 @@ class SessionIdleTimer {
     private let helper : AnalyticsHelper
     private var invalidated : Bool
     
-    init(_ helper : AnalyticsHelper) {
+    init(_ helper : AnalyticsHelper, timeout: UInt) {
         self.invalidated = false
         self.helper = helper
         
-        DispatchQueue.global(qos: .default).asyncAfter(deadline: .now() + .seconds(10)) {
+        DispatchQueue.global(qos: .default).asyncAfter(deadline: .now() + .seconds(Int(timeout))) {
             if self.invalidated {
                 return
             }
@@ -278,8 +278,7 @@ class AnalyticsHelper {
     @objc private func appBecameInactive() {
         becameInactiveAt = Date()
         
-        // TODO config value
-        sessionIdleTimer = SessionIdleTimer(self)
+        sessionIdleTimer = SessionIdleTimer(self, timeout: kumulos.config.sessionIdleTimeout)
     }
     
     @objc private func appBecameBackground() {
