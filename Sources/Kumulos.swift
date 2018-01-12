@@ -125,7 +125,9 @@ open class Kumulos {
         
         analyticsHelper = AnalyticsHelper(kumulos: self)
         
-        sendDeviceInformation()
+        DispatchQueue.global(qos: .background).async {
+            self.sendDeviceInformation()
+        }
         
         if (config.enableCrash) {
             trackAndReportCrashes()
