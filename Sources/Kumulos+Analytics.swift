@@ -20,6 +20,10 @@ public extension Kumulos {
         getInstance().analyticsHelper?.trackEvent(eventType: eventType, properties: properties)
     }
     
+    internal static func trackKumulosEvent(eventType: String, properties: [String:Any]?) {
+        getInstance().analyticsHelper?.trackEvent(eventType: eventType, atTime: Date(), properties: properties, asynchronously: false)
+    }
+    
     /**
      Associates a user identifier with the current Kumulos installation record
      

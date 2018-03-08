@@ -53,9 +53,8 @@ public extension Kumulos{
         let iosTokenType = getTokenType()
 
         let parameters = ["token" : token, "type" : sharedInstance.pushNotificationDeviceType, "iosTokenType" : iosTokenType] as [String : Any]
-        let url =  "\(sharedInstance.basePushUrl)app-installs/\(Kumulos.installId)/push-token"
-
-        _ = sharedInstance.makeNetworkRequest(.put, url: url, parameters: parameters as [String : AnyObject])
+        
+        Kumulos.trackKumulosEvent(eventType: "k.push.deviceRegistered", properties: parameters as [String : AnyObject])
     }
 
     /**
