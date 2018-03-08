@@ -67,9 +67,7 @@ public extension Kumulos{
         if let custom = notification["custom"] as? [String:AnyObject], let id = custom["i"]
         {
             let parameters = ["id" : id]
-            let url = "\(sharedInstance.basePushUrl)app-installs/\(Kumulos.installId)/opens"
-
-            _ = sharedInstance.makeNetworkRequest(.post, url: url, parameters: parameters)
+            Kumulos.trackKumulosEvent(eventType: "k.push.trackOpen", properties: parameters)
         }
     }
 

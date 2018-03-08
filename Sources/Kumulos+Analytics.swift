@@ -37,8 +37,7 @@ public extension Kumulos {
         }
 
         let params = ["id": userIdentifier]
-        let url = "\(getInstance().baseStatsUrl)app-installs/\(Kumulos.installId)/user-id"
-        _ = getInstance().makeJsonNetworkRequest(.put, url: url, parameters: params as [String : AnyObject])
+        Kumulos.trackKumulosEvent(eventType: "k.stats.associateUser", properties: params as [String : AnyObject])
     }
     
 }
