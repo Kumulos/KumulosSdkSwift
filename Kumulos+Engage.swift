@@ -19,7 +19,7 @@ public extension Kumulos{
         Kumulos.trackKumulosEvent(eventType: "k.engage.locationUpdated", properties: parameters)
     }
     
-    public static func sendBeaconProximity(beaconIdentifier: String) {
+    public static func sendiBeaconProximity(beaconIdentifier: String) {
         let parameters = [
             "iBeaconId" : beaconIdentifier
         ]
