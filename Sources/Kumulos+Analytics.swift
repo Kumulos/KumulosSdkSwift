@@ -9,6 +9,10 @@ import Foundation
 
 public extension Kumulos {
     
+    internal static func trackEvent(eventType: KumulosEvent, properties: [String:Any]?, immediateFlush: Bool = false) {
+        getInstance().analyticsHelper?.trackEvent(eventType: eventType.rawValue, properties: properties, immediateFlush: immediateFlush)
+    }
+    
     /**
      Logs an analytics event to the local database
      
@@ -16,12 +20,8 @@ public extension Kumulos {
      - eventType: Unique identifier for the type of event
      - properties: Optional meta-data about the event
      */
-    internal static func trackEvent(eventType: KumulosEvent, properties: [String:Any]?, immediateFlush: Bool = false) {
-        getInstance().analyticsHelper?.trackEvent(eventType: eventType.rawValue, properties: properties, immediateFlush: immediateFlush)
-    }
-    
-    public static func trackEvent(eventType: String, properties: [String:Any]?, immediateFlush: Bool = false) {
-        getInstance().analyticsHelper?.trackEvent(eventType: eventType, properties: properties, immediateFlush: immediateFlush)
+    public static func trackEvent(eventType: String, properties: [String:Any]?) {
+        getInstance().analyticsHelper?.trackEvent(eventType: eventType, properties: properties, immediateFlush: false)
     }
     
     /**
