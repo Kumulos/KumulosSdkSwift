@@ -67,7 +67,7 @@ public extension Kumulos{
         if let custom = notification["custom"] as? [String:AnyObject], let id = custom["i"]
         {
             let parameters = ["id" : id]
-            Kumulos.trackKumulosEvent(eventType: "k.push.trackOpen", properties: parameters)
+            Kumulos.trackKumulosEvent(eventType: "k.push.opened", properties: parameters)
         }
     }
 
