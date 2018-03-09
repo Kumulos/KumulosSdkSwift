@@ -54,7 +54,7 @@ public extension Kumulos{
 
         let parameters = ["token" : token, "type" : sharedInstance.pushNotificationDeviceType, "iosTokenType" : iosTokenType] as [String : Any]
         
-        Kumulos.trackEvent(eventType: "k.push.deviceRegistered", properties: parameters as [String : AnyObject], immediateFlush: true)
+        Kumulos.trackEvent(eventType: KumulosEvent.PUSH_DEVICE_REGISTER, properties: parameters as [String : AnyObject], immediateFlush: true)
     }
 
     /**
@@ -67,7 +67,7 @@ public extension Kumulos{
         if let custom = notification["custom"] as? [String:AnyObject], let id = custom["i"]
         {
             let parameters = ["id" : id]
-            Kumulos.trackEvent(eventType: "k.push.opened", properties: parameters, immediateFlush: true)
+            Kumulos.trackEvent(eventType: KumulosEvent.PUSH_OPEN_TRACK, properties: parameters, immediateFlush: true)
         }
     }
 

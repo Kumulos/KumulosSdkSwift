@@ -112,7 +112,6 @@ class AnalyticsHelper {
     }
 
     // MARK: Event Tracking
-
     func trackEvent(eventType: String, properties: [String:Any]?, immediateFlush: Bool = false) {
         trackEvent(eventType: eventType, atTime: Date(), properties: properties, immediateFlush: immediateFlush)
     }
