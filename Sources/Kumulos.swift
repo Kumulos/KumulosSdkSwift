@@ -15,7 +15,7 @@ protocol KumulosDelegate: class {
     func didFail(_ kumulos: Kumulos, operation: KSAPIOperation, error: NSError?)
 }
 
-enum KumulosEvent : String {
+internal enum KumulosEvent : String {
     case STATS_FOREGROUND = "k.fg"
     case STATS_BACKGROUND = "k.bg"
     case STATS_CALL_HOME = "k.stats.installTracked"
