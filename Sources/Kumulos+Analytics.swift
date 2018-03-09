@@ -16,12 +16,8 @@ public extension Kumulos {
      - eventType: Unique identifier for the type of event
      - properties: Optional meta-data about the event
      */
-    public static func trackEvent(eventType: String, properties: [String:Any]?) {
-        getInstance().analyticsHelper?.trackEvent(eventType: eventType, properties: properties)
-    }
-    
-    internal static func trackKumulosEvent(eventType: String, properties: [String:Any]?) {
-        getInstance().analyticsHelper?.trackEvent(eventType: eventType, atTime: Date(), properties: properties, asynchronously: false)
+    public static func trackEvent(eventType: String, properties: [String:Any]?, immediateFlush: Bool = false) {
+        getInstance().analyticsHelper?.trackEvent(eventType: eventType, properties: properties, immediateFlush: immediateFlush)
     }
     
     /**
@@ -37,7 +33,7 @@ public extension Kumulos {
         }
 
         let params = ["id": userIdentifier]
-        Kumulos.trackKumulosEvent(eventType: "k.stats.associateUser", properties: params as [String : AnyObject])
+        Kumulos.trackEvent(eventType: KumulosEvent.STATS_ASSOCIATE_USER.rawValue, properties: params as [String : AnyObject], immediateFlush: true)
     }
     
 }

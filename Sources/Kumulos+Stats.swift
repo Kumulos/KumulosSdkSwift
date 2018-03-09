@@ -125,7 +125,7 @@ public extension Kumulos{
             "device" : device
         ]
         
-        Kumulos.trackKumulosEvent(eventType: "k.stats.installTracked", properties: finalParameters)
+        Kumulos.trackEvent(eventType: KumulosEvent.STATS_CALL_HOME.rawValue, properties: finalParameters)
     }
     
 }

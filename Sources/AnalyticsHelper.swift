@@ -113,11 +113,11 @@ class AnalyticsHelper {
 
     // MARK: Event Tracking
 
-    func trackEvent(eventType: String, properties: [String:Any]?) {
-        trackEvent(eventType: eventType, atTime: Date(), properties: properties)
+    func trackEvent(eventType: String, properties: [String:Any]?, immediateFlush: Bool = false) {
+        trackEvent(eventType: eventType, atTime: Date(), properties: properties, immediateFlush: immediateFlush)
     }
     
-    func trackEvent(eventType: String, atTime: Date, properties: [String:Any]?, asynchronously : Bool = true) {
+    func trackEvent(eventType: String, atTime: Date, properties: [String:Any]?, asynchronously : Bool = true, immediateFlush: Bool = false) {
         if eventType == "" || (properties != nil && !JSONSerialization.isValidJSONObject(properties as Any)) {
             print("Ignoring invalid event with empty type or non-serializable properties")
             return
@@ -151,6 +151,12 @@ class AnalyticsHelper {
             
             do {
                 try context.save()
+                
+                if (immediateFlush) {
+                    DispatchQueue.global(qos: .background).async {
+                        self.syncEvents()
+                    }
+                }
             }
             catch {
                 print("Failed to record event")
@@ -259,7 +265,7 @@ class AnalyticsHelper {
     
     @objc private func appBecameActive() {
         if startNewSession {
-            trackEvent(eventType: "k.fg", properties: nil)
+            trackEvent(eventType: KumulosEvent.STATS_FOREGROUND.rawValue, properties: nil)
             startNewSession = false
             return
         }
@@ -299,7 +305,7 @@ class AnalyticsHelper {
         startNewSession = true
         sessionIdleTimer = nil
         
-        trackEvent(eventType: "k.bg", atTime: becameInactiveAt!, properties: nil, asynchronously: false)
+        trackEvent(eventType: KumulosEvent.STATS_BACKGROUND.rawValue, atTime: becameInactiveAt!, properties: nil, asynchronously: false)
         becameInactiveAt = nil
         
         DispatchQueue.global(qos: .background).async {

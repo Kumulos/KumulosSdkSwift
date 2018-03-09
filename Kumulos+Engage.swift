@@ -16,7 +16,7 @@ public extension Kumulos{
             "lng" : location.coordinate.longitude
         ]
         
-        Kumulos.trackKumulosEvent(eventType: "k.engage.locationUpdated", properties: parameters)
+        Kumulos.trackEvent(eventType: KumulosEvent.ENGAGE_LOCATION_UPDATED.rawValue, properties: parameters, immediateFlush: true)
     }
     
     public static func sendiBeaconProximity(beaconIdentifier: String) {
@@ -24,6 +24,6 @@ public extension Kumulos{
             "iBeaconId" : beaconIdentifier
         ]
         
-        Kumulos.trackKumulosEvent(eventType: "k.engage.beaconEnteredProximity", properties: parameters)
+        Kumulos.trackEvent(eventType: KumulosEvent.ENGAGE_BEACON_ENTERED_PROXIMITY.rawValue, properties: parameters, immediateFlush: true)
     }
 }
