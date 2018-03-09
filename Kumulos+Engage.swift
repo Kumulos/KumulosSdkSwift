@@ -19,10 +19,12 @@ public extension Kumulos{
         Kumulos.trackEvent(eventType: KumulosEvent.ENGAGE_LOCATION_UPDATED, properties: parameters, immediateFlush: true)
     }
     
-    public static func sendiBeaconProximity(beaconIdentifier: String) {
+    public static func sendiBeaconProximity(beacon: CLBeacon) {
+        
         let parameters = [
-            "iBeaconId" : beaconIdentifier
-        ]
+            "iBeaconId" : beacon.proximityUUID.uuidString + ":" + beacon.major.stringValue + ":" + beacon.minor.stringValue,
+            "proximity" : beacon.proximity.rawValue
+        ] as [String : Any];
         
         Kumulos.trackEvent(eventType: KumulosEvent.ENGAGE_BEACON_ENTERED_PROXIMITY, properties: parameters, immediateFlush: true)
     }
