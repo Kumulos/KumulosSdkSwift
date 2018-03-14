@@ -22,6 +22,7 @@ public extension Kumulos{
     public static func sendiBeaconProximity(beacon: CLBeacon) {
         
         let parameters = [
+            "type": 1,
             "uuid": beacon.proximityUUID.uuidString,
             "major": beacon.major.stringValue,
             "minor": beacon.minor.stringValue,
