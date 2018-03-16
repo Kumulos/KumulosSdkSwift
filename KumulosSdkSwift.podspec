@@ -1,7 +1,7 @@
 
 Pod::Spec.new do |s|
   s.name = "KumulosSdkSwift"
-  s.version = "2.2.0"
+  s.version = "2.2.1"
   s.license = "MIT"
   s.summary = "Official Swift SDK for integrating Kumulos services with your mobile apps"
   s.homepage = "https://github.com/Kumulos/KumulosSdkSwift"

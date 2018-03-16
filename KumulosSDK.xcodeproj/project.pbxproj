@@ -22,7 +22,7 @@
 		1293720B2006378D00EBC8F4 /* AnalyticsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1293720A2006378D00EBC8F4 /* AnalyticsHelper.swift */; };
 		12A6BD871FCD7A7500D59D37 /* KSConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12A6BD861FCD7A7400D59D37 /* KSConfig.swift */; };
 		12B30580200906000036498F /* KSCrash.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 12937235200671EE00EBC8F4 /* KSCrash.framework */; };
-		6FE6B5762051550E0025CBC0 /* Kumulos+Engage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FE6B5752051550E0025CBC0 /* Kumulos+Engage.swift */; };
+		6F469D1C205BCE720069D788 /* Kumulos+Engage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F469D1B205BCE720069D788 /* Kumulos+Engage.swift */; };
 		A13430A11F013D6E00D185FD /* Kumulos+Crash.swift in Sources */ = {isa = PBXBuildFile; fileRef = A13430A01F013D6E00D185FD /* Kumulos+Crash.swift */; };
 		A13430B71F014E5D00D185FD /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A13430B61F014E5D00D185FD /* SystemConfiguration.framework */; };
 		A13430B91F014E6500D185FD /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A13430B81F014E6500D185FD /* MessageUI.framework */; };
@@ -52,7 +52,7 @@
 		12991B862007C2160000D492 /* KSCrash.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = KSCrash.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		12A6BD861FCD7A7400D59D37 /* KSConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = KSConfig.swift; path = Sources/KSConfig.swift; sourceTree = "<group>"; };
 		12F1E5CF2007C16E005151D5 /* KSCrash.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = KSCrash.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		6FE6B5752051550E0025CBC0 /* Kumulos+Engage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Kumulos+Engage.swift"; sourceTree = "<group>"; };
+		6F469D1B205BCE720069D788 /* Kumulos+Engage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "Kumulos+Engage.swift"; path = "Sources/Kumulos+Engage.swift"; sourceTree = "<group>"; };
 		A13430A01F013D6E00D185FD /* Kumulos+Crash.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "Kumulos+Crash.swift"; path = "Sources/Kumulos+Crash.swift"; sourceTree = "<group>"; };
 		A13430B31F014C1500D185FD /* KSCrash.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = KSCrash.framework; path = "../Library/Developer/Xcode/DerivedData/KumulosSDK-aqatglguuyycorbdiyjxlgliawoj/Build/Products/Debug-iphoneos/KSCrash.framework"; sourceTree = "<group>"; };
 		A13430B61F014E5D00D185FD /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
@@ -101,6 +101,7 @@
 		127B22CD1D9BE58800D9C94B /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				6F469D1B205BCE720069D788 /* Kumulos+Engage.swift */,
 				129372052006353600EBC8F4 /* KAnalyticsModel.xcdatamodeld */,
 				127B22CE1D9BE59E00D9C94B /* CwlSysctl.swift */,
 				127B22CF1D9BE59E00D9C94B /* Info.plist */,
@@ -119,7 +120,6 @@
 				A16790831E49DCDE00C276AF /* PushChannel.swift */,
 				129372082006355E00EBC8F4 /* Kumulos+Analytics.swift */,
 				1293720A2006378D00EBC8F4 /* AnalyticsHelper.swift */,
-				6FE6B5752051550E0025CBC0 /* Kumulos+Engage.swift */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
@@ -223,7 +223,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				129372072006353600EBC8F4 /* KAnalyticsModel.xcdatamodeld in Sources */,
-				6FE6B5762051550E0025CBC0 /* Kumulos+Engage.swift in Sources */,
+				6F469D1C205BCE720069D788 /* Kumulos+Engage.swift in Sources */,
 				127B22E01D9BE59E00D9C94B /* Kumulos+Stats.swift in Sources */,
 				127B22D91D9BE59E00D9C94B /* CwlSysctl.swift in Sources */,
 				127B22DF1D9BE59E00D9C94B /* Kumulos+Push.swift in Sources */,
