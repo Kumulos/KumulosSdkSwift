@@ -126,6 +126,14 @@ open class Kumulos {
         }
 
         instance = Kumulos(config: config)
+        
+        DispatchQueue.global(qos: .background).async {
+            instance!.sendDeviceInformation()
+        }
+        
+        if (config.enableCrash) {
+            instance!.trackAndReportCrashes()
+        }
     }
 
     fileprivate init(config: KSConfig) {
@@ -137,13 +145,7 @@ open class Kumulos {
         
         analyticsHelper = AnalyticsHelper(kumulos: self)
         
-        DispatchQueue.global(qos: .background).async {
-            self.sendDeviceInformation()
-        }
-        
-        if (config.enableCrash) {
-            trackAndReportCrashes()
-        }
+     
     }
 
     internal func makeNetworkRequest(_ method: Alamofire.HTTPMethod, url: URLConvertible, parameters: [String : AnyObject]?) -> Alamofire.DataRequest {
