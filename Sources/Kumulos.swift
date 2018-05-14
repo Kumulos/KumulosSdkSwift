@@ -144,8 +144,6 @@ open class Kumulos {
         sessionToken = UUID().uuidString
         
         analyticsHelper = AnalyticsHelper(kumulos: self)
-        
-     
     }
 
     internal func makeNetworkRequest(_ method: Alamofire.HTTPMethod, url: URLConvertible, parameters: [String : AnyObject]?) -> Alamofire.DataRequest {
