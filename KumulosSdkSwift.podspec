@@ -18,9 +18,6 @@ Pod::Spec.new do |s|
 
   s.prepare_command = 'chmod +x upload_dsyms.sh'
 
-  s.framework = "Alamofire"
-  s.framework = "KSCrash"
-
   s.dependency "Alamofire", "~> 4.6.0"
   s.dependency "KSCrash", "~> 1.15.16"
 end
