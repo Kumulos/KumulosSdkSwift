@@ -245,7 +245,7 @@ public class KumulosPushChannels {
         
         let request = KumulosPushChannelSubscriptionRequest()
         
-        sdkInstance.makeNetworkRequest(.post, url: url, parameters: parameters as [String : AnyObject])
+        sdkInstance.makeJsonNetworkRequest(method, url: url, parameters: parameters as [String : AnyObject])
         .validate(statusCode: 200..<300)
         .responseData { response in
             switch response.result {
