@@ -236,7 +236,7 @@ public class KumulosPushChannels {
     private func makeSubscriptionNetworkCall(_ method: Alamofire.HTTPMethod, parameters: [String:AnyObject])
         -> KumulosPushChannelSubscriptionRequest
     {
-        let url =  "\(sdkInstance.basePushUrl)/app-installs/\(Kumulos.installId)/channels/subscriptions"
+        let url =  "\(sdkInstance.basePushUrl)app-installs/\(Kumulos.installId)/channels/subscriptions"
         
         return makeNetworkCall(method: method, url: url, parameters: parameters)
     }
