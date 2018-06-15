@@ -40,4 +40,20 @@ public extension Kumulos {
         Kumulos.trackEvent(eventType: KumulosEvent.STATS_ASSOCIATE_USER, properties: params as [String : AnyObject], immediateFlush: true)
     }
     
+    /**
+     Associates a user identifier with the current Kumulos installation record, additionally setting the attributes for the user
+     
+     Parameters:
+     - userIdentifier: Unique identifier for the current user
+     - attributes: JSON encodable dictionary of attributes to store for the user
+     */
+    public static func associateUserWithInstall(userIdentifier: String, attributes: [String:AnyObject]) {
+        if userIdentifier == "" {
+            print("User identifier cannot be empty, aborting!")
+            return
+        }
+        
+        let params = ["id": userIdentifier, "attributes": attributes] as [String : Any]
+        Kumulos.trackEvent(eventType: KumulosEvent.STATS_ASSOCIATE_USER, properties: params, immediateFlush: true)
+    }
 }
