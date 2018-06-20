@@ -96,7 +96,7 @@ class AnalyticsHelper {
             print("Failed to set up persistent store: " + error.localizedDescription)
             return
         }
-        
+
         analyticsContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
         analyticsContext?.persistentStoreCoordinator = storeCoordinator
     }
@@ -249,6 +249,7 @@ class AnalyticsHelper {
         request.returnsObjectsAsFaults = false
         request.sortDescriptors = [ NSSortDescriptor(key: "happenedAt", ascending: true) ]
         request.fetchLimit = 100
+        request.includesPendingChanges = false
         
         do {
             let results = try context.fetch(request)
