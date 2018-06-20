@@ -54,7 +54,7 @@ struct Platform {
         #if (arch(i386) || arch(x86_64))
             isMac = true
         #endif
-        return isMac
+        return !isSimulator && isMac
     }()
 }
 
@@ -96,17 +96,11 @@ public extension Kumulos{
         
         if Platform.isMacintosh {
             runtime["version"] = ProcessInfo.processInfo.operatingSystemVersionString as AnyObject?
-            
             os["id"] = OSTypeID.osTypeIDOSX.rawValue
             os["version"] = ProcessInfo.processInfo.operatingSystemVersionString as AnyObject?
-            
-            device["isSimulator"] = false as AnyObject?
-            device["name"] = Sysctl.model as AnyObject?
-            
-        }
+         }
         else {
             runtime["version"] = UIDevice.current.systemVersion as AnyObject?
-            
             os["id"] = OSTypeID.osTypeIDiOS.rawValue
             os["version"] = UIDevice.current.systemVersion as AnyObject?
         }
