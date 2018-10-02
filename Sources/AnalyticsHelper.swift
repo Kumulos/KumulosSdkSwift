@@ -68,7 +68,7 @@ class AnalyticsHelper {
         initContext()
         registerListeners()
         
-        DispatchQueue.global(qos: .background).async {
+        DispatchQueue.global(qos: .default).async {
             self.syncEvents()
         }
     }
@@ -152,7 +152,7 @@ class AnalyticsHelper {
                 try context.save()
                 
                 if (immediateFlush) {
-                    DispatchQueue.global(qos: .background).async {
+                    DispatchQueue.global(qos: .default).async {
                         self.syncEvents()
                     }
                 }
@@ -308,7 +308,7 @@ class AnalyticsHelper {
         trackEvent(eventType: KumulosEvent.STATS_BACKGROUND.rawValue, atTime: becameInactiveAt!, properties: nil, asynchronously: false)
         becameInactiveAt = nil
         
-        DispatchQueue.global(qos: .background).async {
+        DispatchQueue.global(qos: .default).async {
             self.syncEvents()
         }
     }
