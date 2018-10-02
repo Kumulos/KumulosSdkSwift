@@ -33,7 +33,7 @@ class SessionIdleTimer {
         self.invalidated = false
         self.helper = helper
         
-        DispatchQueue.global(qos: .default).asyncAfter(deadline: .now() + .seconds(Int(timeout))) {
+        DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(Int(timeout))) {
             if self.invalidated {
                 return
             }
@@ -68,7 +68,7 @@ class AnalyticsHelper {
         initContext()
         registerListeners()
         
-        DispatchQueue.global(qos: .default).async {
+        DispatchQueue.global().async {
             self.syncEvents()
         }
     }
@@ -152,7 +152,7 @@ class AnalyticsHelper {
                 try context.save()
                 
                 if (immediateFlush) {
-                    DispatchQueue.global(qos: .default).async {
+                    DispatchQueue.global().async {
                         self.syncEvents()
                     }
                 }
@@ -308,7 +308,7 @@ class AnalyticsHelper {
         trackEvent(eventType: KumulosEvent.STATS_BACKGROUND.rawValue, atTime: becameInactiveAt!, properties: nil, asynchronously: false)
         becameInactiveAt = nil
         
-        DispatchQueue.global(qos: .default).async {
+        DispatchQueue.global().async {
             self.syncEvents()
         }
     }
