@@ -27,23 +27,32 @@ struct EventsParameterEncoding : ParameterEncoding {
 
 class SessionIdleTimer {
     private let helper : AnalyticsHelper
+    private var invalidationLock : DispatchSemaphore
     private var invalidated : Bool
     
     init(_ helper : AnalyticsHelper, timeout: UInt) {
+        self.invalidationLock = DispatchSemaphore(value: 1)
         self.invalidated = false
         self.helper = helper
         
         DispatchQueue.global(qos: .default).asyncAfter(deadline: .now() + .seconds(Int(timeout))) {
+            self.invalidationLock.wait()
+            
             if self.invalidated {
+                self.invalidationLock.signal()
                 return
             }
+            
+            self.invalidationLock.signal()
             
             helper.sessionDidEnd()
         }
     }
     
     internal func invalidate() {
-        self.invalidated = true
+        invalidationLock.wait()
+        invalidated = true
+        invalidationLock.signal()
     }
 }
 
