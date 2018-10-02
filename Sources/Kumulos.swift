@@ -62,13 +62,13 @@ open class Kumulos {
     fileprivate(set) var secretKey: String
     fileprivate(set) var analyticsHelper: AnalyticsHelper? = nil
 
-    open static var apiKey:String {
+    public static var apiKey:String {
         get {
             return sharedInstance.apiKey
         }
     }
 
-    open static var secretKey:String {
+    public static var secretKey:String {
         get {
             return sharedInstance.secretKey
         }
@@ -83,7 +83,7 @@ open class Kumulos {
     /**
         The token for the current session
     */
-    open static var sessionToken:String {
+    public static var sessionToken:String {
         get {
             return sharedInstance.sessionToken
         }
@@ -97,7 +97,7 @@ open class Kumulos {
 
         - Returns: String - UUID
     */
-    open static var installId :String {
+    public static var installId :String {
         get {
             if let existingID = UserDefaults.standard.object(forKey: "KumulosUUID") {
                 return existingID as! String
@@ -120,7 +120,7 @@ open class Kumulos {
         - Parameters:
               - config: An instance of KSConfig
     */
-    open static func initialize(config: KSConfig) {
+    public static func initialize(config: KSConfig) {
         if (instance !== nil) {
             assertionFailure("The KumulosSDK has already been initialized")
         }
