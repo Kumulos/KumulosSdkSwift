@@ -58,7 +58,7 @@ public extension Kumulos {
     }
     
     /**
-     Logs an analytics event immediately
+     Logs an analytics event to the local database then flushes all locally stored events to the server
      
      Parameters:
      - eventType: Unique identifier for the type of event
