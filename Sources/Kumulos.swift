@@ -30,7 +30,6 @@ internal enum KumulosEvent : String {
 open class Kumulos {
 
     internal let baseApiUrl = "https://api.kumulos.com/b2.2"
-    internal let baseStatsUrl = "https://stats.kumulos.com/v1"
     internal let basePushUrl = "https://push.kumulos.com/v1"
     internal let baseCrashUrl = "https://crash.kumulos.com/v1"
     internal let baseEventsUrl = "https://events.kumulos.com/v1"
