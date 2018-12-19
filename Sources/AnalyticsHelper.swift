@@ -208,7 +208,7 @@ class AnalyticsHelper {
             ])
         }
         
-        let url = "\(kumulos.baseEventsUrl)app-installs/\(Kumulos.installId)/events"
+        let url = "\(kumulos.baseEventsUrl)/app-installs/\(Kumulos.installId)/events"
         
         let request = kumulos.makeJsonNetworkRequest(.post, url: url, parameters: ["events": data], encoding: EventsParameterEncoding())
         

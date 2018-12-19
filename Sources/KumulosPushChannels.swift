@@ -59,7 +59,7 @@ public class KumulosPushChannels {
      */
     public func listChannels() -> KumulosPushChannelRequest {
         let request = KumulosPushChannelRequest()
-        let url =  "\(sdkInstance.basePushUrl)app-installs/\(Kumulos.installId)/channels"
+        let url =  "\(sdkInstance.basePushUrl)/app-installs/\(Kumulos.installId)/channels"
         
         sdkInstance.makeNetworkRequest(.get, url: url, parameters: [:])
         .validate(statusCode: 200..<300)
@@ -110,7 +110,7 @@ public class KumulosPushChannels {
     private func doCreateChannel(uuid: String, subscribe: Bool, name: String? = nil, showInPortal: Bool, meta: [String:AnyObject]? = nil) -> KumulosPushChannelRequest
     {
         let request = KumulosPushChannelRequest()
-        let url =  "\(sdkInstance.basePushUrl)channels"
+        let url =  "\(sdkInstance.basePushUrl)/channels"
         
         var parameters = [
             "uuid": uuid,
@@ -236,7 +236,7 @@ public class KumulosPushChannels {
     private func makeSubscriptionNetworkCall(_ method: Alamofire.HTTPMethod, parameters: [String:AnyObject])
         -> KumulosPushChannelSubscriptionRequest
     {
-        let url =  "\(sdkInstance.basePushUrl)app-installs/\(Kumulos.installId)/channels/subscriptions"
+        let url =  "\(sdkInstance.basePushUrl)/app-installs/\(Kumulos.installId)/channels/subscriptions"
         
         return makeNetworkCall(method: method, url: url, parameters: parameters)
     }
