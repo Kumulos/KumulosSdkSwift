@@ -25,6 +25,17 @@ public extension Kumulos {
     }
     
     /**
+     Logs an analytics event to the local database then flushes all locally stored events to the server
+     
+     Parameters:
+     - eventType: Unique identifier for the type of event
+     - properties: Optional meta-data about the event
+     */
+    public static func trackEventImmediately(eventType: String, properties: [String:Any]?) {
+        getInstance().analyticsHelper?.trackEvent(eventType: eventType, properties: properties, immediateFlush: true)
+    }
+    
+    /**
      Associates a user identifier with the current Kumulos installation record
      
      Parameters:
@@ -55,17 +66,6 @@ public extension Kumulos {
         
         let params = ["id": userIdentifier, "attributes": attributes] as [String : Any]
         Kumulos.trackEvent(eventType: KumulosEvent.STATS_ASSOCIATE_USER, properties: params, immediateFlush: true)
-    }
-    
-    /**
-     Logs an analytics event to the local database then flushes all locally stored events to the server
-     
-     Parameters:
-     - eventType: Unique identifier for the type of event
-     - properties: Optional meta-data about the event
-     */
-    public static func trackEventImmediately(eventType: String, properties: [String:Any]?) {
-        getInstance().analyticsHelper?.trackEvent(eventType: eventType, properties: properties, immediateFlush: true)
     }
     
 }
