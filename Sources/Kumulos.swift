@@ -29,7 +29,7 @@ internal enum KumulosEvent : String {
 // MARK: class
 open class Kumulos {
 
-    static let installIdLock = DispatchSemaphore(value: 1)
+    private static let installIdLock = DispatchSemaphore(value: 1)
     
     internal let baseApiUrl = "https://api.kumulos.com/b2.2"
     internal let basePushUrl = "https://push.kumulos.com/v1"
@@ -108,7 +108,7 @@ open class Kumulos {
             if let existingID = UserDefaults.standard.object(forKey: "KumulosUUID") {
                 return existingID as! String
             }
-            
+
             let newID = UUID().uuidString
             UserDefaults.standard.set(newID, forKey: "KumulosUUID")
             UserDefaults.standard.synchronize()
