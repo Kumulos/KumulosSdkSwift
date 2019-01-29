@@ -107,7 +107,9 @@ class AnalyticsHelper {
         }
 
         analyticsContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
-        analyticsContext?.persistentStoreCoordinator = storeCoordinator
+        analyticsContext?.performAndWait {
+            analyticsContext?.persistentStoreCoordinator = storeCoordinator
+        }
     }
     
     private func registerListeners() {
@@ -180,19 +182,22 @@ class AnalyticsHelper {
     }
     
     private func syncEvents() {
-        let results = fetchEventsBatch()
-        
-        if results.count > 0 {
-            syncEventsBatch(events: results)
-        }
-        else if bgTask != UIBackgroundTaskInvalid {
-            UIApplication.shared.endBackgroundTask(bgTask)
-            bgTask = UIBackgroundTaskInvalid
+        self.analyticsContext?.performAndWait {
+            let results = fetchEventsBatch()
+
+            if results.count > 0 {
+                syncEventsBatch(events: results)
+            }
+            else if bgTask != UIBackgroundTaskInvalid {
+                UIApplication.shared.endBackgroundTask(bgTask)
+                bgTask = UIBackgroundTaskInvalid
+            }
         }
     }
     
     private func syncEventsBatch(events: [NSManagedObject]) {
         var data = [] as [[String : Any?]]
+        var eventIds = [] as [NSManagedObjectID]
         
         for event in events {
             var jsonProps = nil as Any?
@@ -206,6 +211,7 @@ class AnalyticsHelper {
                 "timestamp": event.value(forKey: "happenedAt"),
                 "data": jsonProps
             ])
+            eventIds.append(event.objectID)
         }
         
         let url = "\(kumulos.baseEventsUrl)/app-installs/\(Kumulos.installId)/events"
@@ -216,7 +222,7 @@ class AnalyticsHelper {
             switch response.result {
 
             case .success:
-                if let err = self.pruneEventsBatch(events) {
+                if let err = self.pruneEventsBatch(eventIds) {
                     print("Failed to prune events batch: " + err.localizedDescription)
                     return
                 }
@@ -232,21 +238,21 @@ class AnalyticsHelper {
         }
     }
     
-    private func pruneEventsBatch(_ events: [NSManagedObject]) -> Error? {
-        let ids = events.map { (event) -> NSManagedObjectID in
-            return event.objectID
+    private func pruneEventsBatch(_ eventIds: [NSManagedObjectID]) -> Error? {
+        var err : Error? = nil
+
+        self.analyticsContext?.performAndWait {
+            let request = NSBatchDeleteRequest(objectIDs: eventIds)
+
+            do {
+                try self.analyticsContext?.execute(request)
+            }
+            catch {
+                err = error
+            }
         }
-        
-        let request = NSBatchDeleteRequest(objectIDs: ids)
-        
-        do {
-            try self.analyticsContext?.execute(request)
-        }
-        catch {
-            return error
-        }
-        
-        return nil
+
+        return err
     }
     
     private func fetchEventsBatch() -> [NSManagedObject] {
