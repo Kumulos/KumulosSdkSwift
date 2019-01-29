@@ -182,7 +182,7 @@ class AnalyticsHelper {
     }
     
     private func syncEvents() {
-        self.analyticsContext?.performAndWait {
+        analyticsContext?.performAndWait {
             let results = fetchEventsBatch()
 
             if results.count > 0 {
@@ -241,7 +241,7 @@ class AnalyticsHelper {
     private func pruneEventsBatch(_ eventIds: [NSManagedObjectID]) -> Error? {
         var err : Error? = nil
 
-        self.analyticsContext?.performAndWait {
+        analyticsContext?.performAndWait {
             let request = NSBatchDeleteRequest(objectIDs: eventIds)
 
             do {
