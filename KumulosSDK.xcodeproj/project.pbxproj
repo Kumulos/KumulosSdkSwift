@@ -17,7 +17,6 @@
 		127B22E11D9BE59E00D9C94B /* KumulosSDK.h in Headers */ = {isa = PBXBuildFile; fileRef = 127B22D61D9BE59E00D9C94B /* KumulosSDK.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		127B22E21D9BE59E00D9C94B /* MobileProvision.h in Headers */ = {isa = PBXBuildFile; fileRef = 127B22D71D9BE59E00D9C94B /* MobileProvision.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		127B22E31D9BE59E00D9C94B /* MobileProvision.m in Sources */ = {isa = PBXBuildFile; fileRef = 127B22D81D9BE59E00D9C94B /* MobileProvision.m */; };
-		129372072006353600EBC8F4 /* KAnalyticsModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 129372052006353600EBC8F4 /* KAnalyticsModel.xcdatamodeld */; };
 		129372092006355E00EBC8F4 /* Kumulos+Analytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 129372082006355E00EBC8F4 /* Kumulos+Analytics.swift */; };
 		1293720B2006378D00EBC8F4 /* AnalyticsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1293720A2006378D00EBC8F4 /* AnalyticsHelper.swift */; };
 		12A6BD871FCD7A7500D59D37 /* KSConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12A6BD861FCD7A7400D59D37 /* KSConfig.swift */; };
@@ -45,7 +44,6 @@
 		127B22D61D9BE59E00D9C94B /* KumulosSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KumulosSDK.h; path = Sources/KumulosSDK.h; sourceTree = "<group>"; };
 		127B22D71D9BE59E00D9C94B /* MobileProvision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MobileProvision.h; path = Sources/MobileProvision.h; sourceTree = "<group>"; };
 		127B22D81D9BE59E00D9C94B /* MobileProvision.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MobileProvision.m; path = Sources/MobileProvision.m; sourceTree = "<group>"; };
-		129372062006353600EBC8F4 /* KAnalyticsModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = KAnalyticsModel.xcdatamodel; sourceTree = "<group>"; };
 		129372082006355E00EBC8F4 /* Kumulos+Analytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Kumulos+Analytics.swift"; path = "Sources/Kumulos+Analytics.swift"; sourceTree = "<group>"; };
 		1293720A2006378D00EBC8F4 /* AnalyticsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AnalyticsHelper.swift; path = Sources/AnalyticsHelper.swift; sourceTree = "<group>"; };
 		12937235200671EE00EBC8F4 /* KSCrash.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = KSCrash.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -102,7 +100,6 @@
 			isa = PBXGroup;
 			children = (
 				6F469D1B205BCE720069D788 /* Kumulos+Engage.swift */,
-				129372052006353600EBC8F4 /* KAnalyticsModel.xcdatamodeld */,
 				127B22CE1D9BE59E00D9C94B /* CwlSysctl.swift */,
 				127B22CF1D9BE59E00D9C94B /* Info.plist */,
 				127B22D01D9BE59E00D9C94B /* KSAPIOperation.swift */,
@@ -222,7 +219,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				129372072006353600EBC8F4 /* KAnalyticsModel.xcdatamodeld in Sources */,
 				6F469D1C205BCE720069D788 /* Kumulos+Engage.swift in Sources */,
 				127B22E01D9BE59E00D9C94B /* Kumulos+Stats.swift in Sources */,
 				127B22D91D9BE59E00D9C94B /* CwlSysctl.swift in Sources */,
@@ -433,20 +429,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCVersionGroup section */
-		129372052006353600EBC8F4 /* KAnalyticsModel.xcdatamodeld */ = {
-			isa = XCVersionGroup;
-			children = (
-				129372062006353600EBC8F4 /* KAnalyticsModel.xcdatamodel */,
-			);
-			currentVersion = 129372062006353600EBC8F4 /* KAnalyticsModel.xcdatamodel */;
-			name = KAnalyticsModel.xcdatamodeld;
-			path = Sources/KAnalyticsModel.xcdatamodeld;
-			sourceTree = "<group>";
-			versionGroupType = wrapper.xcdatamodel;
-		};
-/* End XCVersionGroup section */
 	};
 	rootObject = DB481C111D3BC9D30021C627 /* Project object */;
 }

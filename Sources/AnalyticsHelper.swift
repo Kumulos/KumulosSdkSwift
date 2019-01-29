@@ -56,6 +56,13 @@ class SessionIdleTimer {
     }
 }
 
+class KSEventModel : NSManagedObject {
+    @NSManaged var uuid : String?
+    @NSManaged var happenedAt : NSNumber?
+    @NSManaged var eventType : String?
+    @NSManaged var properties : Data?
+}
+
 class AnalyticsHelper {
     private var kumulos : Kumulos
     private var analyticsContext : NSManagedObjectContext?
@@ -83,23 +90,16 @@ class AnalyticsHelper {
     }
     
     private func initContext() {
-        guard let url = Bundle(for: type(of: self)).url(forResource: "KAnalyticsModel", withExtension:"momd") else {
-            print("Failed to find analytics models")
-            return
-        }
-        
-        guard let objectModel = NSManagedObjectModel(contentsOf: url) else {
-            print("Failed to create object model")
-            return
-        }
+        let objectModel = getCoreDataModel()
         
         let storeCoordinator = NSPersistentStoreCoordinator(managedObjectModel: objectModel)
         
         let docsUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last
         let storeUrl = URL(string: "KAnalyticsDb.sqlite", relativeTo: docsUrl)
+        let opts = [NSMigratePersistentStoresAutomaticallyOption: true, NSInferMappingModelAutomaticallyOption: true]
         
         do {
-            try storeCoordinator.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: nil, at: storeUrl, options: nil)
+            try storeCoordinator.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: nil, at: storeUrl, options: opts)
         }
         catch {
             print("Failed to set up persistent store: " + error.localizedDescription)
@@ -144,21 +144,19 @@ class AnalyticsHelper {
                 return
             }
             
-            let event = NSManagedObject(entity: entity, insertInto: context)
-            
-            let happenedAtMillis = atTime.timeIntervalSince1970 * 1000
-            let uuid = UUID().uuidString.lowercased()
-            
-            event.setValue(uuid, forKey: "uuid")
-            event.setValue(happenedAtMillis, forKey: "happenedAt")
-            event.setValue(eventType, forKey: "eventType")
+            let event = KSEventModel(entity: entity, insertInto: nil)
+
+            event.uuid = UUID().uuidString.lowercased()
+            event.happenedAt = NSNumber(value: Int64(atTime.timeIntervalSince1970 * 1000))
+            event.eventType = eventType
 
             if properties != nil {
                 let propsJson = try? JSONSerialization.data(withJSONObject: properties as Any, options: JSONSerialization.WritingOptions(rawValue: 0))
 
-                event.setValue(propsJson, forKey: "properties")
+                event.properties = propsJson
             }
-            
+
+            context.insert(event)
             do {
                 try context.save()
                 
@@ -170,6 +168,7 @@ class AnalyticsHelper {
             }
             catch {
                 print("Failed to record event")
+                print(error)
             }
         }
         
@@ -195,20 +194,20 @@ class AnalyticsHelper {
         }
     }
     
-    private func syncEventsBatch(events: [NSManagedObject]) {
+    private func syncEventsBatch(events: [KSEventModel]) {
         var data = [] as [[String : Any?]]
         var eventIds = [] as [NSManagedObjectID]
         
         for event in events {
             var jsonProps = nil as Any?
-            if let props = event.value(forKey: "properties") as? Data {
+            if let props = event.properties {
                 jsonProps = try? JSONSerialization.jsonObject(with: props, options: JSONSerialization.ReadingOptions.init(rawValue: 0))
             }
             
             data.append([
-                "type": event.value(forKey: "eventType"),
-                "uuid": event.value(forKey: "uuid"),
-                "timestamp": event.value(forKey: "happenedAt"),
+                "type": event.eventType,
+                "uuid": event.uuid,
+                "timestamp": event.happenedAt,
                 "data": jsonProps
             ])
             eventIds.append(event.objectID)
@@ -255,12 +254,12 @@ class AnalyticsHelper {
         return err
     }
     
-    private func fetchEventsBatch() -> [NSManagedObject] {
+    private func fetchEventsBatch() -> [KSEventModel] {
         guard let context = analyticsContext else {
             return []
         }
         
-        let request = NSFetchRequest<NSManagedObject>(entityName: "Event")
+        let request = NSFetchRequest<KSEventModel>(entityName: "Event")
         request.returnsObjectsAsFaults = false
         request.sortDescriptors = [ NSSortDescriptor(key: "happenedAt", ascending: true) ]
         request.fetchLimit = 100
@@ -322,6 +321,47 @@ class AnalyticsHelper {
         
         trackEvent(eventType: KumulosEvent.STATS_BACKGROUND.rawValue, atTime: becameInactiveAt!, properties: nil, asynchronously: false, immediateFlush: true)
         becameInactiveAt = nil
+    }
+
+    // MARK: CoreData model definition
+    fileprivate func getCoreDataModel() -> NSManagedObjectModel {
+        let model = NSManagedObjectModel()
+
+        let eventEntity = NSEntityDescription()
+        eventEntity.name = "Event"
+        eventEntity.managedObjectClassName = NSStringFromClass(KSEventModel.self)
+
+        var eventProps : Array<NSAttributeDescription> = []
+
+        let eventTypeProp = NSAttributeDescription()
+        eventTypeProp.name = "eventType"
+        eventTypeProp.attributeType = .stringAttributeType
+        eventTypeProp.isOptional = false
+        eventProps.append(eventTypeProp)
+
+        let happenedAtProp = NSAttributeDescription()
+        happenedAtProp.name = "happenedAt"
+        happenedAtProp.attributeType = .integer64AttributeType
+        happenedAtProp.isOptional = false
+        happenedAtProp.defaultValue = 0
+        eventProps.append(happenedAtProp)
+
+        let propertiesProp = NSAttributeDescription()
+        propertiesProp.name = "properties"
+        propertiesProp.attributeType = .binaryDataAttributeType
+        propertiesProp.isOptional = true
+        eventProps.append(propertiesProp)
+
+        let uuidProp = NSAttributeDescription()
+        uuidProp.name = "uuid"
+        uuidProp.attributeType = .stringAttributeType
+        uuidProp.isOptional = false
+        eventProps.append(uuidProp);
+
+        eventEntity.properties = eventProps
+        model.entities = [eventEntity]
+
+        return model;
     }
     
 }
