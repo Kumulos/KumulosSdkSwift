@@ -320,12 +320,8 @@ class AnalyticsHelper {
         startNewSession = true
         sessionIdleTimer = nil
         
-        trackEvent(eventType: KumulosEvent.STATS_BACKGROUND.rawValue, atTime: becameInactiveAt!, properties: nil, asynchronously: false)
+        trackEvent(eventType: KumulosEvent.STATS_BACKGROUND.rawValue, atTime: becameInactiveAt!, properties: nil, asynchronously: false, immediateFlush: true)
         becameInactiveAt = nil
-        
-        DispatchQueue.global().async {
-            self.syncEvents()
-        }
     }
     
 }
