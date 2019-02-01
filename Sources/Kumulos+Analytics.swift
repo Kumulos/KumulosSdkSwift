@@ -42,13 +42,7 @@ public extension Kumulos {
      - userIdentifier: Unique identifier for the current user
      */
     public static func associateUserWithInstall(userIdentifier: String) {
-        if userIdentifier == "" {
-            print("User identifier cannot be empty, aborting!")
-            return
-        }
-
-        let params = ["id": userIdentifier]
-        Kumulos.trackEvent(eventType: KumulosEvent.STATS_ASSOCIATE_USER, properties: params as [String : AnyObject], immediateFlush: true)
+        associateUserWithInstallImpl(userIdentifier: userIdentifier, attributes: nil)
     }
     
     /**
@@ -59,12 +53,23 @@ public extension Kumulos {
      - attributes: JSON encodable dictionary of attributes to store for the user
      */
     public static func associateUserWithInstall(userIdentifier: String, attributes: [String:AnyObject]) {
+        associateUserWithInstallImpl(userIdentifier: userIdentifier, attributes: attributes)
+    }
+
+    fileprivate static func associateUserWithInstallImpl(userIdentifier: String, attributes: [String:AnyObject]?) {
         if userIdentifier == "" {
             print("User identifier cannot be empty, aborting!")
             return
         }
-        
-        let params = ["id": userIdentifier, "attributes": attributes] as [String : Any]
+
+        var params : [String:Any]
+        if let attrs = attributes {
+            params = ["id": userIdentifier, "attributes": attrs]
+        }
+        else {
+            params = ["id": userIdentifier]
+        }
+
         Kumulos.trackEvent(eventType: KumulosEvent.STATS_ASSOCIATE_USER, properties: params, immediateFlush: true)
     }
     
