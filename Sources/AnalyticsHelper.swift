@@ -57,9 +57,10 @@ class SessionIdleTimer {
 }
 
 class KSEventModel : NSManagedObject {
-    @NSManaged var uuid : String?
-    @NSManaged var happenedAt : NSNumber?
-    @NSManaged var eventType : String?
+    @NSManaged var uuid : String
+    @NSManaged var userIdentifier : String?
+    @NSManaged var happenedAt : NSNumber
+    @NSManaged var eventType : String
     @NSManaged var properties : Data?
 }
 
@@ -357,6 +358,12 @@ class AnalyticsHelper {
         uuidProp.attributeType = .stringAttributeType
         uuidProp.isOptional = false
         eventProps.append(uuidProp);
+
+        let userIdProp = NSAttributeDescription()
+        userIdProp.name = "userIdentifier"
+        userIdProp.attributeType = .stringAttributeType
+        userIdProp.isOptional = true
+        eventProps.append(userIdProp);
 
         eventEntity.properties = eventProps
         model.entities = [eventEntity]
