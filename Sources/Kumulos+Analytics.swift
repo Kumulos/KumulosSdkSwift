@@ -59,6 +59,23 @@ public extension Kumulos {
         associateUserWithInstallImpl(userIdentifier: userIdentifier, attributes: attributes)
     }
 
+    /**
+     Returns the identifier for the user currently associated with the Kumulos installation record
+
+     If no user is associated, it returns the Kumulos installation ID
+    */
+    public static var currentUserIdentifier : String {
+        get {
+            userIdLock.wait()
+            defer { userIdLock.signal() }
+            if let userId = UserDefaults.standard.value(forKey: USER_ID_KEY) as! String? {
+                return userId;
+            }
+
+            return Kumulos.installId
+        }
+    }
+
     fileprivate static func associateUserWithInstallImpl(userIdentifier: String, attributes: [String:AnyObject]?) {
         if userIdentifier == "" {
             print("User identifier cannot be empty, aborting!")
