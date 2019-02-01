@@ -150,6 +150,7 @@ class AnalyticsHelper {
             event.uuid = UUID().uuidString.lowercased()
             event.happenedAt = NSNumber(value: Int64(atTime.timeIntervalSince1970 * 1000))
             event.eventType = eventType
+            event.userIdentifier = Kumulos.currentUserIdentifier
 
             if properties != nil {
                 let propsJson = try? JSONSerialization.data(withJSONObject: properties as Any, options: JSONSerialization.WritingOptions(rawValue: 0))
