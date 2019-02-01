@@ -20,6 +20,7 @@ internal enum KumulosEvent : String {
     case STATS_BACKGROUND = "k.bg"
     case STATS_CALL_HOME = "k.stats.installTracked"
     case STATS_ASSOCIATE_USER = "k.stats.userAssociated"
+    case STATS_USER_ASSOCIATION_CLEARED = "k.stats.userAssociationCleared"
     case PUSH_DEVICE_REGISTER = "k.push.deviceRegistered"
     case PUSH_OPEN_TRACK = "k.push.opened"
     case ENGAGE_BEACON_ENTERED_PROXIMITY = "k.engage.beaconEnteredProximity"

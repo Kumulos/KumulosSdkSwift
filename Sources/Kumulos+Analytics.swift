@@ -76,6 +76,23 @@ public extension Kumulos {
         }
     }
 
+    /**
+     Clears any existing association between this install record and a user identifier.
+
+     See associateUserWithInstall and currentUserIdentifier for further information.
+     */
+    public static func clearUserAssociation() {
+        userIdLock.wait()
+        let currentUserId = UserDefaults.standard.value(forKey: USER_ID_KEY)
+        userIdLock.signal()
+
+        Kumulos.trackEvent(eventType: KumulosEvent.STATS_USER_ASSOCIATION_CLEARED, properties: ["oldUserIdentifier": currentUserId ?? NSNull()])
+
+        userIdLock.wait()
+        UserDefaults.standard.removeObject(forKey: USER_ID_KEY)
+        userIdLock.signal()
+    }
+
     fileprivate static func associateUserWithInstallImpl(userIdentifier: String, attributes: [String:AnyObject]?) {
         if userIdentifier == "" {
             print("User identifier cannot be empty, aborting!")
