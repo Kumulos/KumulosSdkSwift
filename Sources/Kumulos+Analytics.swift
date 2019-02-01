@@ -8,6 +8,9 @@
 import Foundation
 
 public extension Kumulos {
+
+    private static let userIdLock = DispatchSemaphore(value: 1)
+    internal static let USER_ID_KEY = "KumulosCurrentUserID"
     
     internal static func trackEvent(eventType: KumulosEvent, properties: [String:Any]?, immediateFlush: Bool = false) {
         getInstance().analyticsHelper?.trackEvent(eventType: eventType.rawValue, properties: properties, immediateFlush: immediateFlush)
@@ -69,6 +72,10 @@ public extension Kumulos {
         else {
             params = ["id": userIdentifier]
         }
+
+        userIdLock.wait()
+        UserDefaults.standard.set(userIdentifier, forKey: USER_ID_KEY)
+        userIdLock.signal()
 
         Kumulos.trackEvent(eventType: KumulosEvent.STATS_ASSOCIATE_USER, properties: params, immediateFlush: true)
     }
