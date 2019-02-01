@@ -58,7 +58,7 @@ class SessionIdleTimer {
 
 class KSEventModel : NSManagedObject {
     @NSManaged var uuid : String
-    @NSManaged var userIdentifier : String?
+    @NSManaged var userIdentifier : String
     @NSManaged var happenedAt : NSNumber
     @NSManaged var eventType : String
     @NSManaged var properties : Data?
@@ -210,7 +210,8 @@ class AnalyticsHelper {
                 "type": event.eventType,
                 "uuid": event.uuid,
                 "timestamp": event.happenedAt,
-                "data": jsonProps
+                "data": jsonProps,
+                "userId": event.userIdentifier
             ])
             eventIds.append(event.objectID)
         }
