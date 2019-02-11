@@ -1,2 +1,2 @@
-github "Alamofire/Alamofire" ~> 4.6
+github "Alamofire/Alamofire" ~> 4.8
 github "kstenerud/KSCrash" ~> 1.15
