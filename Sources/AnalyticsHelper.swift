@@ -78,7 +78,7 @@ class AnalyticsHelper {
         self.kumulos = kumulos;
         startNewSession = true
         sessionIdleTimer = nil
-        bgTask = UIBackgroundTaskInvalid
+        bgTask = UIBackgroundTaskIdentifier.invalid
         analyticsContext = nil
         becameInactiveAt = nil
         
@@ -114,13 +114,13 @@ class AnalyticsHelper {
     }
     
     private func registerListeners() {
-        NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appBecameActive), name: .UIApplicationDidBecomeActive, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appBecameActive), name: UIApplication.didBecomeActiveNotification, object: nil)
 
-        NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appBecameInactive), name: .UIApplicationWillResignActive, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appBecameInactive), name: UIApplication.willResignActiveNotification, object: nil)
 
-        NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appBecameBackground), name: .UIApplicationDidEnterBackground, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appBecameBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
 
-        NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appWillTerminate), name: .UIApplicationWillTerminate, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appWillTerminate), name: UIApplication.willTerminateNotification, object: nil)
     }
 
     // MARK: Event Tracking
@@ -189,9 +189,9 @@ class AnalyticsHelper {
             if results.count > 0 {
                 syncEventsBatch(events: results)
             }
-            else if bgTask != UIBackgroundTaskInvalid {
-                UIApplication.shared.endBackgroundTask(bgTask)
-                bgTask = UIBackgroundTaskInvalid
+            else if bgTask != UIBackgroundTaskIdentifier.invalid {
+                UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(bgTask.rawValue))
+                bgTask = UIBackgroundTaskIdentifier.invalid
             }
         }
     }
@@ -232,9 +232,9 @@ class AnalyticsHelper {
 
             case .failure:
                 // Failed so assume will be retried some other time
-                if self.bgTask != UIBackgroundTaskInvalid {
-                    UIApplication.shared.endBackgroundTask(self.bgTask)
-                    self.bgTask = UIBackgroundTaskInvalid
+                if self.bgTask != UIBackgroundTaskIdentifier.invalid {
+                    UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(self.bgTask.rawValue))
+                    self.bgTask = UIBackgroundTaskIdentifier.invalid
                 }
             }
         }
@@ -292,9 +292,9 @@ class AnalyticsHelper {
             sessionIdleTimer = nil
         }
         
-        if bgTask != UIBackgroundTaskInvalid {
-            UIApplication.shared.endBackgroundTask(bgTask)
-            bgTask = UIBackgroundTaskInvalid
+        if bgTask != UIBackgroundTaskIdentifier.invalid {
+            UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(bgTask.rawValue))
+            bgTask = UIBackgroundTaskIdentifier.invalid
         }
     }
     
@@ -306,8 +306,8 @@ class AnalyticsHelper {
     
     @objc private func appBecameBackground() {
         bgTask = UIApplication.shared.beginBackgroundTask(withName: "sync", expirationHandler: {
-            UIApplication.shared.endBackgroundTask(self.bgTask)
-            self.bgTask = UIBackgroundTaskInvalid
+            UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(self.bgTask.rawValue))
+            self.bgTask = UIBackgroundTaskIdentifier.invalid
         })
     }
     
@@ -373,4 +373,9 @@ class AnalyticsHelper {
         return model;
     }
     
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToUIBackgroundTaskIdentifier(_ input: Int) -> UIBackgroundTaskIdentifier {
+	return UIBackgroundTaskIdentifier(rawValue: input)
 }
