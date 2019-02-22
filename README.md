@@ -9,7 +9,7 @@ Select an installation method below to get started.
 Add the following line to your app's target in your `Podfile`:
 
 ```
-pod 'KumulosSdkSwift', '~> 2.4'
+pod 'KumulosSdkSwift', '~> 3.0'
 ```
 
 Run `pod install` to install your dependencies.
@@ -19,10 +19,10 @@ Run `pod install` to install your dependencies.
 Add the following line to your `Cartfile`:
 
 ```
-github "Kumulos/KumulosSdkSwift" ~> 2.4
+github "Kumulos/KumulosSdkSwift" ~> 3.0
 ```
 
-Run `TOOLCHAINS=com.apple.dt.toolchain.Swift_3_0 carthage update` to install your dependencies then follow the [Carthage integration steps](https://github.com/Carthage/Carthage#getting-started) to link the framework with your project.
+Run `carthage update` to install your dependencies then follow the [Carthage integration steps](https://github.com/Carthage/Carthage#getting-started) to link the framework with your project.
 
 Please also ensure you link your project against:
 
@@ -55,4 +55,11 @@ This project is licensed under the MIT license with portions licensed under the 
 ## Requirements
 
 - iOS9+
-- Swift3
+- Swift4.2
+
+## Swift Version Support
+
+| Swift Version | SDK Version |
+| ------------- | ----------- |
+| 3.0           | 2.x         |
+| 4.2           | 3.x         |
