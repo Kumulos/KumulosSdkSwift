@@ -25,6 +25,7 @@ internal enum KumulosEvent : String {
     case PUSH_OPEN_TRACK = "k.push.opened"
     case ENGAGE_BEACON_ENTERED_PROXIMITY = "k.engage.beaconEnteredProximity"
     case ENGAGE_LOCATION_UPDATED = "k.engage.locationUpdated"
+    case DEVICE_UNSUBSCRIBED = "k.push.deviceUnsubscribed"
 }
 
 // MARK: class

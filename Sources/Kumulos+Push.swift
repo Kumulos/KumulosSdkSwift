@@ -56,7 +56,14 @@ public extension Kumulos{
         
         Kumulos.trackEvent(eventType: KumulosEvent.PUSH_DEVICE_REGISTER, properties: parameters as [String : AnyObject], immediateFlush: true)
     }
-
+    
+    /**
+        Unsubscribe your device from the Kumulos Push service
+    */
+    public static func pushTokenDelete() {
+        Kumulos.trackEvent(eventType: KumulosEvent.DEVICE_UNSUBSCRIBED, properties: [:], immediateFlush: true)
+    }
+ 
     /**
         Track a user action triggered by a push notification
 
