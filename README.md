@@ -9,7 +9,7 @@ Select an installation method below to get started.
 Add the following line to your app's target in your `Podfile`:
 
 ```
-pod 'KumulosSdkSwift', '~> 3.0'
+pod 'KumulosSdkSwift', '~> 3.1'
 ```
 
 Run `pod install` to install your dependencies.
@@ -19,17 +19,17 @@ Run `pod install` to install your dependencies.
 Add the following line to your `Cartfile`:
 
 ```
-github "Kumulos/KumulosSdkSwift" ~> 3.0
+github "Kumulos/KumulosSdkSwift" ~> 3.1
 ```
 
 Run `carthage update` to install your dependencies then follow the [Carthage integration steps](https://github.com/Carthage/Carthage#getting-started) to link the framework with your project.
 
 Please also ensure you link your project against:
 
-- SystemConfiguration.framework
-- MessageUI.framework (for iOS projects)
-- libc++
-- libz
+-   SystemConfiguration.framework
+-   MessageUI.framework (for iOS projects)
+-   libc++
+-   libz
 
 ## Initializing and using the SDK
 
@@ -54,8 +54,8 @@ This project is licensed under the MIT license with portions licensed under the 
 
 ## Requirements
 
-- iOS9+
-- Swift4.2
+-   iOS9+
+-   Swift4.2
 
 ## Swift Version Support
 
