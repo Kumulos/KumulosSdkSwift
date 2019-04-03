@@ -10,7 +10,7 @@ import CoreLocation
 
 public extension Kumulos{
     
-    public static func sendLocationUpdate(location: CLLocation) {
+    static func sendLocationUpdate(location: CLLocation) {
         let parameters = [
             "lat" : location.coordinate.latitude,
             "lng" : location.coordinate.longitude
@@ -19,7 +19,7 @@ public extension Kumulos{
         Kumulos.trackEvent(eventType: KumulosEvent.ENGAGE_LOCATION_UPDATED, properties: parameters, immediateFlush: true)
     }
     
-    public static func sendiBeaconProximity(beacon: CLBeacon) {
+    static func sendiBeaconProximity(beacon: CLBeacon) {
         
         let parameters = [
             "type": 1,

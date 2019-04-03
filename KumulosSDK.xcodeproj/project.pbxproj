@@ -189,7 +189,7 @@
 			};
 			buildConfigurationList = DB481C141D3BC9D30021C627 /* Build configuration list for PBXProject "KumulosSDK" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,

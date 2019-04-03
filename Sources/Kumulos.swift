@@ -41,7 +41,7 @@ open class Kumulos {
     internal let pushNotificationDeviceType = 1
     internal let pushNotificationProductionTokenType:Int = 1
 
-    internal(set) var networkRequestsInProgress = 0
+    var networkRequestsInProgress = 0
 
     fileprivate static var instance:Kumulos?
 

@@ -31,7 +31,7 @@ public extension Kumulos {
         }
     }
     
-    public static func logException(name: String, reason: String, language: String, lineOfCode: String, stackTrace: [Any], logAllThreads: Bool)  {
+    static func logException(name: String, reason: String, language: String, lineOfCode: String, stackTrace: [Any], logAllThreads: Bool)  {
         KSCrash.sharedInstance().reportUserException(name, reason: reason, language: language, lineOfCode: lineOfCode, stackTrace: stackTrace, logAllThreads: logAllThreads, terminateProgram: false)
         
         KSCrash.sharedInstance().sendAllReports{ (reports, completed, error) -> Void in

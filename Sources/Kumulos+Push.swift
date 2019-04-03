@@ -14,7 +14,7 @@ public extension Kumulos{
 
         On success will raise the didRegisterForRemoteNotificationsWithDeviceToken UIApplication event
     */
-    public static func pushRequestDeviceToken() {
+    static func pushRequestDeviceToken() {
         if #available(iOS 10.0, *) {
             let center = UNUserNotificationCenter.current()
             center.requestAuthorization(options: [.alert, .badge, .sound]) { (granted, error) in
@@ -48,7 +48,7 @@ public extension Kumulos{
         Parameters:
             - deviceToken: The push token returned by the device
     */
-    public static func pushRegister(_ deviceToken: Data) {
+    static func pushRegister(_ deviceToken: Data) {
         let token = serializeDeviceToken(deviceToken)
         let iosTokenType = getTokenType()
 
@@ -60,7 +60,7 @@ public extension Kumulos{
     /**
         Unsubscribe your device from the Kumulos Push service
     */
-    public static func pushTokenDelete() {
+    static func pushUnregister() {
         Kumulos.trackEvent(eventType: KumulosEvent.DEVICE_UNSUBSCRIBED, properties: [:], immediateFlush: true)
     }
  
@@ -70,7 +70,7 @@ public extension Kumulos{
         Parameters:
             - notification: The notification which triggered the action
     */
-    public static func pushTrackOpen(notification: [AnyHashable: Any]) {
+    static func pushTrackOpen(notification: [AnyHashable: Any]) {
         if let custom = notification["custom"] as? [String:AnyObject], let id = custom["i"]
         {
             let parameters = ["id" : id]

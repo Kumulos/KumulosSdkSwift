@@ -24,7 +24,7 @@ public extension Kumulos {
         - Parameters:
             - methodName: The alias of your API method
     */
-    public static func call(_ methodName: String) -> KSAPIOperation {
+    static func call(_ methodName: String) -> KSAPIOperation {
         return performMethod(methodName, kumulosParameters: nil)
     }
 
@@ -35,7 +35,7 @@ public extension Kumulos {
             - methodName: The alias of your API method
             - parameters: A dictionary of parameters for your method
      */
-    public static func call(_ methodName: String, parameters: Dictionary<String, AnyObject>) -> KSAPIOperation {
+    static func call(_ methodName: String, parameters: Dictionary<String, AnyObject>) -> KSAPIOperation {
         return performMethod(methodName, kumulosParameters: parameters)
     }
 
