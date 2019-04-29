@@ -94,7 +94,7 @@ public extension Kumulos{
             UIApplicationReleaseMode.adHoc,
             UIApplicationReleaseMode.dev,
             UIApplicationReleaseMode.wildcard
-            ].index(of: releaseMode), index > -1 {
+            ].firstIndex(of: releaseMode), index > -1 {
             return releaseMode.rawValue + 1;
         }
         
