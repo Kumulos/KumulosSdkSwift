@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import Alamofire
 
 public typealias PushChannelSubscriptionSuccessBlock = (()->Void)?
 public typealias PushChannelSubscriptionFailureBlock = ((Error?)->Void)?

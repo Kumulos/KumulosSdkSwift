@@ -4,7 +4,6 @@
 //
 
 import Foundation
-import Alamofire
 import UserNotifications
 
 public extension Kumulos{

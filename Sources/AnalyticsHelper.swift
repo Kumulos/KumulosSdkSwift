@@ -7,23 +7,6 @@
 
 import Foundation
 import CoreData
-import Alamofire
-
-struct EventsParameterEncoding : ParameterEncoding {
-    
-    func encode(_ urlRequest: URLRequestConvertible, with parameters: Parameters?) throws -> URLRequest {
-        var urlRequest = try urlRequest.asURLRequest()
-        guard let events = parameters?["events"] else {
-            return urlRequest
-        }
-        
-        let data = try JSONSerialization.data(withJSONObject: events, options: [])
-
-        urlRequest.httpBody = data
-        
-        return urlRequest
-    }
-}
 
 class SessionIdleTimer {
     private let helper : AnalyticsHelper

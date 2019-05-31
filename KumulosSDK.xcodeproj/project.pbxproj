@@ -30,7 +30,6 @@
 		A13430BD1F014E9100D185FD /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A13430BC1F014E9100D185FD /* libz.tbd */; };
 		A16790821E49D8BD00C276AF /* KumulosPushChannels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A16790811E49D8BD00C276AF /* KumulosPushChannels.swift */; };
 		A16790841E49DCDE00C276AF /* PushChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A16790831E49DCDE00C276AF /* PushChannel.swift */; };
-		A1D97A561F8682EF002CFB42 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1D97A571F8682EF002CFB42 /* Alamofire.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -70,7 +69,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A1D97A561F8682EF002CFB42 /* Alamofire.framework in Frameworks */,
 				12B30580200906000036498F /* KSCrash.framework in Frameworks */,
 				A13430BD1F014E9100D185FD /* libz.tbd in Frameworks */,
 				A13430BB1F014E8200D185FD /* libc++.tbd in Frameworks */,

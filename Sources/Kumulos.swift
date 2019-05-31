@@ -4,7 +4,6 @@
 //
 
 import Foundation
-import Alamofire
 
 // MARK: delegate protocol
 /*!

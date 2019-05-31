@@ -4,7 +4,6 @@
 //
 
 import Foundation
-import Alamofire
 
 public typealias KSAPIOperationSuccessBlock = ((KSResponse, KSAPIOperation)->Void)?
 public typealias KSAPIOperationFailureBlock = ((NSError?, KSAPIOperation)->Void)?

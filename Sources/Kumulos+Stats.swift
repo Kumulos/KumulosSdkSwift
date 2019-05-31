@@ -4,7 +4,6 @@
 //
 
 import Foundation
-import Alamofire
 
 #if os(iOS) || os(watchOS) || os(tvOS)
     import UIKit
