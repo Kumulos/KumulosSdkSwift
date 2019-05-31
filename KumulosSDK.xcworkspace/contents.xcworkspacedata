@@ -7,7 +7,4 @@
    <FileRef
       location = "container:KumulosSDK.xcodeproj">
    </FileRef>
-   <FileRef
-      location = "group:Carthage/Checkouts/Alamofire/Alamofire.xcodeproj">
-   </FileRef>
 </Workspace>
