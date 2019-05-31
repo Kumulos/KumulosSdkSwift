@@ -43,6 +43,12 @@ open class KSAPIOperation: Operation {
         return completeParameters
     }
 
+    fileprivate static func pathForMethodName(_ methodName:String) -> String {
+        let k = Kumulos.sharedInstance
+
+        return "/\(k.apiKey)/\(methodName).plist"
+    }
+
     open override func cancel() {
         Kumulos.apiMethodRequestComplete()
     }
@@ -87,49 +93,42 @@ open class KSAPIOperation: Operation {
     }
 
     override open func main() {
-        let url = Kumulos.getUrlForApiMethod(methodName)
+        let path = KSAPIOperation.pathForMethodName(methodName)
         let parameters = buildParameters()
 
         Kumulos.apiMethodRequestStart()
 
+        Kumulos.sharedInstance.rpcHttpClient.sendRequest(.POST, toPath: path, data: parameters, onSuccess: { (response, data) in
+            Kumulos.apiMethodRequestComplete()
 
-            Kumulos.sharedInstance.makeNetworkRequest(.post, url: url, parameters: parameters)
-            .responsePropertyList
-            { response in
+            if let results = data as? Dictionary<String,AnyObject> {
+                //- Detect errors here, not in unpack.
+                let responseCode = results["responseCode"] as? NSNumber
 
-                Kumulos.apiMethodRequestComplete()
+                if (KSResponseCode.success.rawValue == responseCode) {
 
-                switch response.result {
-                    case .success:
-                        if let results = response.result.value as? Dictionary<String,AnyObject> {
-                            //- Detect errors here, not in unpack.
-                            let responseCode = results["responseCode"] as? NSNumber
+                    self.updateSessionToken(results)
 
-                            if (KSResponseCode.success.rawValue == responseCode) {
-
-                                self.updateSessionToken(results)
-
-                                let kumulosResponse = self.unpackKumulosApiResponse(results)
-                                self.delegate?.didComplete(self, results: kumulosResponse)
-                                return
-                            }
-
-                            // error?
-                            let responseMessage = results["responseMessage"] as? String
-                            let userInfo: [AnyHashable: Any] = [NSLocalizedDescriptionKey :  responseMessage!]
-                            let error = NSError(domain: "Kumulos", code: responseCode as! Int, userInfo: userInfo as? [String : Any])
-
-                            self.delegate?.didFail(self, error: error)
-                        }
-                        else
-                        {
-                            self.onRequestError()
-                        }
-                    case .failure:
-                        self.delegate?.didFail(self, error: nil)
+                    let kumulosResponse = self.unpackKumulosApiResponse(results)
+                    self.delegate?.didComplete(self, results: kumulosResponse)
+                    return
                 }
 
+                let responseMessage = results["responseMessage"] as? String
+                let userInfo: [AnyHashable: Any] = [NSLocalizedDescriptionKey :  responseMessage!]
+                let error = NSError(domain: "Kumulos", code: responseCode as! Int, userInfo: userInfo as? [String : Any])
+
+                self.delegate?.didFail(self, error: error)
             }
+            else
+            {
+                self.onRequestError()
+            }
+        }) { (response, error) in
+            Kumulos.apiMethodRequestComplete()
+
+            self.delegate?.didFail(self, error: nil)
+        }
     }
 
     fileprivate func updateSessionToken(_ response: Dictionary<String, AnyObject>) {

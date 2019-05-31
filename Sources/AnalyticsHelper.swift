@@ -215,27 +215,20 @@ class AnalyticsHelper {
             ])
             eventIds.append(event.objectID)
         }
-        
-        let url = "\(kumulos.baseEventsUrl)/app-installs/\(Kumulos.installId)/events"
-        
-        let request = kumulos.makeJsonNetworkRequest(.post, url: url, parameters: ["events": data], encoding: EventsParameterEncoding())
-        
-        request.validate(statusCode: 200..<300).responseJSON { response in
-            switch response.result {
 
-            case .success:
-                if let err = self.pruneEventsBatch(eventIds) {
-                    print("Failed to prune events batch: " + err.localizedDescription)
-                    return
-                }
-                self.syncEvents()
+        let path = "/app-installs/\(Kumulos.installId)/events"
 
-            case .failure:
-                // Failed so assume will be retried some other time
-                if self.bgTask != UIBackgroundTaskIdentifier.invalid {
-                    UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(self.bgTask.rawValue))
-                    self.bgTask = UIBackgroundTaskIdentifier.invalid
-                }
+        kumulos.eventsHttpClient.sendRequest(.POST, toPath: path, data: ["events": data], onSuccess: { (response, data) in
+            if let err = self.pruneEventsBatch(eventIds) {
+                print("Failed to prune events batch: " + err.localizedDescription)
+                return
+            }
+            self.syncEvents()
+        }) { (response, error) in
+            // Failed so assume will be retried some other time
+            if self.bgTask != UIBackgroundTaskIdentifier.invalid {
+                UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(self.bgTask.rawValue))
+                self.bgTask = UIBackgroundTaskIdentifier.invalid
             }
         }
     }

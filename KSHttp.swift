@@ -58,7 +58,7 @@ internal class KSHttpClient {
 
     // MARK: HTTP Methods
 
-    func sendRequest(_ method:KSHttpMethod, toPath:String, data:Any?, onSuccess:@escaping KSHttpSuccessBlock, onFailure:@escaping KSHttpFailureBlock) -> URLSessionDataTask {
+    @discardableResult func sendRequest(_ method:KSHttpMethod, toPath:String, data:Any?, onSuccess:@escaping KSHttpSuccessBlock, onFailure:@escaping KSHttpFailureBlock) -> URLSessionDataTask {
         let request = self.newRequestToPath(toPath, method: method, body: data)
 
         return self.sendRequest(request: request, onSuccess: onSuccess, onFailure: onFailure)

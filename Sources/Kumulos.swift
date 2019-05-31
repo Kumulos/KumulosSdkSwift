@@ -38,6 +38,10 @@ open class Kumulos {
     internal let baseCrashUrl = "https://crash.kumulos.com/v1"
     internal let baseEventsUrl = "https://events.kumulos.com/v1"
 
+    internal let pushHttpClient:KSHttpClient
+    internal let rpcHttpClient:KSHttpClient
+    internal let eventsHttpClient:KSHttpClient
+
     internal let pushNotificationDeviceType = 1
     internal let pushNotificationProductionTokenType:Int = 1
 
@@ -151,42 +155,12 @@ open class Kumulos {
         secretKey = config.secretKey
 
         sessionToken = UUID().uuidString
+
+        pushHttpClient = KSHttpClient(baseUrl: URL(string: basePushUrl)!, requestFormat: .json, responseFormat: .json)
+        rpcHttpClient = KSHttpClient(baseUrl: URL(string: baseApiUrl)!, requestFormat: .json, responseFormat: .plist)
+        eventsHttpClient = KSHttpClient(baseUrl: URL(string: baseEventsUrl)!, requestFormat: .json, responseFormat: .json)
         
         analyticsHelper = AnalyticsHelper(kumulos: self)
     }
 
-    internal func makeNetworkRequest(_ method: Alamofire.HTTPMethod, url: URLConvertible, parameters: [String : AnyObject]?) -> Alamofire.DataRequest {
-        let requestHeaders: HTTPHeaders = [
-            "Authorization": getAuth()
-        ];
-        
-        return Alamofire.request(url, method: method, parameters: parameters, headers: requestHeaders)
-    }
-    
-    internal func makeJsonNetworkRequest(_ method: Alamofire.HTTPMethod, url: URLConvertible, parameters: [String : AnyObject]?) -> Alamofire.DataRequest {
-        return makeJsonNetworkRequest(method, url: url, parameters: parameters, encoding: JSONEncoding.default)
-    }
-    
-    internal func makeJsonNetworkRequest(_ method: Alamofire.HTTPMethod, url: URLConvertible, parameters : Parameters?, encoding: ParameterEncoding) -> Alamofire.DataRequest {
-        let requestHeaders: HTTPHeaders = [
-            "Authorization": getAuth(),
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-        ];
-        
-        return Alamofire.request(url, method: method, parameters: parameters, encoding: encoding, headers: requestHeaders)
-    }
-
-    fileprivate func getAuth()-> String {
-        let authString = "\(apiKey):\(secretKey)"
-        let authData = authString.data(using: String.Encoding.ascii)
-
-        return "Basic \(authData!.base64EncodedString(options: NSData.Base64EncodingOptions.endLineWithLineFeed))"
-    }
-
-    internal static func getUrlForApiMethod(_ methodName: String) -> String {
-        let k = Kumulos.sharedInstance
-
-        return "\(k.baseApiUrl)/\(k.apiKey)/\(methodName).plist"
-    }
 }
