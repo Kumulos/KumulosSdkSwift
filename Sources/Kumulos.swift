@@ -165,4 +165,11 @@ open class Kumulos {
         analyticsHelper = AnalyticsHelper(kumulos: self)
     }
 
+    deinit {
+        operationQueue.cancelAllOperations()
+        rpcHttpClient.invalidateSessionCancellingTasks(true)
+        pushHttpClient.invalidateSessionCancellingTasks(true)
+        eventsHttpClient.invalidateSessionCancellingTasks(false)
+    }
+
 }

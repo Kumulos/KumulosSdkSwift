@@ -56,6 +56,15 @@ internal class KSHttpClient {
         }
     }
 
+    func invalidateSessionCancellingTasks(_ cancel:Bool) {
+        if cancel {
+            urlSession.invalidateAndCancel()
+        }
+        else {
+            urlSession.finishTasksAndInvalidate()
+        }
+    }
+
     // MARK: HTTP Methods
 
     @discardableResult func sendRequest(_ method:KSHttpMethod, toPath:String, data:Any?, onSuccess:@escaping KSHttpSuccessBlock, onFailure:@escaping KSHttpFailureBlock) -> URLSessionDataTask {
