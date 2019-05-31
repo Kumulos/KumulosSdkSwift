@@ -45,7 +45,7 @@ open class KSAPIOperation: Operation {
     fileprivate static func pathForMethodName(_ methodName:String) -> String {
         let k = Kumulos.sharedInstance
 
-        return "/\(k.apiKey)/\(methodName).plist"
+        return "/b2.2/\(k.apiKey)/\(methodName).plist"
     }
 
     open override func cancel() {

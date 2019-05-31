@@ -36,7 +36,7 @@ internal class KSHttpClient {
         self.requestFormat = requestFormat
         self.responseFormat = responseFormat
 
-        let config = URLSessionConfiguration()
+        let config = URLSessionConfiguration.ephemeral
 
         if requestFormat == .json {
             config.httpAdditionalHeaders = ["Accept": "application/json"]

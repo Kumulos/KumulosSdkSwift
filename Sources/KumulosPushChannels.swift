@@ -58,7 +58,7 @@ public class KumulosPushChannels {
      */
     public func listChannels() -> KumulosPushChannelRequest {
         let request = KumulosPushChannelRequest()
-        let path =  "/app-installs/\(Kumulos.installId)/channels"
+        let path =  "/v1/app-installs/\(Kumulos.installId)/channels"
 
         sdkInstance.pushHttpClient.sendRequest(.GET, toPath: path, data: nil, onSuccess: { (response, data) in
             if let successBlock = request.successBlock {
@@ -104,7 +104,7 @@ public class KumulosPushChannels {
     private func doCreateChannel(uuid: String, subscribe: Bool, name: String? = nil, showInPortal: Bool, meta: [String:AnyObject]? = nil) -> KumulosPushChannelRequest
     {
         let request = KumulosPushChannelRequest()
-        let path =  "/channels"
+        let path =  "/v1/channels"
         
         var parameters = [
             "uuid": uuid,
@@ -224,7 +224,7 @@ public class KumulosPushChannels {
     private func makeSubscriptionNetworkCall(_ method: KSHttpMethod, parameters: [String:AnyObject])
         -> KumulosPushChannelSubscriptionRequest
     {
-        let path =  "/app-installs/\(Kumulos.installId)/channels/subscriptions"
+        let path =  "/v1/app-installs/\(Kumulos.installId)/channels/subscriptions"
         
         return makeNetworkCall(method, path: path, parameters: parameters)
     }

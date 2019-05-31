@@ -199,9 +199,9 @@ class AnalyticsHelper {
             eventIds.append(event.objectID)
         }
 
-        let path = "/app-installs/\(Kumulos.installId)/events"
+        let path = "/v1/app-installs/\(Kumulos.installId)/events"
 
-        kumulos.eventsHttpClient.sendRequest(.POST, toPath: path, data: ["events": data], onSuccess: { (response, data) in
+        kumulos.eventsHttpClient.sendRequest(.POST, toPath: path, data: data, onSuccess: { (response, data) in
             if let err = self.pruneEventsBatch(eventIds) {
                 print("Failed to prune events batch: " + err.localizedDescription)
                 return

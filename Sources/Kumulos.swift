@@ -32,10 +32,10 @@ open class Kumulos {
 
     private static let installIdLock = DispatchSemaphore(value: 1)
     
-    internal let baseApiUrl = "https://api.kumulos.com/b2.2"
-    internal let basePushUrl = "https://push.kumulos.com/v1"
+    internal let baseApiUrl = "https://api.kumulos.com"
+    internal let basePushUrl = "https://push.kumulos.com"
     internal let baseCrashUrl = "https://crash.kumulos.com/v1"
-    internal let baseEventsUrl = "https://events.kumulos.com/v1"
+    internal let baseEventsUrl = "https://events.kumulos.com"
 
     internal let pushHttpClient:KSHttpClient
     internal let rpcHttpClient:KSHttpClient
@@ -156,8 +156,11 @@ open class Kumulos {
         sessionToken = UUID().uuidString
 
         pushHttpClient = KSHttpClient(baseUrl: URL(string: basePushUrl)!, requestFormat: .json, responseFormat: .json)
+        pushHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
         rpcHttpClient = KSHttpClient(baseUrl: URL(string: baseApiUrl)!, requestFormat: .json, responseFormat: .plist)
+        rpcHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
         eventsHttpClient = KSHttpClient(baseUrl: URL(string: baseEventsUrl)!, requestFormat: .json, responseFormat: .json)
+        eventsHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
         
         analyticsHelper = AnalyticsHelper(kumulos: self)
     }
