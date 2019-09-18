@@ -25,6 +25,19 @@ internal enum KumulosEvent : String {
     case ENGAGE_BEACON_ENTERED_PROXIMITY = "k.engage.beaconEnteredProximity"
     case ENGAGE_LOCATION_UPDATED = "k.engage.locationUpdated"
     case DEVICE_UNSUBSCRIBED = "k.push.deviceUnsubscribed"
+    case IN_APP_CONSENT_CHANGED = "k.inApp.statusUpdated"
+    case MESSAGE_OPENED = "k.message.opened"
+    case MESSAGE_DISMISSED = "k.message.dismissed"
+    case MESSAGE_DELIVERED = "k.message.delivered"
+}
+
+public typealias InAppDeepLinkHandlerBlock = ((NSDictionary)->Void)?
+public typealias PushOpenedHandlerBlock = ((NSDictionary)->Void)?
+
+public enum InAppConsentStrategy : String {
+    case NotEnabled = "NotEnabled"
+    case AutoEnroll = "AutoEnroll"
+    case ExplicitByUser = "ExplicitByUser"
 }
 
 // MARK: class
@@ -43,6 +56,8 @@ open class Kumulos {
 
     internal let pushNotificationDeviceType = 1
     internal let pushNotificationProductionTokenType:Int = 1
+    
+    
 
     var networkRequestsInProgress = 0
 
@@ -66,7 +81,18 @@ open class Kumulos {
     fileprivate(set) var config : KSConfig
     fileprivate(set) var apiKey: String
     fileprivate(set) var secretKey: String
+    fileprivate(set) var inAppConsentStrategy:InAppConsentStrategy = InAppConsentStrategy.NotEnabled
+    
+    public static var inAppConsentStrategy : InAppConsentStrategy {
+        get{
+            return sharedInstance.inAppConsentStrategy
+        }
+    }
+    
+    fileprivate(set) var inAppHelper: InAppHelper
+    
     fileprivate(set) var analyticsHelper: AnalyticsHelper? = nil
+    
 
     public static var apiKey:String {
         get {
@@ -152,6 +178,7 @@ open class Kumulos {
         self.config = config
         apiKey = config.apiKey
         secretKey = config.secretKey
+        inAppConsentStrategy = config.inAppConsentStrategy
 
         sessionToken = UUID().uuidString
 
@@ -161,6 +188,8 @@ open class Kumulos {
         rpcHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
         eventsHttpClient = KSHttpClient(baseUrl: URL(string: baseEventsUrl)!, requestFormat: .json, responseFormat: .json)
         eventsHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
+        
+        inAppHelper = InAppHelper()
         
         analyticsHelper = AnalyticsHelper(kumulos: self)
     }

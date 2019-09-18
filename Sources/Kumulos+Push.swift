@@ -6,6 +6,23 @@
 import Foundation
 import UserNotifications
 
+
+/*class PushNotification: NSObject {
+    internal(set) open var id: Int
+    internal(set) open var aps: String
+    internal(set) open var data : NSObject
+    internal(set) open var url: String
+    
+    public init(userInfo: NSDictionary) {
+         let custom = userInfo.value(forKey: "custom") as? [String:AnyObject]
+        
+        //id = custom!["a"]["k.message"]["data"]["id"]
+        
+        
+        
+    }
+}*/
+
 public extension Kumulos{
 
     /**
