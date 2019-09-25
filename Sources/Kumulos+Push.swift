@@ -94,6 +94,10 @@ public extension Kumulos{
         }
     }
 
+    internal func pushHandleOpen(withUserInfo: [AnyHashable: Any]) {
+        // TODO
+    }
+
     fileprivate static func serializeDeviceToken(_ deviceToken: Data) -> String {
         var token: String = ""
         for i in 0..<deviceToken.count {
