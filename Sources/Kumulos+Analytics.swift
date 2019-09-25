@@ -83,7 +83,7 @@ public extension Kumulos {
      */
     static func clearUserAssociation() {
         userIdLock.wait()
-        let currentUserId = UserDefaults.standard.value(forKey: USER_ID_KEY)
+        let currentUserId = UserDefaults.standard.value(forKey: USER_ID_KEY) as! String?
         userIdLock.signal()
 
         Kumulos.trackEvent(eventType: KumulosEvent.STATS_USER_ASSOCIATION_CLEARED, properties: ["oldUserIdentifier": currentUserId ?? NSNull()])
@@ -91,6 +91,13 @@ public extension Kumulos {
         userIdLock.wait()
         UserDefaults.standard.removeObject(forKey: USER_ID_KEY)
         userIdLock.signal()
+        
+        
+        #if os(iOS)
+        if (currentUserId != nil && currentUserId != Kumulos.installId) {
+            self.inAppHelper.handleAssociatedUserChange();//TODO: implement on inAppHelper
+        }
+        #endif
     }
 
     fileprivate static func associateUserWithInstallImpl(userIdentifier: String, attributes: [String:AnyObject]?) {
@@ -108,10 +115,17 @@ public extension Kumulos {
         }
 
         userIdLock.wait()
+        let currentUserId = UserDefaults.standard.value(forKey: USER_ID_KEY) as! String?
         UserDefaults.standard.set(userIdentifier, forKey: USER_ID_KEY)
         userIdLock.signal()
 
         Kumulos.trackEvent(eventType: KumulosEvent.STATS_ASSOCIATE_USER, properties: params, immediateFlush: true)
+        
+        #if os(iOS)
+        if (currentUserId != nil && currentUserId != userIdentifier) {
+            self.inAppHelper.handleAssociatedUserChange();
+        }
+        #endif
     }
     
 }
