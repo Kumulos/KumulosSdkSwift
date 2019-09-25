@@ -38,6 +38,8 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
     private var currentMessage : InAppMessage?
 
     init(kumulos: Kumulos) {
+        super.init()
+        
         self.kumulos = kumulos
         
         self.messageQueue = NSMutableOrderedSet.init(capacity: 5)
@@ -103,16 +105,16 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
     }*/
     
     func presentFromQueue() -> Void {
-       /* if (!self.messageQueue.count) {
+        if (self.messageQueue.count == 0) {
             return;
         }
-
+        
         if (self.loadingSpinner) {
-            [self.loadingSpinner performSelectorOnMainThread:@selector(startAnimating) withObject:nil waitUntilDone:YES];
+            self.loadingSpinner!.performSelector(onMainThread: Selector("StartAnimating"), with: nil, waitUntilDone: true)
         }
 
-        self.currentMessage = self.messageQueue[0];
-        [self postClientMessage:@"PRESENT_MESSAGE" withData:self.currentMessage.content];*/
+        self.currentMessage = (self.messageQueue[0] as! InAppMessage)
+        self.postClientMessage(type: "PRESENT_MESSAGE", data: self.currentMessage?.content)
     }
 
     func handleMessageClosed() -> Void {
@@ -134,24 +136,137 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
             [UNUserNotificationCenter.currentNotificationCenter removeDeliveredNotificationsWithIdentifiers:@[tickleNotificationId]];
         }*/
     }
-
-  /*  - (void) cancelCurrentPresentationQueue:(BOOL)waitForViewCleanup {
-        @synchronized (self.messageQueue) {
+    
+    
+    
+    
+    func cancelCurrentPresentationQueue(waitForViewCleanup: Bool) -> Void {
+        /*@synchronized (self.messageQueue) {
             [self.messageQueue removeAllObjects];
             [self.pendingTickleIds removeAllObjects];
             self.currentMessage = nil;
         }
 
-        [self performSelectorOnMainThread:@selector(destroyViews) withObject:nil waitUntilDone:waitForViewCleanup];
-    }*/
+        [self performSelectorOnMainThread:@selector(destroyViews) withObject:nil waitUntilDone:waitForViewCleanup];*/
+    }
+    
+
+
+  /*  - (void) initViews {
+        if (self.window != nil) {
+            return;
+        }
+
+        // Window / frame setup
+        self.window = [[UIWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
+        self.window.windowLevel = UIWindowLevelAlert;
+        [self.window setRootViewController:[UIViewController new]];
+
+        self.frame = [[UIView alloc] initWithFrame:self.window.frame];
+        self.frame.backgroundColor = UIColor.clearColor;
+        [self.window.rootViewController setView:self.frame];
+
+        [self.window setHidden:NO];
+
+        // Webview
+        self.contentController = [WKUserContentController new];
+        [self.contentController addScriptMessageHandler:self name:@"inAppHost"];
+
+        WKWebViewConfiguration* config = [WKWebViewConfiguration new];
+        [config setUserContentController:self.contentController];
+        config.allowsInlineMediaPlayback = YES;
+        if (@available(iOS 10.0, *)) {
+            config.mediaTypesRequiringUserActionForPlayback = WKAudiovisualMediaTypeNone;
+        } else {
+            if (@available(iOS 9.0, *)) {
+                config.requiresUserActionForMediaPlayback = NO;
+            } else {
+                config.mediaPlaybackRequiresUserAction = NO;
+            }
+        }
+
+    #ifdef DEBUG
+        [config.preferences setValue:@YES forKey:@"developerExtrasEnabled"];
+    #endif
+
+        self.webView = [[WKWebView alloc] initWithFrame:self.frame.frame configuration:config];
+        self.webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        self.webView.backgroundColor = UIColor.clearColor;
+        self.webView.scrollView.backgroundColor = UIColor.clearColor;
+        self.webView.opaque = NO;
+        self.webView.navigationDelegate = self;
+        self.webView.scrollView.bounces = NO;
+        self.webView.scrollView.scrollEnabled = NO;
+        self.webView.allowsBackForwardNavigationGestures = NO;
+        if (@available(iOS 9.0, *)) {
+            self.webView.allowsLinkPreview = NO;
+        }
+
+        if (@available(iOS 11.0.0, *)) {
+            // Allow content to pass under the notch / home button
+            [self.webView.scrollView setContentInsetAdjustmentBehavior:UIScrollViewContentInsetAdjustmentNever];
+        }
+
+        [self.frame addSubview:self.webView];
+
+        NSURLRequest* req = [NSURLRequest requestWithURL:[NSURL URLWithString:KSInAppRendererUrl] cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:30];
+        [self.webView loadRequest:req];
+
+        // Spinner
+        self.loadingSpinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+        self.loadingSpinner.translatesAutoresizingMaskIntoConstraints = NO;
+        self.loadingSpinner.hidesWhenStopped = YES;
+        [self.loadingSpinner startAnimating];
+        [self.frame addSubview:self.loadingSpinner];
+
+        NSLayoutConstraint* horCon = [NSLayoutConstraint constraintWithItem:self.loadingSpinner attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.frame attribute:NSLayoutAttributeCenterX multiplier:1 constant:0];
+        NSLayoutConstraint* verCon = [NSLayoutConstraint constraintWithItem:self.loadingSpinner attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self.frame attribute:NSLayoutAttributeCenterY multiplier:1 constant:0];
+        [self.frame addConstraints:@[horCon, verCon]];
+
+        [self.frame bringSubviewToFront:self.loadingSpinner];
+    }
+
+    - (void) destroyViews {
+        if (!self.window) {
+            return;
+        }
+
+        [self.window setHidden:YES];
+
+        [self.loadingSpinner removeFromSuperview];
+        self.loadingSpinner = nil;
+
+        [self.webView removeFromSuperview];
+        self.webView = nil;
+
+        [self.frame removeFromSuperview];
+        self.frame = nil;
+
+        self.window = nil;
+    }
+    
+    
+    */
+    
+    func postClientMessage(type: String, data: Any?) {
+          /*NSDictionary* msg = @{@"type": type, @"data": data != nil ? data : NSNull.null};
+          NSData* jsonMsg = [NSJSONSerialization dataWithJSONObject:msg options:0 error:nil];
+          NSString* evalString = [NSString stringWithFormat:@"postHostMessage(%@);", [[NSString alloc] initWithData:jsonMsg encoding:NSUTF8StringEncoding]];
+
+          [self.webView evaluateJavaScript:evalString completionHandler:nil];*/
+      }
+    
+    
+    
+    
+    
+    
+  
     
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-           
        if message.name != "inAppHost" {
            return;
        }
-
-        
         
         var type = message.body["type"]
         
@@ -175,71 +290,77 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
        }
    }
     
-
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        // Noop
+    }
     
-  /*  - (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error {
-        [self cancelCurrentPresentationQueue:NO];
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        self.cancelCurrentPresentationQueue(waitForViewCleanup: false)
+    }
+    
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        self.cancelCurrentPresentationQueue(waitForViewCleanup: false)
     }
 
-    - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error {
-        [self cancelCurrentPresentationQueue:NO];
-    }*/
-
     func handleActions(actions: [NSDictionary]) -> Void  {
-        var hasClose : Bool = false;
-        var trackEvent : String
-        var subscribeToChannelUuid : String
-        var userAction : NSDictionary
+        if let message = self.currentMessage {
         
-        for (action in actions) {
-            var type = action["type"]
+            var hasClose : Bool = false;
+            var trackEvent : String?
+            var subscribeToChannelUuid : String?
+            var userAction : NSDictionary?
             
-            if (type == InAppAction.CLOSE_MESSAGE) {
-                hasClose = true;
-            } else if (type == InAppAction.TRACK_EVENT) {
-                trackEvent = action["data"]["eventType"];
-            } else if (type == InAppAction.SUBSCRIBE_CHANNEL) {
-                subscribeToChannelUuid = action["data"]["channelUuid"];
-            } else {
-                userAction = action;
+            for action in actions {
+                var type = action["type"] as! String
+                
+                if (type == InAppAction.CLOSE_MESSAGE.rawValue) {
+                    hasClose = true;
+                } else if (type == InAppAction.TRACK_EVENT.rawValue) {
+                    trackEvent = action["data"]["eventType"];
+                } else if (type == InAppAction.SUBSCRIBE_CHANNEL.rawValue) {
+                    subscribeToChannelUuid = action["data"]["channelUuid"];
+                } else {
+                    userAction = action;
+                }
             }
-        }
 
-        if (hasClose) {
-            self.kumulos.inAppHelper.markMessageDismissed(message: self.currentMessage)
-            self.postClientMessage("CLOSE_MESSAGE", withData:nil)
-        }
+            if (hasClose) {
+                self.kumulos.inAppHelper.markMessageDismissed(message: message)
+                self.postClientMessage(type: "CLOSE_MESSAGE", data: nil)
+            }
 
-        if (trackEvent != nil) {
-            [self.kumulos trackEvent:trackEvent withProperties:nil];
-        }
+            if (trackEvent != nil) {
+                Kumulos.trackEvent(eventType: trackEvent!, properties: [:]);
+            }
 
-        if (subscribeToChannelUuid != nil) {
-            KumulosPushSubscriptionManager* psm = [[KumulosPushSubscriptionManager alloc] initWithKumulos:self.kumulos];
-            [psm subscribeToChannels:@[subscribeToChannelUuid]];
-        }
+            if (subscribeToChannelUuid != nil) {
+                /*KumulosPushSubscriptionManager* psm = [[KumulosPushSubscriptionManager alloc] initWithKumulos:self.kumulos];
+                [psm subscribeToChannels:@[subscribeToChannelUuid]];*/
+            }
 
-        if (userAction != nil) {
-            [self handleUserAction:userAction];
-            [self cancelCurrentPresentationQueue:YES];
+            if (userAction != nil) {
+                self.handleUserAction(userAction: userAction!)
+                self.cancelCurrentPresentationQueue(waitForViewCleanup: true)
+            }
         }
     }
 
     func handleUserAction(userAction: NSDictionary) -> Void {
-        /*NSString* type = userAction[@"type"];
-        if ([type isEqualToString:KSInAppActionPromptPushPermission]) {
-            [self.kumulos pushRequestDeviceToken];
-        } else if ([type isEqualToString:KSInAppActionDeepLink]) {
-            if (self.kumulos.config.inAppDeepLinkHandler == nil) {
+        let type = userAction["type"] as! String
+                
+        if (type == InAppAction.PROMPT_PUSH_PERMISSION.rawValue) {
+            Kumulos.pushRequestDeviceToken()
+        } else if (type == InAppAction.DEEP_LINK.rawValue) {
+            if (self.kumulos.config.inAppDeepLinkHandlerBlock == nil) {
                 return;
             }
-
-            dispatch_async(dispatch_get_main_queue(), ^{
+            //TODO!
+            /*dispatch_async(dispatch_get_main_queue(), ^{
                 NSDictionary* data = userAction[@"data"][@"deepLink"] ?: @{};
                 self.kumulos.config.inAppDeepLinkHandler(data);
-            });
-        } else if ([type isEqualToString:KSInAppActionOpenUrl]) {
-            NSURL* url = [NSURL URLWithString:userAction[@"data"][@"url"]];
+            });*/
+        } else if (type == InAppAction.OPEN_URL.rawValue) {
+            /*NSURL* url = [NSURL URLWithString:userAction[@"data"][@"url"]];
 
             if (@available(iOS 10.0.0, *)) {
                 [UIApplication.sharedApplication openURL:url options:@{} completionHandler:^(BOOL success) {
@@ -249,14 +370,14 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [UIApplication.sharedApplication openURL:url];
                 });
-            }
-        } else if ([type isEqualToString:KSInAppActionRequestRating]) {
-            if (@available(iOS 10.3.0, *)) {
-                [SKStoreReviewController requestReview];
+            }*/
+        } else if (type == InAppAction.REQUEST_RATING.rawValue) {
+            if #available(iOS 10.3.0, *) {
+                SKStoreReviewController.requestReview()
             } else {
-                NSLog(@"Requesting a rating not supported on this iOS version");
+                NSLog("Requesting a rating not supported on this iOS version");
             }
-        }*/
+        }
     }
     
 }

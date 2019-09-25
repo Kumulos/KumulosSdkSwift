@@ -234,13 +234,13 @@ internal class InAppHelper {
     }
     
     // MARK: Message management
-    private func trackMessageOpened(message: InAppMessage) -> Void {
+    internal func trackMessageOpened(message: InAppMessage) -> Void {
         let props: [String:Any] = ["type" : MESSAGE_TYPE_IN_APP, "id":message.id]
         
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_OPENED, properties: props)
     }
     
-    private func markMessageDismissed(message: InAppMessage) -> Void {
+    internal func markMessageDismissed(message: InAppMessage) -> Void {
         let props: [String:Any] = ["type" : MESSAGE_TYPE_IN_APP, "id":message.id]
         
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_DISMISSED, properties: props)
