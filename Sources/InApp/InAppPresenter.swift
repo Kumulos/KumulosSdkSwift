@@ -161,39 +161,40 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         }
     }
     
-  /*  - (void) initViews {
-        if (self.window != nil) {
+    func initViews() {
+        guard var window = self.window else {
             return;
         }
-
+        
         // Window / frame setup
-        self.window = [[UIWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
-        self.window.windowLevel = UIWindowLevelAlert;
-        [self.window setRootViewController:[UIViewController new]];
-
-        self.frame = [[UIView alloc] initWithFrame:self.window.frame];
-        self.frame.backgroundColor = UIColor.clearColor;
-        [self.window.rootViewController setView:self.frame];
-
-        [self.window setHidden:NO];
+        window = UIWindow.init(frame: UIScreen.main.bounds)
+        window.windowLevel = UIWindow.Level.alert
+        window.rootViewController = UIViewController()
+        
+        self.frame = UIView.init(frame: window.frame)
+        self.frame!.backgroundColor = UIColor.clear
+        
+        window.rootViewController!.view = self.frame
+        window.isHidden = false
 
         // Webview
-        self.contentController = [WKUserContentController new];
-        [self.contentController addScriptMessageHandler:self name:@"inAppHost"];
-
-        WKWebViewConfiguration* config = [WKWebViewConfiguration new];
-        [config setUserContentController:self.contentController];
-        config.allowsInlineMediaPlayback = YES;
-        if (@available(iOS 10.0, *)) {
-            config.mediaTypesRequiringUserActionForPlayback = WKAudiovisualMediaTypeNone;
+        self.contentController = WKUserContentController()
+        self.contentController.add(self, name: "inAppHost")
+        
+        let config = WKWebViewConfiguration()
+        config.userContentController = self.contentController
+        config.allowsInlineMediaPlayback = true
+                
+        if #available(iOS 10.0, *) {
+            config.mediaTypesRequiringUserActionForPlayback = []
         } else {
-            if (@available(iOS 9.0, *)) {
-                config.requiresUserActionForMediaPlayback = NO;
+            if #available(iOS 9.0, *) {
+                config.requiresUserActionForMediaPlayback = false
             } else {
-                config.mediaPlaybackRequiresUserAction = NO;
+                config.mediaPlaybackRequiresUserAction = false
             }
         }
-
+/*
     #ifdef DEBUG
         [config.preferences setValue:@YES forKey:@"developerExtrasEnabled"];
     #endif
@@ -232,9 +233,9 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         NSLayoutConstraint* verCon = [NSLayoutConstraint constraintWithItem:self.loadingSpinner attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self.frame attribute:NSLayoutAttributeCenterY multiplier:1 constant:0];
         [self.frame addConstraints:@[horCon, verCon]];
 
-        [self.frame bringSubviewToFront:self.loadingSpinner];
+        [self.frame bringSubviewToFront:self.loadingSpinner];*/
     }
-*/
+
     func destroyViews() {
         if let window = self.window {
             window.isHidden = true
@@ -364,17 +365,15 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
                 self.kumulos.config.inAppDeepLinkHandler(data);
             });*/
         } else if (type == InAppAction.OPEN_URL.rawValue) {
-            /*NSURL* url = [NSURL URLWithString:userAction[@"data"][@"url"]];
+            //NSURL* url = [NSURL URLWithString:userAction[@"data"][@"url"]];
 
-            if (@available(iOS 10.0.0, *)) {
-                [UIApplication.sharedApplication openURL:url options:@{} completionHandler:^(BOOL success) {
-                    /* noop */
-                }];
+            if #available(iOS 10.0.0, *) {
+                //UIApplication.shared.openURL(url: url)
             } else {
-                dispatch_async(dispatch_get_main_queue(), ^{
+                /*dispatch_async(dispatch_get_main_queue(), ^{
                     [UIApplication.sharedApplication openURL:url];
-                });
-            }*/
+                });*/
+            }
         } else if (type == InAppAction.REQUEST_RATING.rawValue) {
             if #available(iOS 10.3.0, *) {
                 SKStoreReviewController.requestReview()
