@@ -17,12 +17,14 @@ public enum InAppMessagePresentationResult : String {
 }
 
 
-
-
 internal class InAppHelper {
     
+
+    private var kumulos: Kumulos!
+    private var presenter: InAppPresenter!
+    private var pendingTickleIds: NSMutableOrderedSet?
     
-    internal var messagesContext : NSManagedObjectContext?
+    var messagesContext: NSManagedObjectContext? = nil;
     
     //TODO - date?
     //internal let KUMULOS_MESSAGES_LAST_SYNC_TIME = nil
@@ -33,19 +35,52 @@ internal class InAppHelper {
     internal let MESSAGE_TYPE_IN_APP = 2
     
     
-    
-    //internal let pendingTickleIds;
-    
     // MARK: Initialization
     
-    init() {//TODO: initWithKumulos in Objective-C
+    init(kumulos: Kumulos) {
+        self.kumulos = kumulos
+        pendingTickleIds = NSMutableOrderedSet(capacity: 1)
+        presenter = InAppPresenter(kumulos: kumulos)
+        initContext()
+        handleEnrollmentAndSyncSetup()
+    }
+    
+    func initContext() {
         
+        let objectModel: NSManagedObjectModel? = getDataModel()
         
+        if objectModel == nil {
+            print("Failed to create object model")
+            return
+        }
+        
+        var storeCoordinator: NSPersistentStoreCoordinator? = nil
+        if let objectModel = objectModel {
+            storeCoordinator = NSPersistentStoreCoordinator(managedObjectModel: objectModel)
+        }
+        
+        let docsUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last
+        let storeUrl = URL(string: "KSMessagesDb.sqlite", relativeTo: docsUrl)
+        
+        let options = [
+            NSMigratePersistentStoresAutomaticallyOption: NSNumber(value: true),
+            NSInferMappingModelAutomaticallyOption: NSNumber(value: true)
+        ]
+        
+        do {
+            try storeCoordinator?.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: nil, at: storeUrl, options: options)
+        } catch let err {
+            print("Failed to set up persistent store: \(err)")
+            return;
+        }
         
         messagesContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
-        
-//        self.pendingTickleIds = []
+        messagesContext!.performAndWait({
+            messagesContext!.persistentStoreCoordinator = storeCoordinator
+        })
     }
+    
+    
     
     private func getDataModel() -> NSManagedObjectModel {
         let model = NSManagedObjectModel();
@@ -130,7 +165,7 @@ internal class InAppHelper {
     
     class KSJsonValueTransformer: ValueTransformer {
         override class func transformedValueClass() -> AnyClass {
-            return NSData.self
+            return NSData.self//TODO: mb Data? implicitly converted?
         }
         
         override class func allowsReverseTransformation() -> Bool {
@@ -178,12 +213,33 @@ internal class InAppHelper {
     }
     
     func handleAssociatedUserChange() -> Void {
+        if (Kumulos.inAppConsentStrategy == InAppConsentStrategy.NotEnabled) {
+            DispatchQueue.global(qos: .default).async(execute: {
+                self.updateUserConsent(consentGiven: false)
+            })
+            return
+        }
         
+        DispatchQueue.global(qos: .default).async(execute: {
+            self.resetMessagingState()
+            self.handleEnrollmentAndSyncSetup()
+        })
     }
     
+
     
     private func setupSyncTask() -> Void {
-    
+        //TODO: dispatch_once
+        
+        
+//        let klass : AnyClass = type(of: UIApplication.shared.delegate!)
+//
+//        // Perform background fetch
+//        let performFetchSelector = #selector(UIApplicationDelegate.application(_:performFetchWithCompletionHandler:))
+//        let fetchType = "\("Void")\("Any?")\("Selector")\("UIApplication")\("KSCompletionHandler")".utf8CString
+        
+        //TODO: swizzling
+        //ks_existingBackgroundFetchDelegate = class_replaceMethod(klass, performFetchSelector, kumulos_applicationPerformFetchWithCompletionHandler as? IMP, fetchType)
     }
     
     
@@ -199,39 +255,81 @@ internal class InAppHelper {
     func updateUserConsent(consentGiven: Bool) {
         let props: [String: Any] = ["consented":consentGiven]
         
-        Kumulos.trackEvent(eventType: KumulosEvent.IN_APP_CONSENT_CHANGED, properties: props)
+        Kumulos.trackEventImmediately(eventType: KumulosEvent.IN_APP_CONSENT_CHANGED.rawValue, properties: props)
         
         if (consentGiven) {
             UserDefaults.standard.set(consentGiven, forKey: KUMULOS_IN_APP_CONSENTED_KEY)
             handleEnrollmentAndSyncSetup()
         }
         else {
-            resetMessagingState()
+            DispatchQueue.global(qos: .default).async(execute: {
+                self.resetMessagingState()
+            })
         }
     }
+    
+    @objc func appBecameActive() -> Void {
+        let lockQueue = DispatchQueue(label: "pendingTickleIds")
+        lockQueue.sync {
+            //TODO: implement
+            //let messagesToPresent = getMessagesToPresent([KSInAppPresentedImmediately, KSInAppPresentedNextOpen])
+            //presenter.queueMessages(forPresentation: messagesToPresent, presentingTickles: pendingTickleIds)
+        }
+    }
+    
+  
+    
     
     private func handleEnrollmentAndSyncSetup() -> Void {
         if (Kumulos.inAppConsentStrategy == InAppConsentStrategy.AutoEnroll && userConsented() == false) {
             updateUserConsent(consentGiven: true)
+            return;
         }
         else if (Kumulos.inAppConsentStrategy == InAppConsentStrategy.NotEnabled && userConsented() == true) {
             updateUserConsent(consentGiven: false)
+            return;
         }
         
         if (inAppEnabled()) {
             setupSyncTask()
-            //TODO - NSNotificationCenter.defaultCenter addObserver
+            
+            NotificationCenter.default.addObserver(self, selector: #selector(appBecameActive), name: UIApplication.didBecomeActiveNotification, object: nil)
         }
     }
+
+    
+
     
     private func resetMessagingState() -> Void {
-        //TODO - NSNotificationCenter removeObserver...
-        
+        NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
         UserDefaults.standard.removeObject(forKey: KUMULOS_IN_APP_CONSENTED_KEY)
         UserDefaults.standard.removeObject(forKey: KUMULOS_MESSAGES_LAST_SYNC_TIME)
         
-        //TODO - performBlockAndWait...
+        messagesContext!.performAndWait({
+            let context = self.messagesContext
+            let fetchRequest:NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "Message")
+            fetchRequest.includesPendingChanges = true
+            
+            var messages: [InAppMessageEntity]? = nil
+            do {
+                messages = try context?.fetch(fetchRequest) as? [InAppMessageEntity]
+            } catch {
+                return
+            }
+
+            for message in messages ?? [] {
+                context?.delete(message)
+            }
+            
+            do {
+                try context?.save()
+            } catch let err {
+                print("Failed to clean up messages: \(err)")
+            }
+        })
     }
+    
+
     
     // MARK: Message management
     private func trackMessageOpened(message: InAppMessage) -> Void {
@@ -248,5 +346,15 @@ internal class InAppHelper {
         //TODO - update in local DB
     }
     
+    // MARK: Swizzled behaviour handlers
     
+   
+}
+
+private var ks_existingBackgroundFetchDelegate: IMP? = nil
+typealias KSCompletionHandler = (UIBackgroundFetchResult) -> Void
+
+
+
+func kumulos_applicationPerformFetchWithCompletionHandler(_ self: Any?, _ _cmd: Selector, _ application: UIApplication?, _ completionHandler: KSCompletionHandler) {
 }
