@@ -21,6 +21,8 @@ internal enum InAppAction : String {
 
 class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
    
+    private let messageQueueLock = DispatchSemaphore(value: 1)
+    
     private var inAppRendererUrl : String = "https://iar.app.delivery"
     
     private var kumulos : Kumulos
@@ -109,8 +111,8 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
             return;
         }
         
-        if (self.loadingSpinner) {
-            self.loadingSpinner!.performSelector(onMainThread: Selector("StartAnimating"), with: nil, waitUntilDone: true)
+        if let loadingSpinner = self.loadingSpinner {
+            loadingSpinner.performSelector(onMainThread: #selector(UIActivityIndicatorView.startAnimating), with: nil, waitUntilDone: true)
         }
 
         self.currentMessage = (self.messageQueue[0] as! InAppMessage)
@@ -137,21 +139,28 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         }*/
     }
     
-    
-    
-    
     func cancelCurrentPresentationQueue(waitForViewCleanup: Bool) -> Void {
-        /*@synchronized (self.messageQueue) {
-            [self.messageQueue removeAllObjects];
-            [self.pendingTickleIds removeAllObjects];
-            self.currentMessage = nil;
+        messageQueueLock.wait()
+        defer {
+            messageQueueLock.signal()
         }
-
-        [self performSelectorOnMainThread:@selector(destroyViews) withObject:nil waitUntilDone:waitForViewCleanup];*/
+             
+        self.messageQueue.removeAllObjects()
+        self.pendingTickleIds.removeAllObjects()
+        self.currentMessage = nil
+      
+        if waitForViewCleanup == true {
+            DispatchQueue.main.sync {
+                self.destroyViews()
+            }
+        }
+        else {
+            DispatchQueue.main.async {
+                self.destroyViews()
+            }
+        }
     }
     
-
-
   /*  - (void) initViews {
         if (self.window != nil) {
             return;
@@ -225,29 +234,30 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
 
         [self.frame bringSubviewToFront:self.loadingSpinner];
     }
-
-    - (void) destroyViews {
-        if (!self.window) {
-            return;
+*/
+    func destroyViews() {
+        if let window = self.window {
+            window.isHidden = true
+            
+            if let spinner = self.loadingSpinner {
+                spinner.removeFromSuperview()
+                self.loadingSpinner = nil
+            }
+            
+            if let webView = self.webView {
+                webView.removeFromSuperview()
+                self.webView = nil
+            }
+            
+            if let frame = self.frame {
+                frame.removeFromSuperview()
+                self.frame = nil
+            }
         }
-
-        [self.window setHidden:YES];
-
-        [self.loadingSpinner removeFromSuperview];
-        self.loadingSpinner = nil;
-
-        [self.webView removeFromSuperview];
-        self.webView = nil;
-
-        [self.frame removeFromSuperview];
-        self.frame = nil;
-
+        
         self.window = nil;
     }
-    
-    
-    */
-    
+  
     func postClientMessage(type: String, data: Any?) {
           /*NSDictionary* msg = @{@"type": type, @"data": data != nil ? data : NSNull.null};
           NSData* jsonMsg = [NSJSONSerialization dataWithJSONObject:msg options:0 error:nil];
@@ -255,14 +265,7 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
 
           [self.webView evaluateJavaScript:evalString completionHandler:nil];*/
       }
-    
-    
-    
-    
-    
-    
-  
-    
+        
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
        if message.name != "inAppHost" {
            return;
@@ -271,15 +274,16 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         var type = message.body["type"]
         
         if (type == "READY") {
-            /*
-             TODO
-             @synchronized (self.messageQueue) {
-                [self presentFromQueue];
-            }*/
+              messageQueueLock.wait()
+              defer {
+                  messageQueueLock.signal()
+              }
+                          
+            self.presentFromQueue()
         }
         else if (type == "MESSAGE_OPENED") {
             loadingSpinner?.stopAnimating()
-            self.kumulos.inAppHelper.trackMessageOpened(self.currentMessage)
+            self.kumulos.inAppHelper.trackMessageOpened(message: self.currentMessage!)
        } else if (type  == "MESSAGE_CLOSED") {
             self.handleMessageClosed()
        } else if (type == "EXECUTE_ACTIONS") {
