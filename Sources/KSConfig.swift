@@ -93,12 +93,12 @@ open class KSConfigBuilder: NSObject {
         return self
     }
     
-    public func setInAppDeepLinkHandlerBlock(inAppDeepLinkHandlerBlock: InAppDeepLinkHandlerBlock) -> KSConfigBuilder {
+    public func setInAppDeepLinkHandlerBlock(inAppDeepLinkHandlerBlock: @escaping InAppDeepLinkHandlerBlock) -> KSConfigBuilder {
         _inAppDeepLinkHandlerBlock = inAppDeepLinkHandlerBlock
         return self
     }
     
-    public func setInAppDeepLinkHandlerBlock(pushOpenedHandlerBlock: PushOpenedHandlerBlock) -> KSConfigBuilder {
+    public func setInAppDeepLinkHandlerBlock(pushOpenedHandlerBlock: @escaping PushOpenedHandlerBlock) -> KSConfigBuilder {
         _pushOpenedHandlerBlock = pushOpenedHandlerBlock
         return self
     }

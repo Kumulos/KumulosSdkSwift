@@ -11,13 +11,6 @@ import UserNotifications
 @available(iOS 10.0, *)
 class KSUserNotificationCenterDelegate : NSObject, UNUserNotificationCenterDelegate {
 
-    private var kumulos:Kumulos
-
-    init(kumulos:Kumulos) {
-        self.kumulos = kumulos
-    }
-
-
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         completionHandler(.alert)
     }
@@ -29,7 +22,7 @@ class KSUserNotificationCenterDelegate : NSObject, UNUserNotificationCenterDeleg
         }
 
         let userInfo = response.notification.request.content.userInfo
-        kumulos.pushHandleOpen(withUserInfo: userInfo)
+        Kumulos.sharedInstance.pushHandleOpen(withUserInfo: userInfo)
 
         completionHandler()
     }
