@@ -30,8 +30,8 @@ internal enum KumulosEvent : String {
     case MESSAGE_DELIVERED = "k.message.delivered"
 }
 
-public typealias InAppDeepLinkHandlerBlock = ((NSDictionary)->Void)?
-public typealias PushOpenedHandlerBlock = ((NSDictionary)->Void)?
+public typealias InAppDeepLinkHandlerBlock = ([AnyHashable:Any]) -> Void
+public typealias PushOpenedHandlerBlock = (KSPushNotification) -> Void
 
 public enum InAppConsentStrategy : String {
     case NotEnabled = "NotEnabled"
@@ -93,7 +93,8 @@ open class Kumulos {
     //@property (nonatomic) NSObject<UNUserNotificationCenterDelegate>* _Nullable notificationCenterDelegate API_AVAILABLE(ios(10.0));// TODO: delegate to use in Kumulos+push
     
     fileprivate(set) var analyticsHelper: AnalyticsHelper? = nil
-    
+
+    fileprivate var pushHelper: PushHelper
 
     public static var apiKey:String {
         get {
@@ -191,10 +192,11 @@ open class Kumulos {
         eventsHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
         
         inAppHelper = InAppHelper()
+        pushHelper = PushHelper()
         
         analyticsHelper = AnalyticsHelper(kumulos: self)
-        
-        //self.pushInit();//TODO: add swizzling to Kumulos+Push
+
+        _ = pushHelper.pushInit
     }
 
     deinit {

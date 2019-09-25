@@ -6,24 +6,149 @@
 import Foundation
 import UserNotifications
 
+internal let KS_MESSAGE_TYPE_PUSH = 1
 
-/*class PushNotification: NSObject {
+public class KSPushNotification: NSObject {
+    internal static let DeepLinkTypeInApp : Int = 1;
+
     internal(set) open var id: Int
-    internal(set) open var aps: String
-    internal(set) open var data : NSObject
-    internal(set) open var url: String
-    
-    public init(userInfo: NSDictionary) {
-         let custom = userInfo.value(forKey: "custom") as? [String:AnyObject]
-        
-        //id = custom!["a"]["k.message"]["data"]["id"]
-        
-        
-        
-    }
-}*/
+    internal(set) open var aps: [AnyHashable:Any]
+    internal(set) open var data : [AnyHashable:Any]
+    internal(set) open var url: URL?
 
-public extension Kumulos{
+    init(userInfo: [AnyHashable:Any]) {
+        let custom = userInfo["custom"] as! [AnyHashable:Any]
+        data = custom["a"] as! [AnyHashable:Any]
+
+        let msg = data["k.message"] as! [AnyHashable:Any]
+        let msgData = msg["data"] as! [AnyHashable:Any]
+        
+        id = msgData["id"] as! Int
+        aps = userInfo["aps"] as! [AnyHashable:Any]
+
+        if let urlStr = custom["u"] as? String {
+            url = URL(string: urlStr)
+        } else {
+            url = nil
+        }
+    }
+
+    public func inAppDeepLink() -> [AnyHashable:Any]?  {
+        guard let deepLink = data["k.deepLink"] as? [AnyHashable:Any] else {
+            return nil
+        }
+
+        if deepLink["type"] as? Int != KSPushNotification.DeepLinkTypeInApp {
+            return nil
+        }
+
+        return deepLink
+    }
+}
+
+typealias kumulos_applicationDidRegisterForRemoteNotifications = @convention(c) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ deviceToken:Data) -> Void;
+typealias kumulos_applicationDidFailToRegisterForRemoteNotificaitons = @convention(c) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ error:Error) -> Void;
+typealias kumulos_applicationDidReceiveRemoteNotificationFetchCompletionHandler = @convention(c) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ userInfo: [AnyHashable : Any], _ completionHandler: (UIBackgroundFetchResult) -> Void) -> Void;
+
+fileprivate var existingDidReg : IMP?
+fileprivate var existingDidFailToReg : IMP?
+fileprivate var existingDidReceive : IMP?
+
+class PushHelper {
+
+    let pushInit:Void = {
+        let klass : AnyClass = type(of: UIApplication.shared.delegate!)
+
+        // Did register push delegate
+        let didRegisterSelector = #selector(UIApplicationDelegate.application(_:didRegisterForRemoteNotificationsWithDeviceToken:))
+        // TODO is there _always_ going to be a Method returned here even if AppDelegate doesn't implement?
+        let didRegisterMethod = class_getInstanceMethod(klass, didRegisterSelector)
+        let regType = method_getTypeEncoding(didRegisterMethod!)
+
+        let kumulosDidRegister = imp_implementationWithBlock({ (obj:Any, _cmd:Selector, application:UIApplication, deviceToken:Data) -> Void in
+            if let _ = existingDidReg {
+                unsafeBitCast(existingDidReg, to: kumulos_applicationDidRegisterForRemoteNotifications.self)(obj, _cmd, application, deviceToken)
+            }
+
+            Kumulos.pushRegister(deviceToken)
+        })
+
+        existingDidReg = class_replaceMethod(klass, didRegisterSelector, kumulosDidRegister, regType)
+
+        // Failed to register handler
+        let didFailToRegisterSelector = #selector(UIApplicationDelegate.application(_:didFailToRegisterForRemoteNotificationsWithError:))
+        // TODO is there _always_ going to be a Method returned here even if AppDelegate doesn't implement?
+        let didFailToRegisterMethod = class_getInstanceMethod(klass, didFailToRegisterSelector)
+        let didFailToRegType = method_getTypeEncoding(didFailToRegisterMethod!)
+
+        let kumulosDidFailToRegister = imp_implementationWithBlock({ (obj:Any, _cmd:Selector, application:UIApplication, error:Error) -> Void in
+            if let _ = existingDidFailToReg {
+                unsafeBitCast(existingDidFailToReg, to: kumulos_applicationDidFailToRegisterForRemoteNotificaitons.self)(obj, _cmd, application, error)
+            }
+
+            print("Failed to register for remote notifications: \(error)")
+        })
+
+        existingDidFailToReg = class_replaceMethod(klass, didFailToRegisterSelector, kumulosDidFailToRegister, didFailToRegType)
+
+        // iOS9 did receive remote delegate
+        // iOS9+ content-available handler
+        let didReceiveSelector = #selector(UIApplicationDelegate.application(_:didReceiveRemoteNotification:fetchCompletionHandler:))
+        // TODO is there _always_ going to be a Method returned here even if AppDelegate doesn't implement?
+        let didReceiveMethod = class_getInstanceMethod(klass, didReceiveSelector)
+        let receiveType = method_getTypeEncoding(didReceiveMethod!)
+
+        let kumulosDidReceive = imp_implementationWithBlock({ (obj:Any, _cmd:Selector, _ application: UIApplication, userInfo: [AnyHashable : Any], completionHandler: @escaping (UIBackgroundFetchResult) -> Void) in
+            var fetchResult : UIBackgroundFetchResult = .noData
+            let fetchBarrier = DispatchSemaphore(value: 0)
+
+            if let _ = existingDidReceive {
+                unsafeBitCast(existingDidReceive, to: kumulos_applicationDidReceiveRemoteNotificationFetchCompletionHandler.self)(obj, _cmd, application, userInfo, { (result : UIBackgroundFetchResult) in
+                    fetchResult = result
+                    fetchBarrier.signal()
+                })
+            } else {
+                fetchBarrier.signal()
+            }
+
+            if UIApplication.shared.applicationState == .inactive {
+                if #available(iOS 10, *) {
+                    // Noop (tap handler in delegate will deal with opening the URL)
+                } else {
+                    Kumulos.sharedInstance.pushHandleOpen(withUserInfo:userInfo)
+                }
+            }
+
+            let aps = userInfo["aps"] as! [AnyHashable:Any]
+            guard let contentAvailable = aps["content-available"] as? Int, contentAvailable != 1 else {
+                completionHandler(fetchResult)
+                return
+            }
+
+            Kumulos.sharedInstance.inAppHelper.sync { (result:Int) in
+                fetchBarrier.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(20))
+
+                if result < 0 {
+                    fetchResult = .failed
+                } else if result > 1 {
+                    fetchResult = .newData
+                }
+                // No data case is default, allow override from other handler
+
+                completionHandler(fetchResult)
+            }
+        })
+
+        existingDidReceive = class_replaceMethod(klass, didReceiveSelector, kumulosDidReceive, receiveType)
+
+        if #available(iOS 10, *) {
+            let notificationCenterDelegate = KSUserNotificationCenterDelegate()
+            UNUserNotificationCenter.current().delegate = notificationCenterDelegate
+        }
+    }()
+}
+
+public extension Kumulos {
 
     /**
         Helper method for requesting the device token with alert, badge and sound permissions.
@@ -36,9 +161,13 @@ public extension Kumulos{
             center.requestAuthorization(options: [.alert, .badge, .sound]) { (granted, error) in
                 // actions based on whether notifications were authorized or not
             }
-            UIApplication.shared.registerForRemoteNotifications()
+            DispatchQueue.main.async {
+                UIApplication.shared.registerForRemoteNotifications()
+            }
         } else {
-            requestTokenLegacy()
+            DispatchQueue.main.async {
+                requestTokenLegacy()
+            }
         }
     }
 
@@ -86,16 +215,44 @@ public extension Kumulos{
         Parameters:
             - notification: The notification which triggered the action
     */
-    static func pushTrackOpen(notification: [AnyHashable: Any]) {
-        if let custom = notification["custom"] as? [String:AnyObject], let id = custom["i"]
-        {
-            let parameters = ["id" : id]
-            Kumulos.trackEvent(eventType: KumulosEvent.PUSH_OPEN_TRACK, properties: parameters, immediateFlush: true)
+    static func pushTrackOpen(notification: KSPushNotification?) {
+        guard let notification = notification else {
+            return
         }
+
+        let params = ["type": KS_MESSAGE_TYPE_PUSH, "id": notification.id]
+        Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_OPENED, properties:params)
     }
 
-    internal func pushHandleOpen(withUserInfo: [AnyHashable: Any]) {
-        // TODO
+    internal func pushHandleOpen(withUserInfo: [AnyHashable: Any]?) {
+        guard let userInfo = withUserInfo else {
+            return
+        }
+
+        let notification = KSPushNotification(userInfo: userInfo)
+        Kumulos.pushTrackOpen(notification: notification)
+
+        // Handle URL pushes
+
+        if let url = notification.url {
+            if #available(iOS 10, *) {
+                UIApplication.shared.open(url, options: [:]) { (success) in
+                    // noop
+                }
+            } else {
+                DispatchQueue.main.async {
+                    UIApplication.shared.openURL(url)
+                }
+            }
+        }
+
+        self.inAppHelper.handlePushOpen(notification)
+
+        if let userOpenedHandler = self.config.pushOpenedHandlerBlock {
+            DispatchQueue.main.async {
+                userOpenedHandler(notification)
+            }
+        }
     }
 
     fileprivate static func serializeDeviceToken(_ deviceToken: Data) -> String {
