@@ -15,7 +15,7 @@ public extension Kumulos{
             "lat" : location.coordinate.latitude,
             "lng" : location.coordinate.longitude
         ]
-        
+
         Kumulos.trackEvent(eventType: KumulosEvent.ENGAGE_LOCATION_UPDATED, properties: parameters, immediateFlush: true)
     }
     

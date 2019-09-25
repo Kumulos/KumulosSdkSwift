@@ -90,6 +90,8 @@ open class Kumulos {
     
     fileprivate(set) var inAppHelper: InAppHelper
     
+    //@property (nonatomic) NSObject<UNUserNotificationCenterDelegate>* _Nullable notificationCenterDelegate API_AVAILABLE(ios(10.0));// TODO: delegate to use in Kumulos+push
+    
     fileprivate(set) var analyticsHelper: AnalyticsHelper? = nil
     
 
@@ -191,6 +193,8 @@ open class Kumulos {
         inAppHelper = InAppHelper()
         
         analyticsHelper = AnalyticsHelper(kumulos: self)
+        
+        //self.pushInit();//TODO: add swizzling to Kumulos+Push
     }
 
     deinit {

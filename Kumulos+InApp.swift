@@ -40,6 +40,7 @@ public class InAppInboxItem: NSObject {
 
 
 public extension Kumulos {
+
     func getInboxItems() -> [InAppMessage] {
         
         if (self.inAppHelper.messagesContext == nil) {
@@ -52,7 +53,6 @@ public extension Kumulos {
         
     }
     
-
     func updateConsent(forUser consentGiven: Bool) {
         if self.inAppConsentStrategy != InAppConsentStrategy.ExplicitByUser {
             
