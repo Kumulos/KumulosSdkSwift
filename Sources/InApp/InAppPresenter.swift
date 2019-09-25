@@ -171,10 +171,12 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         window.windowLevel = UIWindow.Level.alert
         window.rootViewController = UIViewController()
         
-        self.frame = UIView.init(frame: window.frame)
-        self.frame!.backgroundColor = UIColor.clear
+        let frame = UIView.init(frame: window.frame)
+        self.frame = frame
         
-        window.rootViewController!.view = self.frame
+        frame.backgroundColor = UIColor.clear
+        
+        window.rootViewController!.view = frame
         window.isHidden = false
 
         // Webview
@@ -220,20 +222,27 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         [self.frame addSubview:self.webView];
 
         NSURLRequest* req = [NSURLRequest requestWithURL:[NSURL URLWithString:KSInAppRendererUrl] cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:30];
-        [self.webView loadRequest:req];
+        [self.webView loadRequest:req];*/
 
         // Spinner
-        self.loadingSpinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-        self.loadingSpinner.translatesAutoresizingMaskIntoConstraints = NO;
-        self.loadingSpinner.hidesWhenStopped = YES;
-        [self.loadingSpinner startAnimating];
-        [self.frame addSubview:self.loadingSpinner];
+        let loadingSpinner = UIActivityIndicatorView(style: UIActivityIndicatorView.Style.gray)
+        self.loadingSpinner = loadingSpinner
+        
+        loadingSpinner.translatesAutoresizingMaskIntoConstraints = true
+        loadingSpinner.hidesWhenStopped = true
+        loadingSpinner.startAnimating()
+        
+        frame.addSubview(loadingSpinner)
 
-        NSLayoutConstraint* horCon = [NSLayoutConstraint constraintWithItem:self.loadingSpinner attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.frame attribute:NSLayoutAttributeCenterX multiplier:1 constant:0];
+        /*NSLayoutConstraint* horCon = [NSLayoutConstraint constraintWithItem:self.loadingSpinner attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.frame attribute:NSLayoutAttributeCenterX multiplier:1 constant:0];
         NSLayoutConstraint* verCon = [NSLayoutConstraint constraintWithItem:self.loadingSpinner attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self.frame attribute:NSLayoutAttributeCenterY multiplier:1 constant:0];
-        [self.frame addConstraints:@[horCon, verCon]];
+        [self.frame addConstraints:@[horCon, verCon]];*/
 
-        [self.frame bringSubviewToFront:self.loadingSpinner];*/
+        
+        frame.bringSubviewToFront(loadingSpinner)
+        
+        
+        
     }
 
     func destroyViews() {
