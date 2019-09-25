@@ -76,11 +76,7 @@ public extension Kumulos{
         
         var sdk = [String : AnyObject]()
         sdk["id"] = SDKTypeID.sdkTypeSwift.rawValue
-        
-        let frameworkBundle = Bundle(for: Kumulos.self)
-        let sdkVersion = frameworkBundle.infoDictionary!["CFBundleShortVersionString"]
-        
-        sdk["version"] = sdkVersion as AnyObject?
+        sdk["version"] = sdkVersion as AnyObject
         
         var runtime = [String : AnyObject]()
         var os = [String : AnyObject]()
