@@ -546,10 +546,8 @@ internal class InAppHelper {
             return obj
         }
     }
-    
+
     // MARK: Swizzled behaviour handlers
-    
-   
 }
 
 private var ks_existingBackgroundFetchDelegate: IMP? = nil

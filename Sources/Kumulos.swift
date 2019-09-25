@@ -21,7 +21,6 @@ internal enum KumulosEvent : String {
     case STATS_ASSOCIATE_USER = "k.stats.userAssociated"
     case STATS_USER_ASSOCIATION_CLEARED = "k.stats.userAssociationCleared"
     case PUSH_DEVICE_REGISTER = "k.push.deviceRegistered"
-    case PUSH_OPEN_TRACK = "k.push.opened"
     case ENGAGE_BEACON_ENTERED_PROXIMITY = "k.engage.beaconEnteredProximity"
     case ENGAGE_LOCATION_UPDATED = "k.engage.locationUpdated"
     case DEVICE_UNSUBSCRIBED = "k.push.deviceUnsubscribed"
@@ -31,8 +30,8 @@ internal enum KumulosEvent : String {
     case MESSAGE_DELIVERED = "k.message.delivered"
 }
 
-public typealias InAppDeepLinkHandlerBlock = ((NSDictionary)->Void)?
-public typealias PushOpenedHandlerBlock = ((NSDictionary)->Void)?
+public typealias InAppDeepLinkHandlerBlock = ([AnyHashable:Any]) -> Void
+public typealias PushOpenedHandlerBlock = (KSPushNotification) -> Void
 
 public enum InAppConsentStrategy : String {
     case NotEnabled = "NotEnabled"
@@ -57,7 +56,7 @@ open class Kumulos {
     internal let pushNotificationDeviceType = 1
     internal let pushNotificationProductionTokenType:Int = 1
     
-    
+    internal let sdkVersion : String = "6.0.0"
 
     var networkRequestsInProgress = 0
 
@@ -94,7 +93,8 @@ open class Kumulos {
     //@property (nonatomic) NSObject<UNUserNotificationCenterDelegate>* _Nullable notificationCenterDelegate API_AVAILABLE(ios(10.0));// TODO: delegate to use in Kumulos+push
     
     fileprivate(set) var analyticsHelper: AnalyticsHelper? = nil
-    
+
+    fileprivate var pushHelper: PushHelper
 
     public static var apiKey:String {
         get {
@@ -192,10 +192,11 @@ open class Kumulos {
         eventsHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
         
         inAppHelper = InAppHelper()
+        pushHelper = PushHelper()
         
         analyticsHelper = AnalyticsHelper(kumulos: self)
-        
-        //self.pushInit();//TODO: add swizzling to Kumulos+Push
+
+        _ = pushHelper.pushInit
     }
 
     deinit {
