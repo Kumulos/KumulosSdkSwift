@@ -46,13 +46,8 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
 
         super.init()
     }
-    
-    func queueMessagesForPresentation(messages:[InAppMessage], tickleIds: NSOrderedSet){
-        
-    }
-    
 
-    func queueMessagesForPresentation(messages: [InAppMessage], tickleIds: [NSNumber]?) {
+    func queueMessagesForPresentation(messages: [InAppMessage], tickleIds: NSOrderedSet) {
     
         messageQueueLock.wait()
         defer {
@@ -71,38 +66,37 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
             messageQueue.add(message)
         }
 
-        if let tickles = tickleIds {
-            for tickleId in tickles {
-                if pendingTickleIds.contains(tickleId) {
-                    continue
-                }
-                pendingTickleIds.insert(tickleId, at: 0)
+        
+        for tickleId in tickleIds {
+            if pendingTickleIds.contains(tickleId) {
+                continue
+            }
+            pendingTickleIds.insert(tickleId, at: 0)
 
-                messageQueue.sort { (a, b) -> ComparisonResult in
-                    guard let a = a as? InAppMessage, let b = b as? InAppMessage else {
-                        return .orderedSame
-                    }
-
-                    let aIsTickle = self.pendingTickleIds.contains(a.id)
-                    let bIsTickle = self.pendingTickleIds.contains(b.id)
-
-                    if aIsTickle && !bIsTickle {
-                        return .orderedAscending
-                    } else if !aIsTickle && bIsTickle {
-                        return .orderedDescending
-                    } else if aIsTickle && bIsTickle {
-                        let aIdx = self.pendingTickleIds.index(of: a.id)
-                        let bIdx = self.pendingTickleIds.index(of: b.id)
-
-                        if aIdx < bIdx {
-                            return .orderedAscending
-                        } else if aIdx > bIdx {
-                            return .orderedDescending
-                        }
-                    }
-
+            messageQueue.sort { (a, b) -> ComparisonResult in
+                guard let a = a as? InAppMessage, let b = b as? InAppMessage else {
                     return .orderedSame
                 }
+
+                let aIsTickle = self.pendingTickleIds.contains(a.id)
+                let bIsTickle = self.pendingTickleIds.contains(b.id)
+
+                if aIsTickle && !bIsTickle {
+                    return .orderedAscending
+                } else if !aIsTickle && bIsTickle {
+                    return .orderedDescending
+                } else if aIsTickle && bIsTickle {
+                    let aIdx = self.pendingTickleIds.index(of: a.id)
+                    let bIdx = self.pendingTickleIds.index(of: b.id)
+
+                    if aIdx < bIdx {
+                        return .orderedAscending
+                    } else if aIdx > bIdx {
+                        return .orderedDescending
+                    }
+                }
+
+                return .orderedSame
             }
         }
         
