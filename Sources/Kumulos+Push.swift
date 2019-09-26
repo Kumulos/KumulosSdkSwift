@@ -246,7 +246,7 @@ public extension Kumulos {
             }
         }
 
-        self.inAppHelper.handlePushOpen(notification)
+        self.inAppHelper.handlePushOpen(notification: notification)
 
         if let userOpenedHandler = self.config.pushOpenedHandlerBlock {
             DispatchQueue.main.async {

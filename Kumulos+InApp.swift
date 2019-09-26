@@ -98,6 +98,6 @@ public extension Kumulos {
         // TODO
         let result = self.inAppHelper.presentMessage(withId: item.id)
 
-        return result ? InAppMessagePresentationResult.PRESENTED : InAppMessagePresentationResult.FAILED as! InAppMessagePresentationResult
+        return result ? InAppMessagePresentationResult.PRESENTED : InAppMessagePresentationResult.FAILED 
     }
 }
