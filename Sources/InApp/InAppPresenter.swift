@@ -24,7 +24,7 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
    
     private let messageQueueLock = DispatchSemaphore(value: 1)
     
-    private var inAppRendererUrl : String = "https://iar.app.delivery"
+    private let inAppRendererUrl : String = "https://iar.app.delivery"
     
     private var webView : WKWebView?
     private var loadingSpinner : UIActivityIndicatorView?
