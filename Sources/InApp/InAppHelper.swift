@@ -16,6 +16,9 @@ public enum InAppMessagePresentationResult : String {
     case FAILED = "failed"
 }
 
+typealias kumulos_applicationPerformFetchWithCompletionHandler = @convention(c) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ completionHandler: (UIBackgroundFetchResult) -> Void) -> Void;
+
+private var ks_existingBackgroundFetchDelegate: IMP? = nil
 
 internal class InAppHelper {
     
@@ -87,7 +90,6 @@ internal class InAppHelper {
         presenter.queueMessagesForPresentation(messages: messagesToPresent, tickleIds: self.pendingTickleIds)
     }
     
-    
     let setupSyncTask:Void = {
         let klass : AnyClass = type(of: UIApplication.shared.delegate!)
         
@@ -95,12 +97,39 @@ internal class InAppHelper {
         let performFetchSelector = #selector(UIApplicationDelegate.application(_:performFetchWithCompletionHandler:))
         let performFetchMethod = class_getInstanceMethod(klass, performFetchSelector)
         let regType = method_getTypeEncoding(performFetchMethod!)
-        let kumulosPerformFetch = imp_implementationWithBlock({ (obj:Any, _cmd:Selector, application:UIApplication, deviceToken:Data) -> Void in
-            //TODO: implementation
+        let kumulosPerformFetch = imp_implementationWithBlock({ (obj:Any, _cmd:Selector, application:UIApplication, completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> Void in
+            var fetchResult : UIBackgroundFetchResult = .noData
+            let fetchBarrier = DispatchSemaphore(value: 0)
+            
+            if let _ = ks_existingBackgroundFetchDelegate {
+                unsafeBitCast(ks_existingBackgroundFetchDelegate, to: kumulos_applicationPerformFetchWithCompletionHandler.self)(obj, _cmd, application, { (result : UIBackgroundFetchResult) in
+                    fetchResult = result
+                    fetchBarrier.signal()
+                })
+            } else {
+                fetchBarrier.signal()
+            }
+            
+            if (Kumulos.sharedInstance.inAppHelper.inAppEnabled()){
+                Kumulos.sharedInstance.inAppHelper.sync { (result:Int) in
+                    _ = fetchBarrier.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(20))
+        
+                    if result < 0 {
+                        fetchResult = .failed
+                    } else if result > 1 {
+                        fetchResult = .newData
+                    }
+                    // No data case is default, allow override from other handler
+                    completionHandler(fetchResult)
+                }
+            }
+            else{
+                completionHandler(fetchResult)
+            }
         })
+        
         ks_existingBackgroundFetchDelegate = class_replaceMethod(klass, performFetchSelector, kumulosPerformFetch, regType)
     }()
-    
     
     // MARK: State helpers
     func inAppEnabled() -> Bool {
@@ -189,7 +218,7 @@ internal class InAppHelper {
     
     // MARK: Message management
     
-    private func sync(_ onComplete: ((_ result: Int) -> Void)? = nil) {
+    func sync(_ onComplete: ((_ result: Int) -> Void)? = nil) {
         let lastSyncTime = UserDefaults.standard.object(forKey: KUMULOS_MESSAGES_LAST_SYNC_TIME) as? Date
         var after = ""
         
@@ -635,14 +664,7 @@ internal class InAppHelper {
             return obj
         }
     }
-
-    // MARK: Swizzled behaviour handlers
 }
 
-private var ks_existingBackgroundFetchDelegate: IMP? = nil
-typealias KSCompletionHandler = (UIBackgroundFetchResult) -> Void
 
 
-
-func kumulos_applicationPerformFetchWithCompletionHandler(_ self: Any?, _ _cmd: Selector, _ application: UIApplication?, _ completionHandler: KSCompletionHandler) {
-}
