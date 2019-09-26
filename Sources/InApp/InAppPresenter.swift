@@ -50,61 +50,71 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
     }
     
 
-   /*func queueMessagesForPresentation:(NSArray<KSInAppMessage*>*)messages presentingTickles:(NSOrderedSet<NSNumber*>*)tickleIds {
-        @synchronized (self.messageQueue) {
-            if (!messages.count && !self.messageQueue.count) {
-                return;
+    func queueMessagesForPresentation(messages: [InAppMessage], tickleIds: [NSNumber]?) {
+    
+        messageQueueLock.wait()
+        defer {
+            messageQueueLock.signal()
+        }
+    
+        if (messages.count == 0 && messageQueue.count == 0) {
+            return;
+        }
+        
+        for message in messages {
+            if messageQueue.contains(message) {
+                continue
             }
-
-            for (KSInAppMessage* message in messages) {
-                if ([self.messageQueue containsObject:message]) {
-                    continue;
-                }
-
-                [self.messageQueue addObject:message];
-            }
-
-            if (tickleIds != nil && tickleIds.count > 0) {
-                for (NSNumber* tickleId in tickleIds) {
-                    if ([self.pendingTickleIds containsObject:tickleId]) {
-                        continue;
-                    }
-
-                    [self.pendingTickleIds insertObject:tickleId atIndex:0];
-                }
-
-                [self.messageQueue sortUsingComparator:^NSComparisonResult(KSInAppMessage* _Nonnull a, KSInAppMessage* _Nonnull b) {
-                    BOOL aIsTickle = [self.pendingTickleIds containsObject:a.id];
-                    BOOL bIsTickle = [self.pendingTickleIds containsObject:b.id];
-
-                    if (aIsTickle && !bIsTickle) {
-                        return NSOrderedAscending;
-                    } else if (!aIsTickle && bIsTickle) {
-                        return NSOrderedDescending;
-                    } else if (aIsTickle && bIsTickle) {
-                        NSUInteger aIdx = [self.pendingTickleIds indexOfObject: a.id];
-                        NSUInteger bIdx = [self.pendingTickleIds indexOfObject: b.id];
-
-                        if (aIdx < bIdx) {
-                            return NSOrderedAscending;
-                        } else if (aIdx > bIdx) {
-                            return NSOrderedDescending;
-                        }
-                    }
-
-                    return NSOrderedSame;
-                }];
-            }
+            
+            messageQueue.add(message)
         }
 
-        [self performSelectorOnMainThread:@selector(initViews) withObject:nil waitUntilDone:YES];
+        if let tickles = tickleIds {
+            for tickleId in tickles {
+                if(pendingTickleIds.contains(tickleId)) {
+                    continue
+                }
+                pendingTickleIds.insert(tickleId, at: 0)
+                
 
-        if (self.currentMessage
-            && ![self.currentMessage.id isEqualToNumber:self.messageQueue[0].id]
-            && [self.messageQueue[0].id isEqualToNumber:self.pendingTickleIds[0]]) {
-            [self presentFromQueue];
+                /*                [self.messageQueue sortUsingComparator:^NSComparisonResult(KSInAppMessage* _Nonnull a, KSInAppMessage* _Nonnull b) {
+                                    BOOL aIsTickle = [self.pendingTickleIds containsObject:a.id];
+                                    BOOL bIsTickle = [self.pendingTickleIds containsObject:b.id];
+
+                                    if (aIsTickle && !bIsTickle) {
+                                        return NSOrderedAscending;
+                                    } else if (!aIsTickle && bIsTickle) {
+                                        return NSOrderedDescending;
+                                    } else if (aIsTickle && bIsTickle) {
+                                        NSUInteger aIdx = [self.pendingTickleIds indexOfObject: a.id];
+                                        NSUInteger bIdx = [self.pendingTickleIds indexOfObject: b.id];
+
+                                        if (aIdx < bIdx) {
+                                            return NSOrderedAscending;
+                                        } else if (aIdx > bIdx) {
+                                            return NSOrderedDescending;
+                                        }
+                                    }
+
+                                    return NSOrderedSame;
+                                }];
+                            }
+                        }*/
+            }
         }
-    }*/
+        
+        DispatchQueue.main.sync {
+            self.initViews()
+        }
+
+        if let message = self.currentMessage {
+            let messageQueueItem = messageQueue[0] as! InAppMessage
+
+            if message.id != messageQueueItem.id && messageQueueItem.id == pendingTickleIds[0] as! Int {
+                presentFromQueue()
+            }
+        }
+    }
     
     func presentFromQueue() -> Void {
         if (self.messageQueue.count == 0) {
@@ -302,7 +312,8 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
            return;
        }
         
-        var type = message.body["type"]
+        var body = message.body as! [String:Any]
+        var type = body["type"] as! String
         
         if (type == "READY") {
               messageQueueLock.wait()
@@ -312,7 +323,7 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
                           
             self.presentFromQueue()
         }
-        else if (type == "MESSAGE_OPENED") {
+       /* else if (type == "MESSAGE_OPENED") {
             loadingSpinner?.stopAnimating()
             self.kumulos.inAppHelper.trackMessageOpened(message: self.currentMessage!)
        } else if (type  == "MESSAGE_CLOSED") {
@@ -322,7 +333,7 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
        } else {
             
            NSLog("Unknown message: %@", message.body)
-       }
+       }*/
    }
     
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
@@ -348,7 +359,7 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
             for action in actions {
                 var type = action["type"] as! String
                 
-                if (type == InAppAction.CLOSE_MESSAGE.rawValue) {
+                /*if (type == InAppAction.CLOSE_MESSAGE.rawValue) {
                     hasClose = true;
                 } else if (type == InAppAction.TRACK_EVENT.rawValue) {
                     trackEvent = action["data"]["eventType"];
@@ -356,7 +367,7 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
                     subscribeToChannelUuid = action["data"]["channelUuid"];
                 } else {
                     userAction = action;
-                }
+                }*/
             }
 
             if (hasClose) {
