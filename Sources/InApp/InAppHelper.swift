@@ -19,6 +19,8 @@ typealias kumulos_applicationPerformFetchWithCompletionHandler = @convention(c) 
 private var ks_existingBackgroundFetchDelegate: IMP? = nil
 
 internal class InAppHelper {
+    private var config : KSConfig
+    
     private var presenter: InAppPresenter!
     private var pendingTickleIds: NSMutableOrderedSet = NSMutableOrderedSet(capacity: 1)
     
@@ -32,7 +34,8 @@ internal class InAppHelper {
     
     // MARK: Initialization
     
-    init() {
+    init(config: KSConfig) {
+        self.config = config
         presenter = InAppPresenter()
         initContext()
         handleEnrollmentAndSyncSetup()
@@ -85,7 +88,7 @@ internal class InAppHelper {
         let klass : AnyClass = type(of: UIApplication.shared.delegate!)
         
         // Perform background fetch
-        let performFetchSelector = #selector(UIApplicationDelegate.application(_:performFetchWithCompletionHandler:))
+        /*let performFetchSelector = #selector(UIApplicationDelegate.application(_:performFetchWithCompletionHandler:))
         let performFetchMethod = class_getInstanceMethod(klass, performFetchSelector)
         let regType = method_getTypeEncoding(performFetchMethod!)
         let kumulosPerformFetch = imp_implementationWithBlock({ (obj:Any, _cmd:Selector, application:UIApplication, completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> Void in
@@ -119,12 +122,12 @@ internal class InAppHelper {
             }
         })
         
-        ks_existingBackgroundFetchDelegate = class_replaceMethod(klass, performFetchSelector, kumulosPerformFetch, regType)
+        ks_existingBackgroundFetchDelegate = class_replaceMethod(klass, performFetchSelector, kumulosPerformFetch, regType)*/
     }()
     
     // MARK: State helpers
     func inAppEnabled() -> Bool {
-        return Kumulos.inAppConsentStrategy != InAppConsentStrategy.NotEnabled && userConsented();
+        return config.inAppConsentStrategy != InAppConsentStrategy.NotEnabled && userConsented();
     }
     
     func userConsented() -> Bool {
@@ -148,7 +151,7 @@ internal class InAppHelper {
     }
     
     func handleAssociatedUserChange() -> Void {
-        if (Kumulos.inAppConsentStrategy == InAppConsentStrategy.NotEnabled) {
+        if (config.inAppConsentStrategy == InAppConsentStrategy.NotEnabled) {
             DispatchQueue.global(qos: .default).async(execute: {
                 self.updateUserConsent(consentGiven: false)
             })
@@ -162,11 +165,11 @@ internal class InAppHelper {
     }
     
     private func handleEnrollmentAndSyncSetup() -> Void {
-        if (Kumulos.inAppConsentStrategy == InAppConsentStrategy.AutoEnroll && userConsented() == false) {
+        if (config.inAppConsentStrategy == InAppConsentStrategy.AutoEnroll && userConsented() == false) {
             updateUserConsent(consentGiven: true)
             return;
         }
-        else if (Kumulos.inAppConsentStrategy == InAppConsentStrategy.NotEnabled && userConsented() == true) {
+        else if (config.inAppConsentStrategy == InAppConsentStrategy.NotEnabled && userConsented() == true) {
             updateUserConsent(consentGiven: false)
             return;
         }
@@ -605,8 +608,8 @@ internal class InAppHelper {
         
         messageEntity.properties = messageProps;
         
-        model.setEntities([messageEntity], forConfigurationName: "default");
-        
+        model.entities = [messageEntity]
+                
         return model;
     }
     

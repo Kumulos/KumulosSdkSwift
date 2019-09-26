@@ -191,7 +191,7 @@ open class Kumulos {
         eventsHttpClient = KSHttpClient(baseUrl: URL(string: baseEventsUrl)!, requestFormat: .json, responseFormat: .json)
         eventsHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
         
-        inAppHelper = InAppHelper()
+        inAppHelper = InAppHelper(config: config)
         pushHelper = PushHelper()
         analyticsHelper = AnalyticsHelper()
 
