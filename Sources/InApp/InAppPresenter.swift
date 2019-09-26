@@ -4,6 +4,7 @@
 //
 //  Copyright © 2019 Kumulos. All rights reserved.
 //
+
 import UIKit
 import WebKit
 import StoreKit
@@ -19,7 +20,7 @@ internal enum InAppAction : String {
 }
 
 class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
-    
+   
     private let messageQueueLock = DispatchSemaphore(value: 1)
     
     private var inAppRendererUrl : String = "https://iar.app.delivery"
@@ -35,9 +36,9 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
     // TODO - how to init this properly?
     private var messageQueue : NSMutableOrderedSet
     private var pendingTickleIds : NSMutableOrderedSet
-    
+
     private var currentMessage : InAppMessage?
-    
+
     init(kumulos: Kumulos) {
         super.init()
         
@@ -48,52 +49,62 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         self.currentMessage = nil
     }
     
-    
-    /*func queueMessagesForPresentation:(NSArray<KSInAppMessage*>*)messages presentingTickles:(NSOrderedSet<NSNumber*>*)tickleIds {
-     @synchronized (self.messageQueue) {
-     if (!messages.count && !self.messageQueue.count) {
-     return;
-     }
-     for (KSInAppMessage* message in messages) {
-     if ([self.messageQueue containsObject:message]) {
-     continue;
-     }
-     [self.messageQueue addObject:message];
-     }
-     if (tickleIds != nil && tickleIds.count > 0) {
-     for (NSNumber* tickleId in tickleIds) {
-     if ([self.pendingTickleIds containsObject:tickleId]) {
-     continue;
-     }
-     [self.pendingTickleIds insertObject:tickleId atIndex:0];
-     }
-     [self.messageQueue sortUsingComparator:^NSComparisonResult(KSInAppMessage* _Nonnull a, KSInAppMessage* _Nonnull b) {
-     BOOL aIsTickle = [self.pendingTickleIds containsObject:a.id];
-     BOOL bIsTickle = [self.pendingTickleIds containsObject:b.id];
-     if (aIsTickle && !bIsTickle) {
-     return NSOrderedAscending;
-     } else if (!aIsTickle && bIsTickle) {
-     return NSOrderedDescending;
-     } else if (aIsTickle && bIsTickle) {
-     NSUInteger aIdx = [self.pendingTickleIds indexOfObject: a.id];
-     NSUInteger bIdx = [self.pendingTickleIds indexOfObject: b.id];
-     if (aIdx < bIdx) {
-     return NSOrderedAscending;
-     } else if (aIdx > bIdx) {
-     return NSOrderedDescending;
-     }
-     }
-     return NSOrderedSame;
-     }];
-     }
-     }
-     [self performSelectorOnMainThread:@selector(initViews) withObject:nil waitUntilDone:YES];
-     if (self.currentMessage
-     && ![self.currentMessage.id isEqualToNumber:self.messageQueue[0].id]
-     && [self.messageQueue[0].id isEqualToNumber:self.pendingTickleIds[0]]) {
-     [self presentFromQueue];
-     }
-     }*/
+
+   /*func queueMessagesForPresentation:(NSArray<KSInAppMessage*>*)messages presentingTickles:(NSOrderedSet<NSNumber*>*)tickleIds {
+        @synchronized (self.messageQueue) {
+            if (!messages.count && !self.messageQueue.count) {
+                return;
+            }
+
+            for (KSInAppMessage* message in messages) {
+                if ([self.messageQueue containsObject:message]) {
+                    continue;
+                }
+
+                [self.messageQueue addObject:message];
+            }
+
+            if (tickleIds != nil && tickleIds.count > 0) {
+                for (NSNumber* tickleId in tickleIds) {
+                    if ([self.pendingTickleIds containsObject:tickleId]) {
+                        continue;
+                    }
+
+                    [self.pendingTickleIds insertObject:tickleId atIndex:0];
+                }
+
+                [self.messageQueue sortUsingComparator:^NSComparisonResult(KSInAppMessage* _Nonnull a, KSInAppMessage* _Nonnull b) {
+                    BOOL aIsTickle = [self.pendingTickleIds containsObject:a.id];
+                    BOOL bIsTickle = [self.pendingTickleIds containsObject:b.id];
+
+                    if (aIsTickle && !bIsTickle) {
+                        return NSOrderedAscending;
+                    } else if (!aIsTickle && bIsTickle) {
+                        return NSOrderedDescending;
+                    } else if (aIsTickle && bIsTickle) {
+                        NSUInteger aIdx = [self.pendingTickleIds indexOfObject: a.id];
+                        NSUInteger bIdx = [self.pendingTickleIds indexOfObject: b.id];
+
+                        if (aIdx < bIdx) {
+                            return NSOrderedAscending;
+                        } else if (aIdx > bIdx) {
+                            return NSOrderedDescending;
+                        }
+                    }
+
+                    return NSOrderedSame;
+                }];
+            }
+        }
+
+        [self performSelectorOnMainThread:@selector(initViews) withObject:nil waitUntilDone:YES];
+
+        if (self.currentMessage
+            && ![self.currentMessage.id isEqualToNumber:self.messageQueue[0].id]
+            && [self.messageQueue[0].id isEqualToNumber:self.pendingTickleIds[0]]) {
+            [self presentFromQueue];
+        }
+    }*/
     
     func presentFromQueue() -> Void {
         if (self.messageQueue.count == 0) {
@@ -103,39 +114,51 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         if let loadingSpinner = self.loadingSpinner {
             loadingSpinner.performSelector(onMainThread: #selector(UIActivityIndicatorView.startAnimating), with: nil, waitUntilDone: true)
         }
-        
+
         self.currentMessage = (self.messageQueue[0] as! InAppMessage)
         self.postClientMessage(type: "PRESENT_MESSAGE", data: self.currentMessage?.content)
     }
-    
+
     func handleMessageClosed() -> Void {
-        /* @synchronized (self.messageQueue) {
-         [self.messageQueue removeObjectAtIndex:0];
-         [self.pendingTickleIds removeObject:self.currentMessage.id];
-         self.currentMessage = nil;
-         if (!self.messageQueue.count) {
-         [self.pendingTickleIds removeAllObjects];
-         [self performSelectorOnMainThread:@selector(destroyViews) withObject:nil waitUntilDone:YES];
-         } else {
-         [self presentFromQueue];
-         }
-         }
-         if (@available(iOS 10, *)) {
-         NSString* tickleNotificationId = [NSString stringWithFormat:@"k-in-app-message:%@", self.currentMessage.id];
-         [UNUserNotificationCenter.currentNotificationCenter removeDeliveredNotificationsWithIdentifiers:@[tickleNotificationId]];
-         }*/
-    }
+        guard let message = currentMessage else  {
+            return
+        }
+
+        if #available(iOS 10, *) {
+            let tickleNotificationId = String(format: "k-in-app-message:%@", message.id)
+            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [tickleNotificationId])
+        }
+        
+        messageQueueLock.wait()
+        defer {
+            messageQueueLock.signal()
+        }
+        
+        messageQueue.removeObject(at: 0)
+        pendingTickleIds.remove(message.id)
+        currentMessage = nil
+        
+        if messageQueue.count == 0 {
+            pendingTickleIds.removeAllObjects()
+            DispatchQueue.main.sync {
+                self.destroyViews()
+            }
+        }
+        else {
+            presentFromQueue()
+        }
+   }
     
     func cancelCurrentPresentationQueue(waitForViewCleanup: Bool) -> Void {
         messageQueueLock.wait()
         defer {
             messageQueueLock.signal()
         }
-        
+             
         self.messageQueue.removeAllObjects()
         self.pendingTickleIds.removeAllObjects()
         self.currentMessage = nil
-        
+      
         if waitForViewCleanup == true {
             DispatchQueue.main.sync {
                 self.destroyViews()
@@ -158,12 +181,14 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         window.windowLevel = UIWindow.Level.alert
         window.rootViewController = UIViewController()
         
-        self.frame = UIView.init(frame: window.frame)
-        self.frame!.backgroundColor = UIColor.clear
+        let frame = UIView.init(frame: window.frame)
+        self.frame = frame
         
-        window.rootViewController!.view = self.frame
+        frame.backgroundColor = .clear
+        
+        window.rootViewController!.view = frame
         window.isHidden = false
-        
+
         // Webview
         self.contentController = WKUserContentController()
         self.contentController.add(self, name: "inAppHost")
@@ -171,7 +196,7 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         let config = WKWebViewConfiguration()
         config.userContentController = self.contentController
         config.allowsInlineMediaPlayback = true
-        
+                
         if #available(iOS 10.0, *) {
             config.mediaTypesRequiringUserActionForPlayback = []
         } else {
@@ -181,41 +206,54 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
                 config.mediaPlaybackRequiresUserAction = false
             }
         }
-        /*
-         #ifdef DEBUG
-         [config.preferences setValue:@YES forKey:@"developerExtrasEnabled"];
-         #endif
-         self.webView = [[WKWebView alloc] initWithFrame:self.frame.frame configuration:config];
-         self.webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-         self.webView.backgroundColor = UIColor.clearColor;
-         self.webView.scrollView.backgroundColor = UIColor.clearColor;
-         self.webView.opaque = NO;
-         self.webView.navigationDelegate = self;
-         self.webView.scrollView.bounces = NO;
-         self.webView.scrollView.scrollEnabled = NO;
-         self.webView.allowsBackForwardNavigationGestures = NO;
-         if (@available(iOS 9.0, *)) {
-         self.webView.allowsLinkPreview = NO;
-         }
-         if (@available(iOS 11.0.0, *)) {
-         // Allow content to pass under the notch / home button
-         [self.webView.scrollView setContentInsetAdjustmentBehavior:UIScrollViewContentInsetAdjustmentNever];
-         }
-         [self.frame addSubview:self.webView];
-         NSURLRequest* req = [NSURLRequest requestWithURL:[NSURL URLWithString:KSInAppRendererUrl] cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:30];
-         [self.webView loadRequest:req];
-         // Spinner
-         self.loadingSpinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-         self.loadingSpinner.translatesAutoresizingMaskIntoConstraints = NO;
-         self.loadingSpinner.hidesWhenStopped = YES;
-         [self.loadingSpinner startAnimating];
-         [self.frame addSubview:self.loadingSpinner];
-         NSLayoutConstraint* horCon = [NSLayoutConstraint constraintWithItem:self.loadingSpinner attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.frame attribute:NSLayoutAttributeCenterX multiplier:1 constant:0];
-         NSLayoutConstraint* verCon = [NSLayoutConstraint constraintWithItem:self.loadingSpinner attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self.frame attribute:NSLayoutAttributeCenterY multiplier:1 constant:0];
-         [self.frame addConstraints:@[horCon, verCon]];
-         [self.frame bringSubviewToFront:self.loadingSpinner];*/
+
+        #if DEBUG
+            config.preferences.setValue(true, forKey:"developerExtrasEnabled")
+        #endif
+
+        let webView = WKWebView(frame: window.frame, configuration: config)
+        self.webView = webView
+
+        webView.autoresizingMask = [.flexibleWidth, .flexibleHeight];
+        webView.backgroundColor = .clear;
+        webView.scrollView.backgroundColor = .clear;
+        webView.isOpaque = false;
+        webView.navigationDelegate = self;
+        webView.scrollView.bounces = false;
+        webView.scrollView.isScrollEnabled = false;
+        webView.allowsBackForwardNavigationGestures = false;
+        
+        if #available(iOS 9.0, *) {
+            webView.allowsLinkPreview = false;
+        }
+
+        if #available(iOS 11.0.0, *) {
+            // Allow content to pass under the notch / home button
+            webView.scrollView.contentInsetAdjustmentBehavior = .never
+        }
+
+        frame.addSubview(webView)
+        
+        let request = URLRequest(url: URL(string: inAppRendererUrl)!, cachePolicy: .returnCacheDataElseLoad, timeoutInterval: 30)
+        webView.load(request)
+        
+        // Spinner
+        let loadingSpinner = UIActivityIndicatorView(style: UIActivityIndicatorView.Style.gray)
+        self.loadingSpinner = loadingSpinner
+        
+        loadingSpinner.translatesAutoresizingMaskIntoConstraints = true
+        loadingSpinner.hidesWhenStopped = true
+        loadingSpinner.startAnimating()
+        
+        frame.addSubview(loadingSpinner)
+
+        let horizontalConstraint = NSLayoutConstraint(item: loadingSpinner, attribute: .centerX, relatedBy: .equal, toItem: frame, attribute: .centerX, multiplier: 1, constant: 0)
+        let verticalConstraint = NSLayoutConstraint(item: loadingSpinner, attribute: .centerY, relatedBy: .equal, toItem: frame, attribute: .centerY, multiplier: 1, constant: 0)
+        
+        frame.addConstraints([horizontalConstraint,verticalConstraint])
+        frame.bringSubviewToFront(loadingSpinner)
     }
-    
+
     func destroyViews() {
         if let window = self.window {
             window.isHidden = true
@@ -238,41 +276,54 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         
         self.window = nil;
     }
-    
+  
     func postClientMessage(type: String, data: Any?) {
-        /*NSDictionary* msg = @{@"type": type, @"data": data != nil ? data : NSNull.null};
-         NSData* jsonMsg = [NSJSONSerialization dataWithJSONObject:msg options:0 error:nil];
-         NSString* evalString = [NSString stringWithFormat:@"postHostMessage(%@);", [[NSString alloc] initWithData:jsonMsg encoding:NSUTF8StringEncoding]];
-         [self.webView evaluateJavaScript:evalString completionHandler:nil];*/
-    }
-    
-    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        if message.name != "inAppHost" {
-            return;
+        guard let webView = self.webView else {
+            return
         }
+        
+        do {
+        
+            let msg: [String: Any] = ["type" : type, "data" : data != nil ? data! : NSNull()]
+            let json : Data = try JSONSerialization.data(withJSONObject: msg, options: JSONSerialization.WritingOptions(rawValue: 0))
+            
+            
+            let jsonMsg = String(data: json, encoding: .utf8)
+            let evalString = String(format: "postHostMessage(%@);", jsonMsg!)
+          
+            webView.evaluateJavaScript(evalString, completionHandler: nil)
+        } catch {
+            //Noop?
+        }
+      }
+        
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+       if message.name != "inAppHost" {
+           return;
+       }
         
         var type = message.body["type"]
         
         if (type == "READY") {
-            messageQueueLock.wait()
-            defer {
-                messageQueueLock.signal()
-            }
-            
+              messageQueueLock.wait()
+              defer {
+                  messageQueueLock.signal()
+              }
+                          
             self.presentFromQueue()
         }
         else if (type == "MESSAGE_OPENED") {
             loadingSpinner?.stopAnimating()
             self.kumulos.inAppHelper.trackMessageOpened(message: self.currentMessage!)
-        } else if (type  == "MESSAGE_CLOSED") {
+       } else if (type  == "MESSAGE_CLOSED") {
             self.handleMessageClosed()
-        } else if (type == "EXECUTE_ACTIONS") {
+       } else if (type == "EXECUTE_ACTIONS") {
             self.handleActions(actions: message.body["data"]["actions"])
-        } else {
+       } else {
             
-            NSLog("Unknown message: %@", message.body)
-        }
-    }
+           NSLog("Unknown message: %@", message.body)
+       }
+   }
     
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         // Noop
@@ -285,10 +336,10 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         self.cancelCurrentPresentationQueue(waitForViewCleanup: false)
     }
-    
+
     func handleActions(actions: [NSDictionary]) -> Void  {
         if let message = self.currentMessage {
-            
+        
             var hasClose : Bool = false;
             var trackEvent : String?
             var subscribeToChannelUuid : String?
@@ -307,31 +358,31 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
                     userAction = action;
                 }
             }
-            
+
             if (hasClose) {
                 self.kumulos.inAppHelper.markMessageDismissed(message: message)
                 self.postClientMessage(type: "CLOSE_MESSAGE", data: nil)
             }
-            
+
             if (trackEvent != nil) {
                 Kumulos.trackEvent(eventType: trackEvent!, properties: [:]);
             }
-            
+
             if (subscribeToChannelUuid != nil) {
                 /*KumulosPushSubscriptionManager* psm = [[KumulosPushSubscriptionManager alloc] initWithKumulos:self.kumulos];
-                 [psm subscribeToChannels:@[subscribeToChannelUuid]];*/
+                [psm subscribeToChannels:@[subscribeToChannelUuid]];*/
             }
-            
+
             if (userAction != nil) {
                 self.handleUserAction(userAction: userAction!)
                 self.cancelCurrentPresentationQueue(waitForViewCleanup: true)
             }
         }
     }
-    
+
     func handleUserAction(userAction: NSDictionary) -> Void {
         let type = userAction["type"] as! String
-        
+                
         if (type == InAppAction.PROMPT_PUSH_PERMISSION.rawValue) {
             Kumulos.pushRequestDeviceToken()
         } else if (type == InAppAction.DEEP_LINK.rawValue) {
@@ -340,17 +391,18 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
             }
             //TODO!
             /*dispatch_async(dispatch_get_main_queue(), ^{
-             NSDictionary* data = userAction[@"data"][@"deepLink"] ?: @{};
-             self.kumulos.config.inAppDeepLinkHandler(data);
-             });*/
+                NSDictionary* data = userAction[@"data"][@"deepLink"] ?: @{};
+                self.kumulos.config.inAppDeepLinkHandler(data);
+            });*/
         } else if (type == InAppAction.OPEN_URL.rawValue) {
             //NSURL* url = [NSURL URLWithString:userAction[@"data"][@"url"]];
+
             if #available(iOS 10.0.0, *) {
                 //UIApplication.shared.openURL(url: url)
             } else {
                 /*dispatch_async(dispatch_get_main_queue(), ^{
-                 [UIApplication.sharedApplication openURL:url];
-                 });*/
+                    [UIApplication.sharedApplication openURL:url];
+                });*/
             }
         } else if (type == InAppAction.REQUEST_RATING.rawValue) {
             if #available(iOS 10.3.0, *) {
