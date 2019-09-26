@@ -25,7 +25,6 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
     
     private var inAppRendererUrl : String = "https://iar.app.delivery"
     
-    private var kumulos : Kumulos
     private var webView : WKWebView?
     private var loadingSpinner : UIActivityIndicatorView?
     private var frame : UIView?
@@ -39,10 +38,8 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
 
     private var currentMessage : InAppMessage?
 
-    init(kumulos: Kumulos) {
+    override init() {
         super.init()
-        
-        self.kumulos = kumulos
         
         self.messageQueue = NSMutableOrderedSet.init(capacity: 5)
         self.pendingTickleIds = NSMutableOrderedSet.init(capacity: 2)
@@ -375,7 +372,7 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
             }
 
             if (hasClose) {
-                self.kumulos.inAppHelper.markMessageDismissed(message: message)
+                Kumulos.sharedInstance.inAppHelper.markMessageDismissed(message: message)
                 self.postClientMessage(type: "CLOSE_MESSAGE", data: nil)
             }
 
@@ -401,7 +398,7 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         if (type == InAppAction.PROMPT_PUSH_PERMISSION.rawValue) {
             Kumulos.pushRequestDeviceToken()
         } else if (type == InAppAction.DEEP_LINK.rawValue) {
-            if (self.kumulos.config.inAppDeepLinkHandlerBlock == nil) {
+            if (Kumulos.sharedInstance.config.inAppDeepLinkHandlerBlock == nil) {
                 return;
             }
             //TODO!

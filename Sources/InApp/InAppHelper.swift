@@ -19,9 +19,6 @@ typealias kumulos_applicationPerformFetchWithCompletionHandler = @convention(c) 
 private var ks_existingBackgroundFetchDelegate: IMP? = nil
 
 internal class InAppHelper {
-    
-
-    private var kumulos: Kumulos!
     private var presenter: InAppPresenter!
     private var pendingTickleIds: NSMutableOrderedSet = NSMutableOrderedSet(capacity: 1)
     
@@ -35,9 +32,8 @@ internal class InAppHelper {
     
     // MARK: Initialization
     
-    init(kumulos: Kumulos) {
-        self.kumulos = kumulos
-        presenter = InAppPresenter(kumulos: kumulos)
+    init() {
+        presenter = InAppPresenter()
         initContext()
         handleEnrollmentAndSyncSetup()
     }
@@ -230,7 +226,7 @@ internal class InAppHelper {
         
         let path = "/v1/users/\(Kumulos.currentUserIdentifier)/messages\(after)"
         
-        kumulos.pushHttpClient.sendRequest(.GET, toPath: path, data: nil, onSuccess: { response, decodedBody in
+        Kumulos.sharedInstance.pushHttpClient.sendRequest(.GET, toPath: path, data: nil, onSuccess: { response, decodedBody in
             let messagesToPersist = decodedBody as? [[AnyHashable : Any]]
             if (messagesToPersist == nil || messagesToPersist!.count == 0) {
                 if onComplete != nil {
@@ -397,7 +393,7 @@ internal class InAppHelper {
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_OPENED, properties: props)
     }
     
-    private func markMessageDismissed(message: InAppMessage) -> Void {
+    internal func markMessageDismissed(message: InAppMessage) -> Void {
         let props: [String:Any] = ["type" : MESSAGE_TYPE_IN_APP, "id":message.id]
         
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_DISMISSED, properties: props)
@@ -450,7 +446,7 @@ internal class InAppHelper {
     
     // MARK Interop with other components
     
-    func presentMessageWithId(messageId: Int) -> Bool {
+    func presentMessage(withId: Int) -> Bool {
         var result = true;
         
         messagesContext!.performAndWait({
@@ -461,7 +457,7 @@ internal class InAppHelper {
             fetchRequest.includesPendingChanges = false
             fetchRequest.returnsObjectsAsFaults = false
             
-            let predicate: NSPredicate? = NSPredicate(format: "id = %@", messageId)
+            let predicate: NSPredicate? = NSPredicate(format: "id = %@", withId)
             fetchRequest.predicate = predicate
             
             var items: [InAppMessageEntity]
@@ -479,7 +475,7 @@ internal class InAppHelper {
             }
             
             let message: InAppMessage = InAppMessage(entity: items[0]);
-            let tickles = NSOrderedSet(array: [messageId])
+            let tickles = NSOrderedSet(array: [withId])
             presenter.queueMessagesForPresentation(messages: [message], tickleIds: tickles)
         })
         

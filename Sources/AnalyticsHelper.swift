@@ -48,7 +48,6 @@ class KSEventModel : NSManagedObject {
 }
 
 class AnalyticsHelper {
-    private var kumulos : Kumulos
     private var analyticsContext : NSManagedObjectContext?
     private var startNewSession : Bool
     private var sessionIdleTimer : SessionIdleTimer?
@@ -57,8 +56,7 @@ class AnalyticsHelper {
     
     // MARK: Initialization
     
-    init(kumulos:Kumulos) {
-        self.kumulos = kumulos;
+    init() {
         startNewSession = true
         sessionIdleTimer = nil
         bgTask = UIBackgroundTaskIdentifier.invalid
@@ -201,7 +199,7 @@ class AnalyticsHelper {
 
         let path = "/v1/app-installs/\(Kumulos.installId)/events"
 
-        kumulos.eventsHttpClient.sendRequest(.POST, toPath: path, data: data, onSuccess: { (response, data) in
+        Kumulos.sharedInstance.eventsHttpClient.sendRequest(.POST, toPath: path, data: data, onSuccess: { (response, data) in
             if let err = self.pruneEventsBatch(eventIds) {
                 print("Failed to prune events batch: " + err.localizedDescription)
                 return
@@ -277,7 +275,7 @@ class AnalyticsHelper {
     @objc private func appBecameInactive() {
         becameInactiveAt = Date()
         
-        sessionIdleTimer = SessionIdleTimer(self, timeout: kumulos.config.sessionIdleTimeout)
+        sessionIdleTimer = SessionIdleTimer(self, timeout: Kumulos.sharedInstance.config.sessionIdleTimeout)
     }
     
     @objc private func appBecameBackground() {

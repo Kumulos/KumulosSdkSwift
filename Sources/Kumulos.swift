@@ -193,8 +193,7 @@ open class Kumulos {
         
         inAppHelper = InAppHelper()
         pushHelper = PushHelper()
-        
-        analyticsHelper = AnalyticsHelper(kumulos: self)
+        analyticsHelper = AnalyticsHelper()
 
         _ = pushHelper.pushInit
     }
