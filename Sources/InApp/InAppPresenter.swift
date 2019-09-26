@@ -120,24 +120,34 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
     }
 
     func handleMessageClosed() -> Void {
-       /* @synchronized (self.messageQueue) {
-            [self.messageQueue removeObjectAtIndex:0];
-            [self.pendingTickleIds removeObject:self.currentMessage.id];
-            self.currentMessage = nil;
-
-            if (!self.messageQueue.count) {
-                [self.pendingTickleIds removeAllObjects];
-                [self performSelectorOnMainThread:@selector(destroyViews) withObject:nil waitUntilDone:YES];
-            } else {
-                [self presentFromQueue];
-            }
+        guard let message = currentMessage else  {
+            return
         }
 
-        if (@available(iOS 10, *)) {
-            NSString* tickleNotificationId = [NSString stringWithFormat:@"k-in-app-message:%@", self.currentMessage.id];
-            [UNUserNotificationCenter.currentNotificationCenter removeDeliveredNotificationsWithIdentifiers:@[tickleNotificationId]];
-        }*/
-    }
+        if #available(iOS 10, *) {
+            let tickleNotificationId = String(format: "k-in-app-message:%@", message.id)
+            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [tickleNotificationId])
+        }
+        
+        messageQueueLock.wait()
+        defer {
+            messageQueueLock.signal()
+        }
+        
+        messageQueue.removeObject(at: 0)
+        pendingTickleIds.remove(message.id)
+        currentMessage = nil
+        
+        if messageQueue.count == 0 {
+            pendingTickleIds.removeAllObjects()
+            DispatchQueue.main.sync {
+                self.destroyViews()
+            }
+        }
+        else {
+            presentFromQueue()
+        }
+   }
     
     func cancelCurrentPresentationQueue(waitForViewCleanup: Bool) -> Void {
         messageQueueLock.wait()
