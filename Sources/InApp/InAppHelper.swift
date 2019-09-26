@@ -15,7 +15,6 @@ public enum InAppMessagePresentationResult : String {
 }
 
 typealias kumulos_applicationPerformFetchWithCompletionHandler = @convention(c) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ completionHandler: (UIBackgroundFetchResult) -> Void) -> Void;
-
 private var ks_existingBackgroundFetchDelegate: IMP? = nil
 
 internal class InAppHelper {
@@ -29,11 +28,17 @@ internal class InAppHelper {
     
     internal let MESSAGE_TYPE_IN_APP = 2
     
+    private var syncBarrier: DispatchSemaphore
+    private var syncQueue: DispatchQueue
+    
     
     // MARK: Initialization
     
     init() {
         presenter = InAppPresenter()
+        syncBarrier = DispatchSemaphore(value: 0)
+        syncQueue = DispatchQueue(label: ("kumulos.in-app.sync"))
+        
         initContext()
         handleEnrollmentAndSyncSetup()
     }
@@ -74,11 +79,22 @@ internal class InAppHelper {
     }
     
     @objc func appBecameActive() -> Void {
-        objc_sync_enter(self.pendingTickleIds)
-        defer { objc_sync_exit(self.pendingTickleIds) }
+        presentImmediateAndNextOpenContent()
         
-        let messagesToPresent = self.getMessagesToPresent([InAppPresented.IMMEDIATELY.rawValue, InAppPresented.NEXT_OPEN.rawValue])
-        presenter.queueMessagesForPresentation(messages: messagesToPresent, tickleIds: self.pendingTickleIds)
+        let onComplete: ((Int) -> Void)? = { result in
+            if result > 0 {
+                self.presentImmediateAndNextOpenContent()
+            }
+        }
+        
+        #if DEBUG
+            sync(onComplete)
+        #else
+            let lastSyncTime = UserDefaults.standard.object(forKey: KUMULOS_MESSAGES_LAST_SYNC_TIME) as? Date
+            if lastSyncTime != nil && lastSyncTime?.timeIntervalSinceNow < -3600 {
+                sync(onComplete)
+            }
+        #endif
     }
     
     let setupSyncTask:Void = {
@@ -171,11 +187,27 @@ internal class InAppHelper {
             return;
         }
         
-        if (inAppEnabled()) {
-            _ = setupSyncTask
-            
-            NotificationCenter.default.addObserver(self, selector: #selector(appBecameActive), name: UIApplication.didBecomeActiveNotification, object: nil)
+        if (!inAppEnabled()) {
+            return;
         }
+        
+         _ = setupSyncTask
+        NotificationCenter.default.addObserver(self, selector: #selector(appBecameActive), name: UIApplication.didBecomeActiveNotification, object: nil)
+        
+        DispatchQueue.main.async(execute: {
+            if UIApplication.shared.applicationState == .background {
+                return
+            }
+            
+            let onComplete: ((Int) -> Void)? = { result in
+                if result > 0 {
+                    self.presentImmediateAndNextOpenContent()
+                }
+            }
+            
+            self.sync(onComplete)
+           
+        })
     }
 
     private func resetMessagingState() -> Void {
@@ -209,51 +241,61 @@ internal class InAppHelper {
     
     // MARK: Message management
     func sync(_ onComplete: ((_ result: Int) -> Void)? = nil) {
-        let lastSyncTime = UserDefaults.standard.object(forKey: KUMULOS_MESSAGES_LAST_SYNC_TIME) as? NSDate
-        var after = ""
-        
-        if lastSyncTime != nil {
-            let formatter = DateFormatter()
-            formatter.timeStyle = .full
-            formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
-            formatter.timeZone = NSTimeZone(forSecondsFromGMT: 0) as TimeZone
-            if let lastSyncTime = lastSyncTime {
-                after = "?after=\(self.urlEncode(url: formatter.string(from: lastSyncTime as Date))!)" ;
-            }
-        }
-        
-        let path = "/v1/users/\(Kumulos.currentUserIdentifier)/messages\(after)"
-        
-        Kumulos.sharedInstance.pushHttpClient.sendRequest(.GET, toPath: path, data: nil, onSuccess: { response, decodedBody in
-            let messagesToPersist = decodedBody as? [[AnyHashable : Any]]
-            if (messagesToPersist == nil || messagesToPersist!.count == 0) {
-                if onComplete != nil {
-                    onComplete?(0)
+        syncQueue.async(execute: {
+            let lastSyncTime = UserDefaults.standard.object(forKey: self.KUMULOS_MESSAGES_LAST_SYNC_TIME) as? NSDate
+            var after = ""
+            
+            if lastSyncTime != nil {
+                let formatter = DateFormatter()
+                formatter.timeStyle = .full
+                formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+                formatter.timeZone = NSTimeZone(forSecondsFromGMT: 0) as TimeZone
+                if let lastSyncTime = lastSyncTime {
+                    after = "?after=\(self.urlEncode(url: formatter.string(from: lastSyncTime as Date))!)" ;
                 }
-                return
             }
             
-            self.persistInAppMessages(messages: messagesToPersist!)
-            
-            if onComplete != nil {
-                onComplete?(1)
-            }
-            
-            DispatchQueue.main.async(execute: {
-                if UIApplication.shared.applicationState != .active {
+            let path = "/v1/users/\(Kumulos.currentUserIdentifier)/messages\(after)"
+        
+            Kumulos.sharedInstance.pushHttpClient.sendRequest(.GET, toPath: path, data: nil, onSuccess: { response, decodedBody in
+                let messagesToPersist = decodedBody as? [[AnyHashable : Any]]
+                if (messagesToPersist == nil || messagesToPersist!.count == 0) {
+                    if onComplete != nil {
+                        onComplete?(0)
+                    }
+                    
+                    self.syncBarrier.signal()
                     return
                 }
                 
-                DispatchQueue.global(qos: .default).async(execute: {
-                    let messagesToPresent = self.getMessagesToPresent([InAppPresented.IMMEDIATELY.rawValue])
-                    self.presenter.queueMessagesForPresentation(messages: messagesToPresent, tickleIds: self.pendingTickleIds)
+                self.persistInAppMessages(messages: messagesToPersist!)
+                
+                if onComplete != nil {
+                    onComplete?(1)
+                }
+                
+                DispatchQueue.main.async(execute: {
+                    if UIApplication.shared.applicationState != .active {
+                        return
+                    }
+                    
+                    DispatchQueue.global(qos: .default).async(execute: {
+                        let messagesToPresent = self.getMessagesToPresent([InAppPresented.IMMEDIATELY.rawValue])
+                        self.presenter.queueMessagesForPresentation(messages: messagesToPresent, tickleIds: self.pendingTickleIds)
+                    })
                 })
+                
+                self.syncBarrier.signal()
+                
+            }, onFailure: { response, error in
+                if onComplete != nil {
+                    onComplete?(-1)
+                }
+                
+                 self.syncBarrier.signal()
             })
-        }, onFailure: { response, error in
-            if onComplete != nil {
-                onComplete?(-1)
-            }
         })
+        _ = syncBarrier.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(20))
     }
     
     private func urlEncode(url: String) -> String? {
@@ -455,6 +497,13 @@ internal class InAppHelper {
     }
     
     // MARK Interop with other components
+    func presentImmediateAndNextOpenContent() -> Void{
+        objc_sync_enter(self.pendingTickleIds)
+        defer { objc_sync_exit(self.pendingTickleIds) }
+        
+        let messagesToPresent = self.getMessagesToPresent([InAppPresented.IMMEDIATELY.rawValue, InAppPresented.NEXT_OPEN.rawValue])
+        presenter.queueMessagesForPresentation(messages: messagesToPresent, tickleIds: self.pendingTickleIds)
+    }
     
     func presentMessage(withId: Int) -> Bool {
         var result = true;
