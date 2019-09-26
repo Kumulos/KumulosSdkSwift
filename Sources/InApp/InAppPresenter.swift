@@ -49,6 +49,10 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         self.currentMessage = nil
     }
     
+    func queueMessagesForPresentation(messages:[InAppMessage], tickleIds: NSOrderedSet){
+        
+    }
+    
 
     func queueMessagesForPresentation(messages: [InAppMessage], tickleIds: [NSNumber]?) {
     

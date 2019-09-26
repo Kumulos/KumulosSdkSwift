@@ -10,24 +10,24 @@ public enum InAppPresented : String {
 
 class InAppMessageEntity : NSManagedObject {
     @NSManaged var id : Int
-    @NSManaged var updatedAt: Date?
+    @NSManaged var updatedAt: NSDate
     @NSManaged var presentedWhen: String
     @NSManaged var content: String
     @NSManaged var data : NSObject
     @NSManaged var badgeConfig : NSObject
     @NSManaged var inboxConfig : NSObject
-    @NSManaged var dismissedAt : Date?
+    @NSManaged var dismissedAt : NSDate?
 }
 
 public class InAppMessage: NSObject {
     internal(set) open var id: Int
-    internal(set) open var updatedAt: Date?
+    internal(set) open var updatedAt: NSDate
     internal(set) open var presentedWhen: InAppPresented//??? this not set in Objective-C
     internal(set) open var content: String
     internal(set) open var data : NSObject
     internal(set) open var badgeConfig : NSObject
     internal(set) open var inboxConfig : NSObject
-    internal(set) open var dismissedAt : Date?
+    internal(set) open var dismissedAt : NSDate?
     
     init(entity: InAppMessageEntity) {
         id = entity.id
