@@ -208,7 +208,6 @@ internal class InAppHelper {
     }
     
     // MARK: Message management
-    
     func sync(_ onComplete: ((_ result: Int) -> Void)? = nil) {
         let lastSyncTime = UserDefaults.standard.object(forKey: KUMULOS_MESSAGES_LAST_SYNC_TIME) as? NSDate
         var after = ""
@@ -219,8 +218,7 @@ internal class InAppHelper {
             formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
             formatter.timeZone = NSTimeZone(forSecondsFromGMT: 0) as TimeZone
             if let lastSyncTime = lastSyncTime {
-                //TODO: extend String with urlEncoded
-                //after = "?after=\(formatter.string(from: lastSyncTime).urlEncoded())"
+                after = "?after=\(self.urlEncode(url: formatter.string(from: lastSyncTime as Date))!)" ;
             }
         }
         
@@ -256,6 +254,17 @@ internal class InAppHelper {
                 onComplete?(-1)
             }
         })
+    }
+    
+    private func urlEncode(url: String) -> String? {
+        let unreserved = "*-._ "
+        var allowed = CharacterSet.alphanumerics
+        allowed.insert(charactersIn: unreserved)
+        
+        var encoded = url.addingPercentEncoding(withAllowedCharacters: allowed)
+        encoded = encoded?.replacingOccurrences(of: " ", with: "+")
+        
+        return encoded
     }
     
     private func persistInAppMessages(messages: [[AnyHashable : Any]]) {
