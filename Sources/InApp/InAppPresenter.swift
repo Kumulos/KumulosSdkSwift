@@ -31,7 +31,7 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
     private var frame : UIView?
     private var window : UIWindow?
     
-    private var contentController : WKUserContentController
+    private var contentController : WKUserContentController?
     
     // TODO - how to init this properly?
     private var messageQueue : NSMutableOrderedSet
@@ -40,11 +40,11 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
     private var currentMessage : InAppMessage?
 
     override init() {
-        super.init()
-        
         self.messageQueue = NSMutableOrderedSet.init(capacity: 5)
         self.pendingTickleIds = NSMutableOrderedSet.init(capacity: 2)
         self.currentMessage = nil
+
+        super.init()
     }
     
     func queueMessagesForPresentation(messages:[InAppMessage], tickleIds: NSOrderedSet){
@@ -73,35 +73,36 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
 
         if let tickles = tickleIds {
             for tickleId in tickles {
-                if(pendingTickleIds.contains(tickleId)) {
+                if pendingTickleIds.contains(tickleId) {
                     continue
                 }
                 pendingTickleIds.insert(tickleId, at: 0)
-                
 
-                /*                [self.messageQueue sortUsingComparator:^NSComparisonResult(KSInAppMessage* _Nonnull a, KSInAppMessage* _Nonnull b) {
-                                    BOOL aIsTickle = [self.pendingTickleIds containsObject:a.id];
-                                    BOOL bIsTickle = [self.pendingTickleIds containsObject:b.id];
+                messageQueue.sort { (a, b) -> ComparisonResult in
+                    guard let a = a as? InAppMessage, let b = b as? InAppMessage else {
+                        return .orderedSame
+                    }
 
-                                    if (aIsTickle && !bIsTickle) {
-                                        return NSOrderedAscending;
-                                    } else if (!aIsTickle && bIsTickle) {
-                                        return NSOrderedDescending;
-                                    } else if (aIsTickle && bIsTickle) {
-                                        NSUInteger aIdx = [self.pendingTickleIds indexOfObject: a.id];
-                                        NSUInteger bIdx = [self.pendingTickleIds indexOfObject: b.id];
+                    let aIsTickle = self.pendingTickleIds.contains(a.id)
+                    let bIsTickle = self.pendingTickleIds.contains(b.id)
 
-                                        if (aIdx < bIdx) {
-                                            return NSOrderedAscending;
-                                        } else if (aIdx > bIdx) {
-                                            return NSOrderedDescending;
-                                        }
-                                    }
+                    if aIsTickle && !bIsTickle {
+                        return .orderedAscending
+                    } else if !aIsTickle && bIsTickle {
+                        return .orderedDescending
+                    } else if aIsTickle && bIsTickle {
+                        let aIdx = self.pendingTickleIds.index(of: a.id)
+                        let bIdx = self.pendingTickleIds.index(of: b.id)
 
-                                    return NSOrderedSame;
-                                }];
-                            }
-                        }*/
+                        if aIdx < bIdx {
+                            return .orderedAscending
+                        } else if aIdx > bIdx {
+                            return .orderedDescending
+                        }
+                    }
+
+                    return .orderedSame
+                }
             }
         }
         
@@ -203,10 +204,10 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
 
         // Webview
         self.contentController = WKUserContentController()
-        self.contentController.add(self, name: "inAppHost")
+        self.contentController!.add(self, name: "inAppHost")
         
         let config = WKWebViewConfiguration()
-        config.userContentController = self.contentController
+        config.userContentController = self.contentController!
         config.allowsInlineMediaPlayback = true
                 
         if #available(iOS 10.0, *) {
@@ -314,7 +315,7 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
            return;
        }
         
-        var body = message.body as! [String:Any]
+        var body = message.body as! NSDictionary
         var type = body["type"] as! String
         
         if (type == "READY") {
@@ -325,17 +326,21 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
                           
             self.presentFromQueue()
         }
-       /* else if (type == "MESSAGE_OPENED") {
+       else if (type == "MESSAGE_OPENED") {
             loadingSpinner?.stopAnimating()
-            self.kumulos.inAppHelper.trackMessageOpened(message: self.currentMessage!)
+            Kumulos.sharedInstance.inAppHelper.trackMessageOpened(message: self.currentMessage!)
        } else if (type  == "MESSAGE_CLOSED") {
             self.handleMessageClosed()
        } else if (type == "EXECUTE_ACTIONS") {
-            self.handleActions(actions: message.body["data"]["actions"])
+            guard let body = message.body as? [AnyHashable:Any],
+                  let data = body["data"] as? [AnyHashable:Any],
+                  let actions = data["actions"] as? [NSDictionary] else {
+                return
+            }
+            self.handleActions(actions: actions)
        } else {
-            
-           NSLog("Unknown message: %@", message.body)
-       }*/
+           print("Unknown message: \(message.body)")
+       }
    }
     
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
@@ -352,38 +357,40 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
 
     func handleActions(actions: [NSDictionary]) -> Void  {
         if let message = self.currentMessage {
-        
-            var hasClose : Bool = false;
+            
+            var hasClose = false;
             var trackEvent : String?
             var subscribeToChannelUuid : String?
             var userAction : NSDictionary?
             
             for action in actions {
-                var type = action["type"] as! String
-                
-                /*if (type == InAppAction.CLOSE_MESSAGE.rawValue) {
-                    hasClose = true;
-                } else if (type == InAppAction.TRACK_EVENT.rawValue) {
-                    trackEvent = action["data"]["eventType"];
-                } else if (type == InAppAction.SUBSCRIBE_CHANNEL.rawValue) {
-                    subscribeToChannelUuid = action["data"]["channelUuid"];
-                } else {
-                    userAction = action;
-                }*/
+                let type = InAppAction(rawValue: action["type"] as! String)!
+                let data = action["data"] as? [AnyHashable:Any]
+
+                switch type {
+                case .CLOSE_MESSAGE:
+                    hasClose = true
+                case .TRACK_EVENT:
+                    trackEvent = data!["eventType"] as? String
+                case .SUBSCRIBE_CHANNEL:
+                    subscribeToChannelUuid = data!["channelUuid"] as? String
+                default:
+                    userAction = action
+                }
             }
 
-            if (hasClose) {
+            if hasClose {
                 Kumulos.sharedInstance.inAppHelper.markMessageDismissed(message: message)
                 self.postClientMessage(type: "CLOSE_MESSAGE", data: nil)
             }
 
-            if (trackEvent != nil) {
-                Kumulos.trackEvent(eventType: trackEvent!, properties: [:]);
+            if let trackEvent = trackEvent {
+                Kumulos.trackEvent(eventType: trackEvent, properties: [:]);
             }
 
-            if (subscribeToChannelUuid != nil) {
-                /*KumulosPushSubscriptionManager* psm = [[KumulosPushSubscriptionManager alloc] initWithKumulos:self.kumulos];
-                [psm subscribeToChannels:@[subscribeToChannelUuid]];*/
+            if let subscribeToChannelUuid = subscribeToChannelUuid {
+                let psm = KumulosPushChannels(sdkInstance: Kumulos.sharedInstance)
+                _ = psm.subscribe(uuids: [subscribeToChannelUuid])
             }
 
             if (userAction != nil) {
@@ -402,20 +409,23 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
             if (Kumulos.sharedInstance.config.inAppDeepLinkHandlerBlock == nil) {
                 return;
             }
-            //TODO!
-            /*dispatch_async(dispatch_get_main_queue(), ^{
-                NSDictionary* data = userAction[@"data"][@"deepLink"] ?: @{};
-                self.kumulos.config.inAppDeepLinkHandler(data);
-            });*/
+            DispatchQueue.main.async {
+                let data = userAction.value(forKeyPath: "data.deepLink") as? [AnyHashable:Any] ?? [:]
+                Kumulos.sharedInstance.config.inAppDeepLinkHandlerBlock?(data)
+            }
         } else if (type == InAppAction.OPEN_URL.rawValue) {
-            //NSURL* url = [NSURL URLWithString:userAction[@"data"][@"url"]];
+            guard let url = URL(string: userAction.value(forKeyPath: "data.url") as! String) else {
+                return
+            }
 
             if #available(iOS 10.0.0, *) {
-                //UIApplication.shared.openURL(url: url)
+                UIApplication.shared.open(url, options: [:]) { (win) in
+                    // noop
+                }
             } else {
-                /*dispatch_async(dispatch_get_main_queue(), ^{
-                    [UIApplication.sharedApplication openURL:url];
-                });*/
+                DispatchQueue.main.async {
+                    UIApplication.shared.openURL(url)
+                }
             }
         } else if (type == InAppAction.REQUEST_RATING.rawValue) {
             if #available(iOS 10.3.0, *) {

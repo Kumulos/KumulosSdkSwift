@@ -396,7 +396,7 @@ internal class InAppHelper {
     }
     
 
-    private func trackMessageOpened(message: InAppMessage) -> Void {
+    internal func trackMessageOpened(message: InAppMessage) -> Void {
         let props: [String:Any] = ["type" : MESSAGE_TYPE_IN_APP, "id":message.id]
         
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_OPENED, properties: props)
