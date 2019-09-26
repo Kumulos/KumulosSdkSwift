@@ -126,7 +126,7 @@ class PushHelper {
             }
 
             Kumulos.sharedInstance.inAppHelper.sync { (result:Int) in
-                fetchBarrier.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(20))
+                _ = fetchBarrier.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(20))
 
                 if result < 0 {
                     fetchResult = .failed
