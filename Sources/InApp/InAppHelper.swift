@@ -18,9 +18,8 @@ typealias kumulos_applicationPerformFetchWithCompletionHandler = @convention(c) 
 private var ks_existingBackgroundFetchDelegate: IMP? = nil
 
 internal class InAppHelper {
-    private var config : KSConfig
-    
-    private var presenter: InAppPresenter!
+   
+    private var presenter: InAppPresenter
     private var pendingTickleIds: NSMutableOrderedSet = NSMutableOrderedSet(capacity: 1)
     
     var messagesContext: NSManagedObjectContext? = nil;
@@ -36,12 +35,13 @@ internal class InAppHelper {
     
     // MARK: Initialization
     
-    init(config: KSConfig) {
-        self.config = config
+    init() {
         presenter = InAppPresenter()
         syncBarrier = DispatchSemaphore(value: 0)
         syncQueue = DispatchQueue(label: ("kumulos.in-app.sync"))
-        
+    }
+
+    func initialize() {
         initContext()
         handleEnrollmentAndSyncSetup()
     }
@@ -143,7 +143,7 @@ internal class InAppHelper {
     
     // MARK: State helpers
     func inAppEnabled() -> Bool {
-        return config.inAppConsentStrategy != InAppConsentStrategy.NotEnabled && userConsented();
+        return Kumulos.sharedInstance.inAppConsentStrategy != InAppConsentStrategy.NotEnabled && userConsented();
     }
     
     func userConsented() -> Bool {
@@ -167,7 +167,7 @@ internal class InAppHelper {
     }
     
     func handleAssociatedUserChange() -> Void {
-        if (config.inAppConsentStrategy == InAppConsentStrategy.NotEnabled) {
+        if (Kumulos.sharedInstance.inAppConsentStrategy == InAppConsentStrategy.NotEnabled) {
             DispatchQueue.global(qos: .default).async(execute: {
                 self.updateUserConsent(consentGiven: false)
             })
@@ -181,11 +181,11 @@ internal class InAppHelper {
     }
     
     private func handleEnrollmentAndSyncSetup() -> Void {
-        if (config.inAppConsentStrategy == InAppConsentStrategy.AutoEnroll && userConsented() == false) {
+        if (Kumulos.sharedInstance.inAppConsentStrategy == InAppConsentStrategy.AutoEnroll && userConsented() == false) {
             updateUserConsent(consentGiven: true)
             return;
         }
-        else if (config.inAppConsentStrategy == InAppConsentStrategy.NotEnabled && userConsented() == true) {
+        else if (Kumulos.sharedInstance.inAppConsentStrategy == InAppConsentStrategy.NotEnabled && userConsented() == true) {
             updateUserConsent(consentGiven: false)
             return;
         }

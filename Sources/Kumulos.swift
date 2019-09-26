@@ -89,10 +89,8 @@ open class Kumulos {
     }
     
     fileprivate(set) var inAppHelper: InAppHelper
-    
-    //@property (nonatomic) NSObject<UNUserNotificationCenterDelegate>* _Nullable notificationCenterDelegate API_AVAILABLE(ios(10.0));// TODO: delegate to use in Kumulos+push
-    
-    fileprivate(set) var analyticsHelper: AnalyticsHelper? = nil
+        
+    fileprivate(set) var analyticsHelper: AnalyticsHelper
 
     fileprivate var pushHelper: PushHelper
 
@@ -167,6 +165,8 @@ open class Kumulos {
 
         instance = Kumulos(config: config)
         
+        instance!.initializeHelpers()
+        
         DispatchQueue.global().async {
             instance!.sendDeviceInformation()
         }
@@ -191,10 +191,14 @@ open class Kumulos {
         eventsHttpClient = KSHttpClient(baseUrl: URL(string: baseEventsUrl)!, requestFormat: .json, responseFormat: .json)
         eventsHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
         
-        inAppHelper = InAppHelper(config: config)
-        pushHelper = PushHelper()
         analyticsHelper = AnalyticsHelper()
-
+        inAppHelper = InAppHelper()
+        pushHelper = PushHelper()
+    }
+    
+    private func initializeHelpers() {
+        analyticsHelper.initialize(kumulos: self)
+        inAppHelper.initialize()
         _ = pushHelper.pushInit
     }
 

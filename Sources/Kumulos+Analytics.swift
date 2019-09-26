@@ -13,7 +13,7 @@ public extension Kumulos {
     internal static let USER_ID_KEY = "KumulosCurrentUserID"
     
     internal static func trackEvent(eventType: KumulosEvent, properties: [String:Any]?, immediateFlush: Bool = false) {
-        getInstance().analyticsHelper?.trackEvent(eventType: eventType.rawValue, properties: properties, immediateFlush: immediateFlush)
+        getInstance().analyticsHelper.trackEvent(eventType: eventType.rawValue, properties: properties, immediateFlush: immediateFlush)
     }
     
     /**
@@ -24,7 +24,7 @@ public extension Kumulos {
      - properties: Optional meta-data about the event
      */
     static func trackEvent(eventType: String, properties: [String:Any]?) {
-        getInstance().analyticsHelper?.trackEvent(eventType: eventType, properties: properties, immediateFlush: false)
+        getInstance().analyticsHelper.trackEvent(eventType: eventType, properties: properties, immediateFlush: false)
     }
     
     /**
@@ -35,7 +35,7 @@ public extension Kumulos {
      - properties: Optional meta-data about the event
      */
     static func trackEventImmediately(eventType: String, properties: [String:Any]?) {
-        getInstance().analyticsHelper?.trackEvent(eventType: eventType, properties: properties, immediateFlush: true)
+        getInstance().analyticsHelper.trackEvent(eventType: eventType, properties: properties, immediateFlush: true)
     }
     
     /**
