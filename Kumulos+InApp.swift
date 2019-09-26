@@ -64,7 +64,7 @@ public extension Kumulos {
             request.returnsObjectsAsFaults = false
             request.includesPendingChanges = false
             request.sortDescriptors = [ NSSortDescriptor(key: "updatedAt", ascending: false) ]
-            request.predicate = NSPredicate(format: "(inboxConfig != %@)")
+            request.predicate = NSPredicate(format: "(inboxConfig != nil)")
             request.propertiesToFetch = ["id", "inboxConfig", "inboxFrom", "inboxTo", "dismissedAt"]
             
             
@@ -73,6 +73,7 @@ public extension Kumulos {
                 items = try context.fetch(request) as [InAppMessageEntity]
             } catch {
                 print("Failed to fetch items: \(error)")
+
                 return
             }
             
@@ -95,9 +96,8 @@ public extension Kumulos {
             return InAppMessagePresentationResult.EXPIRED
         }
 
-        // TODO
         let result = self.inAppHelper.presentMessage(withId: item.id)
-
+        
         return result ? InAppMessagePresentationResult.PRESENTED : InAppMessagePresentationResult.FAILED 
     }
 }

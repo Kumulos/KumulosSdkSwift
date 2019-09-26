@@ -8,6 +8,7 @@
 import UIKit
 import WebKit
 import StoreKit
+import UserNotifications
 
 internal enum InAppAction : String {
     case CLOSE_MESSAGE = "closeMessage"
