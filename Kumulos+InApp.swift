@@ -56,7 +56,9 @@ public extension Kumulos {
         var results: [InAppInboxItem] = []
         
         self.inAppHelper.messagesContext!.performAndWait({
-            let context = self.inAppHelper.messagesContext!
+            guard let context = self.inAppHelper.messagesContext else {
+                return
+            }
             
             let request = NSFetchRequest<InAppMessageEntity>(entityName: "Message")
             request.returnsObjectsAsFaults = false
@@ -69,8 +71,9 @@ public extension Kumulos {
             var items: [InAppMessageEntity] = []
             do {
                 items = try context.fetch(request) as [InAppMessageEntity]
-            } catch let err {
-                print("Failed to fetch items: \(err)")
+            } catch {
+                print("Failed to fetch items: \(error)")
+
                 return
             }
             
