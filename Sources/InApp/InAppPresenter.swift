@@ -174,7 +174,7 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         let frame = UIView.init(frame: window.frame)
         self.frame = frame
         
-        frame.backgroundColor = UIColor.clear
+        frame.backgroundColor = .clear
         
         window.rootViewController!.view = frame
         window.isHidden = false
@@ -196,34 +196,37 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
                 config.mediaPlaybackRequiresUserAction = false
             }
         }
-/*
-    #ifdef DEBUG
-        [config.preferences setValue:@YES forKey:@"developerExtrasEnabled"];
-    #endif
 
-        self.webView = [[WKWebView alloc] initWithFrame:self.frame.frame configuration:config];
-        self.webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        self.webView.backgroundColor = UIColor.clearColor;
-        self.webView.scrollView.backgroundColor = UIColor.clearColor;
-        self.webView.opaque = NO;
-        self.webView.navigationDelegate = self;
-        self.webView.scrollView.bounces = NO;
-        self.webView.scrollView.scrollEnabled = NO;
-        self.webView.allowsBackForwardNavigationGestures = NO;
-        if (@available(iOS 9.0, *)) {
-            self.webView.allowsLinkPreview = NO;
+        #if DEBUG
+            config.preferences.setValue(true, forKey:"developerExtrasEnabled")
+        #endif
+
+        let webView = WKWebView(frame: window.frame, configuration: config)
+        self.webView = webView
+
+        webView.autoresizingMask = [.flexibleWidth, .flexibleHeight];
+        webView.backgroundColor = .clear;
+        webView.scrollView.backgroundColor = .clear;
+        webView.isOpaque = false;
+        webView.navigationDelegate = self;
+        webView.scrollView.bounces = false;
+        webView.scrollView.isScrollEnabled = false;
+        webView.allowsBackForwardNavigationGestures = false;
+        
+        if #available(iOS 9.0, *) {
+            webView.allowsLinkPreview = false;
         }
 
-        if (@available(iOS 11.0.0, *)) {
+        if #available(iOS 11.0.0, *) {
             // Allow content to pass under the notch / home button
-            [self.webView.scrollView setContentInsetAdjustmentBehavior:UIScrollViewContentInsetAdjustmentNever];
+            webView.scrollView.contentInsetAdjustmentBehavior = .never
         }
 
-        [self.frame addSubview:self.webView];
-
-        NSURLRequest* req = [NSURLRequest requestWithURL:[NSURL URLWithString:KSInAppRendererUrl] cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:30];
-        [self.webView loadRequest:req];*/
-
+        frame.addSubview(webView)
+        
+        let request = URLRequest(url: URL(string: inAppRendererUrl)!, cachePolicy: .returnCacheDataElseLoad, timeoutInterval: 30)
+        webView.load(request)
+        
         // Spinner
         let loadingSpinner = UIActivityIndicatorView(style: UIActivityIndicatorView.Style.gray)
         self.loadingSpinner = loadingSpinner
@@ -234,15 +237,11 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         
         frame.addSubview(loadingSpinner)
 
-        /*NSLayoutConstraint* horCon = [NSLayoutConstraint constraintWithItem:self.loadingSpinner attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.frame attribute:NSLayoutAttributeCenterX multiplier:1 constant:0];
-        NSLayoutConstraint* verCon = [NSLayoutConstraint constraintWithItem:self.loadingSpinner attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self.frame attribute:NSLayoutAttributeCenterY multiplier:1 constant:0];
-        [self.frame addConstraints:@[horCon, verCon]];*/
-
+        let horizontalConstraint = NSLayoutConstraint(item: loadingSpinner, attribute: .centerX, relatedBy: .equal, toItem: frame, attribute: .centerX, multiplier: 1, constant: 0)
+        let verticalConstraint = NSLayoutConstraint(item: loadingSpinner, attribute: .centerY, relatedBy: .equal, toItem: frame, attribute: .centerY, multiplier: 1, constant: 0)
         
+        frame.addConstraints([horizontalConstraint,verticalConstraint])
         frame.bringSubviewToFront(loadingSpinner)
-        
-        
-        
     }
 
     func destroyViews() {
