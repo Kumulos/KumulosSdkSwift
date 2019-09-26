@@ -98,7 +98,7 @@ open class KSConfigBuilder: NSObject {
         return self
     }
     
-    public func setInAppDeepLinkHandlerBlock(pushOpenedHandlerBlock: @escaping PushOpenedHandlerBlock) -> KSConfigBuilder {
+    public func setPushOpenedHandlerBlock(pushOpenedHandlerBlock: @escaping PushOpenedHandlerBlock) -> KSConfigBuilder {
         _pushOpenedHandlerBlock = pushOpenedHandlerBlock
         return self
     }

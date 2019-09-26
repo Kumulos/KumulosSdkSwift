@@ -37,7 +37,6 @@ public class InAppInboxItem: NSObject {
 }
 
 public extension Kumulos {
-    
     func updateConsent(forUser consentGiven: Bool) {
         if self.inAppConsentStrategy != InAppConsentStrategy.ExplicitByUser {
             NSException(name:NSExceptionName(rawValue: "Kumulos: Invalid In-app consent strategy"), reason:"You can only manage in-app messaging consent when the feature is enabled and strategy is set to KSInAppConsentStrategyExplicitByUser", userInfo:nil).raise()
