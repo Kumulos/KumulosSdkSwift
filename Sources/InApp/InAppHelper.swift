@@ -19,9 +19,6 @@ typealias kumulos_applicationPerformFetchWithCompletionHandler = @convention(c) 
 private var ks_existingBackgroundFetchDelegate: IMP? = nil
 
 internal class InAppHelper {
-    
-
-    private var kumulos: Kumulos!
     private var presenter: InAppPresenter!
     private var pendingTickleIds: NSMutableOrderedSet = NSMutableOrderedSet(capacity: 1)
     
@@ -35,9 +32,8 @@ internal class InAppHelper {
     
     // MARK: Initialization
     
-    init(kumulos: Kumulos) {
-        self.kumulos = kumulos
-        presenter = InAppPresenter(kumulos: kumulos)
+    init() {
+        presenter = InAppPresenter()
         initContext()
         handleEnrollmentAndSyncSetup()
     }
@@ -228,7 +224,7 @@ internal class InAppHelper {
         
         let path = "/v1/users/\(Kumulos.currentUserIdentifier)/messages\(after)"
         
-        kumulos.pushHttpClient.sendRequest(.GET, toPath: path, data: nil, onSuccess: { response, decodedBody in
+        Kumulos.sharedInstance.pushHttpClient.sendRequest(.GET, toPath: path, data: nil, onSuccess: { response, decodedBody in
             let messagesToPersist = decodedBody as? [[AnyHashable : Any]]
             if (messagesToPersist == nil || messagesToPersist!.count == 0) {
                 if onComplete != nil {
@@ -406,7 +402,8 @@ internal class InAppHelper {
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_OPENED, properties: props)
     }
     
-    func markMessageDismissed(message: InAppMessage) -> Void {
+    internal func markMessageDismissed(message: InAppMessage) -> Void {
+
         let props: [String:Any] = ["type" : MESSAGE_TYPE_IN_APP, "id":message.id]
         
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_DISMISSED, properties: props)
