@@ -84,23 +84,22 @@ internal class InAppHelper {
         defer { objc_sync_exit(self.pendingTickleIds) }
         
         let messagesToPresent = self.getMessagesToPresent([InAppPresented.IMMEDIATELY.rawValue, InAppPresented.NEXT_OPEN.rawValue])
-        //TODO: implement
-        //presenter.queueMessages(forPresentation: messagesToPresent, presentingTickles: pendingTickleIds)
+        presenter.queueMessagesForPresentation(messages: messagesToPresent, tickleIds: self.pendingTickleIds)
     }
     
-    private func setupSyncTask() -> Void {
-        //TODO: dispatch_once
+    
+    let setupSyncTask:Void = {
+        let klass : AnyClass = type(of: UIApplication.shared.delegate!)
         
-        
-        //        let klass : AnyClass = type(of: UIApplication.shared.delegate!)
-        //
-        //        // Perform background fetch
-        //        let performFetchSelector = #selector(UIApplicationDelegate.application(_:performFetchWithCompletionHandler:))
-        //        let fetchType = "\("Void")\("Any?")\("Selector")\("UIApplication")\("KSCompletionHandler")".utf8CString
-        
-        //TODO: swizzling
-        //ks_existingBackgroundFetchDelegate = class_replaceMethod(klass, performFetchSelector, kumulos_applicationPerformFetchWithCompletionHandler as? IMP, fetchType)
-    }
+        // Perform background fetch
+        let performFetchSelector = #selector(UIApplicationDelegate.application(_:performFetchWithCompletionHandler:))
+        let performFetchMethod = class_getInstanceMethod(klass, performFetchSelector)
+        let regType = method_getTypeEncoding(performFetchMethod!)
+        let kumulosPerformFetch = imp_implementationWithBlock({ (obj:Any, _cmd:Selector, application:UIApplication, deviceToken:Data) -> Void in
+            //TODO: implementation
+        })
+        ks_existingBackgroundFetchDelegate = class_replaceMethod(klass, performFetchSelector, kumulosPerformFetch, regType)
+    }()
     
     
     // MARK: State helpers
@@ -153,7 +152,7 @@ internal class InAppHelper {
         }
         
         if (inAppEnabled()) {
-            setupSyncTask()
+            _ = setupSyncTask
             
             NotificationCenter.default.addObserver(self, selector: #selector(appBecameActive), name: UIApplication.didBecomeActiveNotification, object: nil)
         }
@@ -229,8 +228,7 @@ internal class InAppHelper {
                 
                 DispatchQueue.global(qos: .default).async(execute: {
                     let messagesToPresent = self.getMessagesToPresent([InAppPresented.IMMEDIATELY.rawValue])
-                    //TODO:
-                    //presenter.queueMessages(forPresentation: messagesToPresent, presentingTickles: pendingTickleIds)
+                    self.presenter.queueMessagesForPresentation(messages: messagesToPresent, tickleIds: self.pendingTickleIds)
                 })
             })
         }, onFailure: { response, error in
@@ -339,8 +337,8 @@ internal class InAppHelper {
         }
     }
    
-    private func getMessagesToPresent(_ presentedWhenOptions: [String]) -> [InAppMessage]? {
-        var messages: [InAppMessage]? = []
+    private func getMessagesToPresent(_ presentedWhenOptions: [String]) -> [InAppMessage] {
+        var messages: [InAppMessage] = []
         
         messagesContext!.performAndWait({
             let context = self.messagesContext!
@@ -465,9 +463,7 @@ internal class InAppHelper {
             
             let message: InAppMessage = InAppMessage(entity: items[0]);
             let tickles = NSOrderedSet(array: [messageId])
-            //TODO: implement
-            //presenter.queueMessages(forPresentation: messagesToPresent, presentingTickles: pendingTickleIds)
-            
+            presenter.queueMessagesForPresentation(messages: [message], tickleIds: tickles)
         })
         
         return result
@@ -491,8 +487,7 @@ internal class InAppHelper {
             self.pendingTickleIds.add(inAppPartId)
             if (isActive){
                 let messagesToPresent = self.getMessagesToPresent([])
-                //TODO: implement
-                //presenter.queueMessages(forPresentation: messagesToPresent, presentingTickles: self.pendingTickleIds)
+                self.presenter.queueMessagesForPresentation(messages: messagesToPresent, tickleIds: self.pendingTickleIds)
             }
         })
     }
