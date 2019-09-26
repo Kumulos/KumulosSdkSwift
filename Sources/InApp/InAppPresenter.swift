@@ -268,11 +268,23 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
     }
   
     func postClientMessage(type: String, data: Any?) {
-          /*NSDictionary* msg = @{@"type": type, @"data": data != nil ? data : NSNull.null};
-          NSData* jsonMsg = [NSJSONSerialization dataWithJSONObject:msg options:0 error:nil];
-          NSString* evalString = [NSString stringWithFormat:@"postHostMessage(%@);", [[NSString alloc] initWithData:jsonMsg encoding:NSUTF8StringEncoding]];
-
-          [self.webView evaluateJavaScript:evalString completionHandler:nil];*/
+        guard let webView = self.webView else {
+            return
+        }
+        
+        do {
+        
+            let msg: [String: Any] = ["type" : type, "data" : data != nil ? data! : NSNull()]
+            let json : Data = try JSONSerialization.data(withJSONObject: msg, options: JSONSerialization.WritingOptions(rawValue: 0))
+            
+            
+            let jsonMsg = String(data: json, encoding: .utf8)
+            let evalString = String(format: "postHostMessage(%@);", jsonMsg!)
+          
+            webView.evaluateJavaScript(evalString, completionHandler: nil)
+        } catch {
+            //Noop?
+        }
       }
         
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
