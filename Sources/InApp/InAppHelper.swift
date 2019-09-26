@@ -8,8 +8,6 @@
 import Foundation
 import CoreData
 
-
-
 public enum InAppMessagePresentationResult : String {
     case PRESENTED = "presented"
     case EXPIRED = "expired"
@@ -28,9 +26,6 @@ internal class InAppHelper {
     private var pendingTickleIds: NSMutableOrderedSet = NSMutableOrderedSet(capacity: 1)
     
     var messagesContext: NSManagedObjectContext? = nil;
-    
-    //TODO - date?
-    //internal let KUMULOS_MESSAGES_LAST_SYNC_TIME = nil
     
     internal let KUMULOS_IN_APP_CONSENTED_KEY = "KumulosInAppConsented"
     internal let KUMULOS_MESSAGES_LAST_SYNC_TIME = "KumulosMessagesLastSyncTime"
@@ -219,7 +214,7 @@ internal class InAppHelper {
     // MARK: Message management
     
     func sync(_ onComplete: ((_ result: Int) -> Void)? = nil) {
-        let lastSyncTime = UserDefaults.standard.object(forKey: KUMULOS_MESSAGES_LAST_SYNC_TIME) as? Date
+        let lastSyncTime = UserDefaults.standard.object(forKey: KUMULOS_MESSAGES_LAST_SYNC_TIME) as? NSDate
         var after = ""
         
         if lastSyncTime != nil {
@@ -267,8 +262,6 @@ internal class InAppHelper {
         })
     }
     
-
-    
     private func persistInAppMessages(messages: [[AnyHashable : Any]]) {
         messagesContext!.performAndWait({
             let context = self.messagesContext!
@@ -279,7 +272,7 @@ internal class InAppHelper {
                 return
             }
             
-            var lastSyncTime = Date(timeIntervalSince1970: 0)
+            var lastSyncTime = NSDate(timeIntervalSince1970: 0)
             let dateParser = DateFormatter()
             dateParser.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
             
@@ -291,9 +284,6 @@ internal class InAppHelper {
                 let predicate: NSPredicate = NSPredicate(format: "id = %@", partId)
                 fetchRequest.predicate = predicate
                 
-                
-                
-                
                 var fetchedObjects: [InAppMessageEntity];
                 do {
                     fetchedObjects = try context.fetch(fetchRequest) as! [InAppMessageEntity]
@@ -302,34 +292,33 @@ internal class InAppHelper {
                 }
                 
                 // Upsert
-                var model: InAppMessageEntity = fetchedObjects.count == 1 ? fetchedObjects[0] : InAppMessageEntity(entity: entity!, insertInto: context)
+                let model: InAppMessageEntity = fetchedObjects.count == 1 ? fetchedObjects[0] : InAppMessageEntity(entity: entity!, insertInto: context)
                
-                
                 model.id = partId
                 model.updatedAt = dateParser.date(from: message["updatedAt"] as! String)! as NSDate
                 model.dismissedAt =  dateParser.date(from: message["openedAt"] as? String ?? "") as NSDate?
                 model.presentedWhen = message["presentedWhen"] as! String
-                //TODO:
-//                model.content = message["content"]
-//                model.data = message["data"] == NSNull.null ? nil : message["data"]
-//                model.badgeConfig = message["badge"] == NSNull.null ? nil : message["badge"]
-//                model.inboxConfig = message["inbox"] == NSNull.null ? nil : message["inbox"]
-//
-//                if model.inboxConfig != nil {
-//                    let inbox = model.inboxConfig
-//                    model.inboxFrom = !(inbox["from"] == NSNull.null) ? dateParser.date(from: inbox["from"] as? String ?? "") : nil
-//                    model.inboxTo = !(inbox["to"] == NSNull.null) ? dateParser.date(from: inbox["to"] as? String ?? "") : nil
-//                }
+
+                model.content = message["content"] as! NSDictionary
+                model.data = message["data"] as? NSDictionary
+                model.badgeConfig = message["badge"] as? NSDictionary
+                model.inboxConfig = message["inbox"] as? NSDictionary
                 
-//                if model.updatedAt.timeIntervalSince1970 > lastSyncTime.timeIntervalSince1970 {
-//                    lastSyncTime = model.updatedAt
-//                }
+                if (model.inboxConfig != nil){
+                    let inbox = model.inboxConfig!
+                    
+                    model.inboxFrom = dateParser.date(from: inbox["from"] as? String ?? "") as NSDate?
+                    model.inboxTo = dateParser.date(from: inbox["to"] as? String ?? "") as NSDate?
+                }
+                
+                if (model.updatedAt.timeIntervalSince1970 > lastSyncTime.timeIntervalSince1970) {
+                    lastSyncTime = model.updatedAt
+                }
             }
             
             // Evict
             evictMessages(context: context)
             
-           
             do{
                 try context.save()
             }
@@ -337,7 +326,6 @@ internal class InAppHelper {
                 print("Failed to persist messages: \(err)")
                 return
             }
-            
             
             UserDefaults.standard.set(lastSyncTime, forKey: KUMULOS_MESSAGES_LAST_SYNC_TIME)
             
@@ -618,7 +606,7 @@ internal class InAppHelper {
     
     class KSJsonValueTransformer: ValueTransformer {
         override class func transformedValueClass() -> AnyClass {
-            return NSData.self//TODO: mb Data? implicitly converted?
+            return NSDictionary.self
         }
         
         override class func allowsReverseTransformation() -> Bool {
@@ -665,6 +653,3 @@ internal class InAppHelper {
         }
     }
 }
-
-
-

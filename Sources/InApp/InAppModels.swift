@@ -12,21 +12,23 @@ class InAppMessageEntity : NSManagedObject {
     @NSManaged var id : Int
     @NSManaged var updatedAt: NSDate
     @NSManaged var presentedWhen: String
-    @NSManaged var content: String
-    @NSManaged var data : NSObject
-    @NSManaged var badgeConfig : NSObject
-    @NSManaged var inboxConfig : NSObject
+    @NSManaged var content: NSDictionary
+    @NSManaged var data : NSDictionary?
+    @NSManaged var badgeConfig : NSDictionary?
+    @NSManaged var inboxConfig : NSDictionary?
     @NSManaged var dismissedAt : NSDate?
+    @NSManaged var inboxFrom : NSDate?
+    @NSManaged var inboxTo : NSDate?
 }
 
 public class InAppMessage: NSObject {
     internal(set) open var id: Int
     internal(set) open var updatedAt: NSDate
     internal(set) open var presentedWhen: InAppPresented//??? this not set in Objective-C
-    internal(set) open var content: String
-    internal(set) open var data : NSObject
-    internal(set) open var badgeConfig : NSObject
-    internal(set) open var inboxConfig : NSObject
+    internal(set) open var content: NSDictionary
+    internal(set) open var data : NSDictionary?
+    internal(set) open var badgeConfig : NSDictionary?
+    internal(set) open var inboxConfig : NSDictionary?
     internal(set) open var dismissedAt : NSDate?
     
     init(entity: InAppMessageEntity) {
