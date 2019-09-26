@@ -406,7 +406,7 @@ internal class InAppHelper {
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_OPENED, properties: props)
     }
     
-    private func markMessageDismissed(message: InAppMessage) -> Void {
+    func markMessageDismissed(message: InAppMessage) -> Void {
         let props: [String:Any] = ["type" : MESSAGE_TYPE_IN_APP, "id":message.id]
         
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_DISMISSED, properties: props)
@@ -459,7 +459,7 @@ internal class InAppHelper {
     
     // MARK Interop with other components
     
-    func presentMessageWithId(messageId: Int) -> Bool {
+    func presentMessage(withId: Int) -> Bool {
         var result = true;
         
         messagesContext!.performAndWait({
@@ -470,7 +470,7 @@ internal class InAppHelper {
             fetchRequest.includesPendingChanges = false
             fetchRequest.returnsObjectsAsFaults = false
             
-            let predicate: NSPredicate? = NSPredicate(format: "id = %@", messageId)
+            let predicate: NSPredicate? = NSPredicate(format: "id = %@", withId)
             fetchRequest.predicate = predicate
             
             var items: [InAppMessageEntity]
@@ -488,7 +488,7 @@ internal class InAppHelper {
             }
             
             let message: InAppMessage = InAppMessage(entity: items[0]);
-            let tickles = NSOrderedSet(array: [messageId])
+            let tickles = NSOrderedSet(array: [withId])
             presenter.queueMessagesForPresentation(messages: [message], tickleIds: tickles)
         })
         
