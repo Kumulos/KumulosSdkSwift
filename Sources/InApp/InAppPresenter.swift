@@ -33,7 +33,6 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
     
     private var contentController : WKUserContentController?
     
-    // TODO - how to init this properly?
     private var messageQueue : NSMutableOrderedSet
     private var pendingTickleIds : NSMutableOrderedSet
 

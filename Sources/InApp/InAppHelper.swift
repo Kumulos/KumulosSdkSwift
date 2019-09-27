@@ -39,7 +39,7 @@ internal class InAppHelper {
     init() {
         presenter = InAppPresenter()
         syncBarrier = DispatchSemaphore(value: 0)
-        syncQueue = DispatchQueue(label: ("kumulos.in-app.sync"))
+        syncQueue = DispatchQueue(label: "kumulos.in-app.sync")
     }
 
     func initialize() {
@@ -416,8 +416,8 @@ internal class InAppHelper {
             fetchRequest.includesPendingChanges = false
             fetchRequest.returnsObjectsAsFaults = false
             
-//            let predicate: NSPredicate? = NSPredicate(format: "((presentedWhen IN %@) OR (id IN %@)) AND (dismissedAt = %@)", presentedWhenOptions, self.pendingTickleIds)
-//            fetchRequest.predicate = predicate
+            let predicate = NSPredicate(format: "((presentedWhen IN %@) OR (id IN %@)) AND (dismissedAt = %@)", presentedWhenOptions, self.pendingTickleIds)
+            fetchRequest.predicate = predicate
 
             let sortDescriptor = NSSortDescriptor(key: "updatedAt", ascending: true)
             fetchRequest.sortDescriptors = [sortDescriptor]
