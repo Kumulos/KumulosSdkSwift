@@ -48,13 +48,10 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
     }
 
     func queueMessagesForPresentation(messages: [InAppMessage], tickleIds: NSOrderedSet) {
-    
         messageQueueLock.wait()
-        defer {
-            messageQueueLock.signal()
-        }
     
         if (messages.count == 0 && messageQueue.count == 0) {
+            messageQueueLock.signal()
             return;
         }
         
@@ -99,17 +96,21 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
                 return .orderedSame
             }
         }
-        
-        DispatchQueue.main.sync {
+
+        messageQueueLock.signal()
+
+        if Thread.isMainThread {
             self.initViews()
+        } else {
+            DispatchQueue.main.sync {
+                self.initViews()
+            }
         }
 
-        if let message = self.currentMessage {
-            let messageQueueItem = messageQueue[0] as! InAppMessage
-
-            if message.id != messageQueueItem.id && messageQueueItem.id == pendingTickleIds[0] as! Int {
-                presentFromQueue()
-            }
+        if (self.currentMessage != nil
+            && currentMessage!.id != (messageQueue[0] as! InAppMessage).id
+            && (messageQueue[0] as! InAppMessage).id == pendingTickleIds[0] as! Int64) {
+            presentFromQueue()
         }
     }
     
@@ -179,22 +180,22 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
     }
     
     func initViews() {
-        guard var window = self.window else {
-            return;
+        if window != nil {
+            return
         }
         
         // Window / frame setup
         window = UIWindow.init(frame: UIScreen.main.bounds)
-        window.windowLevel = UIWindow.Level.alert
-        window.rootViewController = UIViewController()
+        window!.windowLevel = UIWindow.Level.alert
+        window!.rootViewController = UIViewController()
         
-        let frame = UIView.init(frame: window.frame)
+        let frame = UIView.init(frame: window!.frame)
         self.frame = frame
         
         frame.backgroundColor = .clear
         
-        window.rootViewController!.view = frame
-        window.isHidden = false
+        window!.rootViewController!.view = frame
+        window!.isHidden = false
 
         // Webview
         self.contentController = WKUserContentController()
@@ -218,7 +219,7 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
             config.preferences.setValue(true, forKey:"developerExtrasEnabled")
         #endif
 
-        let webView = WKWebView(frame: window.frame, configuration: config)
+        let webView = WKWebView(frame: window!.frame, configuration: config)
         self.webView = webView
 
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight];

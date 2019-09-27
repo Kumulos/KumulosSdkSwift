@@ -328,13 +328,13 @@ internal class InAppHelper {
             dateParser.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
             
             for message in messages {
-                let partId = message["id"] as! Int
+                let partId = message["id"] as! Int64
                 
                 let fetchRequest:NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "Message")
                 fetchRequest.entity = entity
-                let predicate: NSPredicate = NSPredicate(format: "id = %@", partId)
-                fetchRequest.predicate = predicate
-                
+//                let predicate: NSPredicate = NSPredicate(format: "id = %@", partId)
+//                fetchRequest.predicate = predicate
+
                 var fetchedObjects: [InAppMessageEntity];
                 do {
                     fetchedObjects = try context.fetch(fetchRequest) as! [InAppMessageEntity]
@@ -391,7 +391,6 @@ internal class InAppHelper {
         let predicate: NSPredicate? = NSPredicate(format: "((dismissedAt != nil AND inboxConfig = nil) OR (inboxTo != nil AND inboxTo < %@))", NSDate())
         fetchRequest.predicate = predicate
         
-        
         var toEvict: [InAppMessageEntity]
         do {
             toEvict = try context.fetch(fetchRequest) as! [InAppMessageEntity]
@@ -417,9 +416,9 @@ internal class InAppHelper {
             fetchRequest.includesPendingChanges = false
             fetchRequest.returnsObjectsAsFaults = false
             
-            let predicate: NSPredicate? = NSPredicate(format: "((presentedWhen IN %@) OR (id IN %@)) AND (dismissedAt = %@)", presentedWhenOptions, self.pendingTickleIds)
-            fetchRequest.predicate = predicate
-            
+//            let predicate: NSPredicate? = NSPredicate(format: "((presentedWhen IN %@) OR (id IN %@)) AND (dismissedAt = %@)", presentedWhenOptions, self.pendingTickleIds)
+//            fetchRequest.predicate = predicate
+
             let sortDescriptor = NSSortDescriptor(key: "updatedAt", ascending: true)
             fetchRequest.sortDescriptors = [sortDescriptor]
             
@@ -467,9 +466,9 @@ internal class InAppHelper {
             fetchRequest.entity = entity
             fetchRequest.includesPendingChanges = false
   
-            let predicate: NSPredicate? = NSPredicate(format: "id = %@", message.id)
-            fetchRequest.predicate = predicate
-            
+//            let predicate: NSPredicate? = NSPredicate(format: "id = %@", message.id)
+//            fetchRequest.predicate = predicate
+
             var messageEntities: [InAppMessageEntity]
             do {
                 messageEntities = try context.fetch(fetchRequest) as! [InAppMessageEntity]
@@ -509,7 +508,7 @@ internal class InAppHelper {
         presenter.queueMessagesForPresentation(messages: messagesToPresent, tickleIds: self.pendingTickleIds)
     }
     
-    func presentMessage(withId: Int) -> Bool {
+    func presentMessage(withId: Int64) -> Bool {
         var result = true;
         
         messagesContext!.performAndWait({
@@ -520,9 +519,9 @@ internal class InAppHelper {
             fetchRequest.includesPendingChanges = false
             fetchRequest.returnsObjectsAsFaults = false
             
-            let predicate: NSPredicate? = NSPredicate(format: "id = %@", withId)
-            fetchRequest.predicate = predicate
-            
+//            let predicate: NSPredicate? = NSPredicate(format: "id = %@", withId)
+//            fetchRequest.predicate = predicate
+
             var items: [InAppMessageEntity]
             do {
                 items = try context.fetch(fetchRequest) as! [InAppMessageEntity]

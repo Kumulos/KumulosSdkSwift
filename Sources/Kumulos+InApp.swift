@@ -9,7 +9,7 @@ import Foundation
 import CoreData
 
 public class InAppInboxItem: NSObject {
-    internal(set) open var id: Int
+    internal(set) open var id: Int64
     internal(set) open var title: String
     internal(set) open var subtitle: String
     internal(set) open var availableFrom: Date?

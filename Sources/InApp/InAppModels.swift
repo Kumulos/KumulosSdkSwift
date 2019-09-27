@@ -9,7 +9,7 @@ public enum InAppPresented : String {
 }
 
 class InAppMessageEntity : NSManagedObject {
-    @NSManaged var id : Int
+    @NSManaged var id : Int64
     @NSManaged var updatedAt: NSDate
     @NSManaged var presentedWhen: String
     @NSManaged var content: NSDictionary
@@ -22,7 +22,7 @@ class InAppMessageEntity : NSManagedObject {
 }
 
 public class InAppMessage: NSObject {
-    internal(set) open var id: Int
+    internal(set) open var id: Int64
     internal(set) open var updatedAt: NSDate
     internal(set) open var presentedWhen: InAppPresented//??? this not set in Objective-C
     internal(set) open var content: NSDictionary
