@@ -132,7 +132,7 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         }
 
         if #available(iOS 10, *) {
-            let tickleNotificationId = String(format: "k-in-app-message:%@", message.id)
+            let tickleNotificationId = "k-in-app-message:\(message.id)"
             UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [tickleNotificationId])
         }
         
@@ -147,9 +147,7 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         
         if messageQueue.count == 0 {
             pendingTickleIds.removeAllObjects()
-            DispatchQueue.main.sync {
-                self.destroyViews()
-            }
+            self.destroyViews()
         }
         else {
             presentFromQueue()

@@ -415,8 +415,8 @@ internal class InAppHelper {
             fetchRequest.entity = entity
             fetchRequest.includesPendingChanges = false
             fetchRequest.returnsObjectsAsFaults = false
-            
-            let predicate = NSPredicate(format: "((presentedWhen IN %@) OR (id IN %@)) AND (dismissedAt = %@)", presentedWhenOptions, self.pendingTickleIds)
+
+            let predicate = NSPredicate(format: "((presentedWhen IN %@) OR (id IN %@)) AND (dismissedAt = nil)", presentedWhenOptions, self.pendingTickleIds)
             fetchRequest.predicate = predicate
 
             let sortDescriptor = NSSortDescriptor(key: "updatedAt", ascending: true)
