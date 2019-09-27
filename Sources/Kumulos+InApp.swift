@@ -37,26 +37,26 @@ public class InAppInboxItem: NSObject {
 }
 
 public extension Kumulos {
-    func updateConsent(forUser consentGiven: Bool) {
+    static func updateConsent(forUser consentGiven: Bool) {
         if self.inAppConsentStrategy != InAppConsentStrategy.ExplicitByUser {
             NSException(name:NSExceptionName(rawValue: "Kumulos: Invalid In-app consent strategy"), reason:"You can only manage in-app messaging consent when the feature is enabled and strategy is set to KSInAppConsentStrategyExplicitByUser", userInfo:nil).raise()
             
             return
         }
 
-        self.inAppHelper.updateUserConsent(consentGiven: consentGiven)
+        Kumulos.sharedInstance.inAppHelper.updateUserConsent(consentGiven: consentGiven)
     }
     
-    func getInboxItems() -> [InAppInboxItem]
+    static func getInboxItems() -> [InAppInboxItem]
      {
-        if self.inAppHelper.messagesContext == nil {
+        if Kumulos.sharedInstance.inAppHelper.messagesContext == nil {
             return []
         }
 
         var results: [InAppInboxItem] = []
         
-        self.inAppHelper.messagesContext!.performAndWait({
-            guard let context = self.inAppHelper.messagesContext else {
+        Kumulos.sharedInstance.inAppHelper.messagesContext!.performAndWait({
+            guard let context = Kumulos.sharedInstance.inAppHelper.messagesContext else {
                 return
             }
             
@@ -91,12 +91,12 @@ public extension Kumulos {
         return results
     }
     
-    func presentInboxMessage(item: InAppInboxItem) -> InAppMessagePresentationResult {
+    static func presentInboxMessage(item: InAppInboxItem) -> InAppMessagePresentationResult {
         if item.isAvailable() == false {
             return InAppMessagePresentationResult.EXPIRED
         }
 
-        let result = self.inAppHelper.presentMessage(withId: item.id)
+        let result = Kumulos.sharedInstance.inAppHelper.presentMessage(withId: item.id)
         
         return result ? InAppMessagePresentationResult.PRESENTED : InAppMessagePresentationResult.FAILED 
     }
