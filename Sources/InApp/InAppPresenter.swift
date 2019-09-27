@@ -188,9 +188,9 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         
         let frame = UIView.init(frame: window!.frame)
         self.frame = frame
-        
+
         frame.backgroundColor = .clear
-        
+
         window!.rootViewController!.view = frame
         window!.isHidden = false
 

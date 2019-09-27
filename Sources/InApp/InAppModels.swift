@@ -50,15 +50,15 @@ public class InAppMessage: NSObject {
         inboxConfig = entity.inboxConfig
         dismissedAt = entity.dismissedAt
     }
-    
-    //    - (BOOL)isEqual:(id)other
-    //    {
-    //    if (other && [other isKindOfClass:KSInAppMessage.class]) {
-    //    return [self.id isEqualToNumber:((KSInAppMessage*)other).id];
-    //    }
-    //
-    //    return [super isEqual:other];
-    //    }
+
+    public override func isEqual(_ object: Any?) -> Bool {
+        if let other = object as? InAppMessage {
+            return self.id == other.id
+        }
+
+        return super.isEqual(object)
+    }
+
     //
     //    - (NSUInteger)hash
     //    {
