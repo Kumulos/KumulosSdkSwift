@@ -14,7 +14,8 @@ public enum InAppMessagePresentationResult : String {
     case FAILED = "failed"
 }
 
-typealias kumulos_applicationPerformFetchWithCompletionHandler = @convention(c) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ completionHandler: (UIBackgroundFetchResult) -> Void) -> Void;
+typealias kumulos_applicationPerformFetchWithCompletionHandler = @convention(c) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> Void;
+typealias fetchBlock = @convention(block) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> Void;
 private var ks_existingBackgroundFetchDelegate: IMP? = nil
 
 internal class InAppHelper {
@@ -104,13 +105,12 @@ internal class InAppHelper {
         let klass : AnyClass = type(of: UIApplication.shared.delegate!)
         
         // Perform background fetch
-        /*let performFetchSelector = #selector(UIApplicationDelegate.application(_:performFetchWithCompletionHandler:))
-        let performFetchMethod = class_getInstanceMethod(klass, performFetchSelector)
-        let regType = method_getTypeEncoding(performFetchMethod!)
-        let kumulosPerformFetch = imp_implementationWithBlock({ (obj:Any, _cmd:Selector, application:UIApplication, completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> Void in
+        let performFetchSelector = #selector(UIApplicationDelegate.application(_:performFetchWithCompletionHandler:))
+        let fetchType = NSString(string: "v@:@@?").utf8String
+        let block : fetchBlock = { (obj:Any, _cmd:Selector, application:UIApplication, completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> Void in
             var fetchResult : UIBackgroundFetchResult = .noData
             let fetchBarrier = DispatchSemaphore(value: 0)
-            
+
             if let _ = ks_existingBackgroundFetchDelegate {
                 unsafeBitCast(ks_existingBackgroundFetchDelegate, to: kumulos_applicationPerformFetchWithCompletionHandler.self)(obj, _cmd, application, { (result : UIBackgroundFetchResult) in
                     fetchResult = result
@@ -119,11 +119,11 @@ internal class InAppHelper {
             } else {
                 fetchBarrier.signal()
             }
-            
+
             if (Kumulos.sharedInstance.inAppHelper.inAppEnabled()){
                 Kumulos.sharedInstance.inAppHelper.sync { (result:Int) in
                     _ = fetchBarrier.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(20))
-        
+
                     if result < 0 {
                         fetchResult = .failed
                     } else if result > 1 {
@@ -136,9 +136,10 @@ internal class InAppHelper {
             else{
                 completionHandler(fetchResult)
             }
-        })
+        }
+        let kumulosPerformFetch = imp_implementationWithBlock(unsafeBitCast(block, to: AnyObject.self))
         
-        ks_existingBackgroundFetchDelegate = class_replaceMethod(klass, performFetchSelector, kumulosPerformFetch, regType)*/
+        ks_existingBackgroundFetchDelegate = class_replaceMethod(klass, performFetchSelector, kumulosPerformFetch, fetchType)
     }()
     
     // MARK: State helpers

@@ -46,9 +46,13 @@ public class KSPushNotification: NSObject {
     }
 }
 
-typealias kumulos_applicationDidRegisterForRemoteNotifications = @convention(c) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ deviceToken:Data) -> Void;
-typealias kumulos_applicationDidFailToRegisterForRemoteNotificaitons = @convention(c) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ error:Error) -> Void;
-typealias kumulos_applicationDidReceiveRemoteNotificationFetchCompletionHandler = @convention(c) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ userInfo: [AnyHashable : Any], _ completionHandler: (UIBackgroundFetchResult) -> Void) -> Void;
+
+typealias kumulos_applicationDidRegisterForRemoteNotifications = @convention(c) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ deviceToken:Data) -> Void
+typealias didRegBlock = @convention(block) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ deviceToken:Data) -> Void
+typealias kumulos_applicationDidFailToRegisterForRemoteNotificaitons = @convention(c) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ error:Error) -> Void
+typealias didFailToRegBlock = @convention(block) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ error:Error) -> Void
+typealias kumulos_applicationDidReceiveRemoteNotificationFetchCompletionHandler = @convention(c) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ userInfo: [AnyHashable : Any], _ completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> Void
+typealias didReceiveBlock = @convention(block) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ userInfo: [AnyHashable : Any], _ completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> Void
 
 fileprivate var existingDidReg : IMP?
 fileprivate var existingDidFailToReg : IMP?
@@ -61,44 +65,35 @@ class PushHelper {
 
         // Did register push delegate
         let didRegisterSelector = #selector(UIApplicationDelegate.application(_:didRegisterForRemoteNotificationsWithDeviceToken:))
-        // TODO is there _always_ going to be a Method returned here even if AppDelegate doesn't implement?
-        let didRegisterMethod = class_getInstanceMethod(klass, didRegisterSelector)
-        let regType = method_getTypeEncoding(didRegisterMethod!)
-
-        let kumulosDidRegister = imp_implementationWithBlock({ (obj:Any, _cmd:Selector, application:UIApplication, deviceToken:Data) -> Void in
+        let regType = NSString(string: "v@:@@").utf8String
+        let regBlock : didRegBlock = { (obj:Any, _cmd:Selector, application:UIApplication, deviceToken:Data) -> Void in
             if let _ = existingDidReg {
                 unsafeBitCast(existingDidReg, to: kumulos_applicationDidRegisterForRemoteNotifications.self)(obj, _cmd, application, deviceToken)
             }
 
             Kumulos.pushRegister(deviceToken)
-        })
-
+        }
+        let kumulosDidRegister = imp_implementationWithBlock(unsafeBitCast(regBlock, to: AnyObject.self))
         existingDidReg = class_replaceMethod(klass, didRegisterSelector, kumulosDidRegister, regType)
 
         // Failed to register handler
         let didFailToRegisterSelector = #selector(UIApplicationDelegate.application(_:didFailToRegisterForRemoteNotificationsWithError:))
-        // TODO is there _always_ going to be a Method returned here even if AppDelegate doesn't implement?
-        let didFailToRegisterMethod = class_getInstanceMethod(klass, didFailToRegisterSelector)
-        let didFailToRegType = method_getTypeEncoding(didFailToRegisterMethod!)
-
-        let kumulosDidFailToRegister = imp_implementationWithBlock({ (obj:Any, _cmd:Selector, application:UIApplication, error:Error) -> Void in
+        let didFailToRegType = NSString(string: "v@:@@").utf8String
+        let didFailToRegBlock : didFailToRegBlock = { (obj:Any, _cmd:Selector, application:UIApplication, error:Error) -> Void in
             if let _ = existingDidFailToReg {
                 unsafeBitCast(existingDidFailToReg, to: kumulos_applicationDidFailToRegisterForRemoteNotificaitons.self)(obj, _cmd, application, error)
             }
 
             print("Failed to register for remote notifications: \(error)")
-        })
-
+        }
+        let kumulosDidFailToRegister = imp_implementationWithBlock(unsafeBitCast(didFailToRegBlock, to: AnyObject.self))
         existingDidFailToReg = class_replaceMethod(klass, didFailToRegisterSelector, kumulosDidFailToRegister, didFailToRegType)
 
         // iOS9 did receive remote delegate
         // iOS9+ content-available handler
         let didReceiveSelector = #selector(UIApplicationDelegate.application(_:didReceiveRemoteNotification:fetchCompletionHandler:))
-        // TODO is there _always_ going to be a Method returned here even if AppDelegate doesn't implement?
-        let didReceiveMethod = class_getInstanceMethod(klass, didReceiveSelector)
-        let receiveType = method_getTypeEncoding(didReceiveMethod!)
-
-        let kumulosDidReceive = imp_implementationWithBlock({ (obj:Any, _cmd:Selector, _ application: UIApplication, userInfo: [AnyHashable : Any], completionHandler: @escaping (UIBackgroundFetchResult) -> Void) in
+        let receiveType = NSString(string: "v@:@@@?").utf8String
+        let didReceive : didReceiveBlock = { (obj:Any, _cmd:Selector, _ application: UIApplication, userInfo: [AnyHashable : Any], completionHandler: @escaping (UIBackgroundFetchResult) -> Void) in
             var fetchResult : UIBackgroundFetchResult = .noData
             let fetchBarrier = DispatchSemaphore(value: 0)
 
@@ -137,8 +132,8 @@ class PushHelper {
 
                 completionHandler(fetchResult)
             }
-        })
-
+        }
+        let kumulosDidReceive = imp_implementationWithBlock(unsafeBitCast(didReceive, to: AnyObject.self))
         existingDidReceive = class_replaceMethod(klass, didReceiveSelector, kumulosDidReceive, receiveType)
 
         if #available(iOS 10, *) {
