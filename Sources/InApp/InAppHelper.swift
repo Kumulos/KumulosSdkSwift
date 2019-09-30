@@ -332,7 +332,7 @@ internal class InAppHelper {
                 
                 let fetchRequest:NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "Message")
                 fetchRequest.entity = entity
-                let predicate: NSPredicate = NSPredicate(format: "id = %@", partId)
+                let predicate: NSPredicate = NSPredicate(format: "id = %d", partId)
                 fetchRequest.predicate = predicate
 
                 var fetchedObjects: [InAppMessageEntity];
