@@ -465,9 +465,7 @@ internal class InAppHelper {
             let fetchRequest:NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "Message")
             fetchRequest.entity = entity
             fetchRequest.includesPendingChanges = false
-  
-            let predicate: NSPredicate? = NSPredicate(format: "id = %@", message.id)
-            fetchRequest.predicate = predicate
+            fetchRequest.predicate = NSPredicate(format: "id = %i", message.id)
 
             var messageEntities: [InAppMessageEntity]
             do {
@@ -518,10 +516,8 @@ internal class InAppHelper {
             
             fetchRequest.includesPendingChanges = false
             fetchRequest.returnsObjectsAsFaults = false
-            
-            let predicate: NSPredicate? = NSPredicate(format: "id = %@", withId)
-            fetchRequest.predicate = predicate
-
+            fetchRequest.predicate = NSPredicate(format: "id = %i", withId)
+             
             var items: [InAppMessageEntity]
             do {
                 items = try context.fetch(fetchRequest) as! [InAppMessageEntity]
