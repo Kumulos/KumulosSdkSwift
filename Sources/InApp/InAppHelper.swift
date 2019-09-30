@@ -332,8 +332,8 @@ internal class InAppHelper {
                 
                 let fetchRequest:NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "Message")
                 fetchRequest.entity = entity
-//                let predicate: NSPredicate = NSPredicate(format: "id = %@", partId)
-//                fetchRequest.predicate = predicate
+                let predicate: NSPredicate = NSPredicate(format: "id = %@", partId)
+                fetchRequest.predicate = predicate
 
                 var fetchedObjects: [InAppMessageEntity];
                 do {
@@ -466,8 +466,8 @@ internal class InAppHelper {
             fetchRequest.entity = entity
             fetchRequest.includesPendingChanges = false
   
-//            let predicate: NSPredicate? = NSPredicate(format: "id = %@", message.id)
-//            fetchRequest.predicate = predicate
+            let predicate: NSPredicate? = NSPredicate(format: "id = %@", message.id)
+            fetchRequest.predicate = predicate
 
             var messageEntities: [InAppMessageEntity]
             do {
@@ -519,8 +519,8 @@ internal class InAppHelper {
             fetchRequest.includesPendingChanges = false
             fetchRequest.returnsObjectsAsFaults = false
             
-//            let predicate: NSPredicate? = NSPredicate(format: "id = %@", withId)
-//            fetchRequest.predicate = predicate
+            let predicate: NSPredicate? = NSPredicate(format: "id = %@", withId)
+            fetchRequest.predicate = predicate
 
             var items: [InAppMessageEntity]
             do {
