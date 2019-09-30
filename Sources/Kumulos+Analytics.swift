@@ -95,7 +95,7 @@ public extension Kumulos {
         
         #if os(iOS)
         if (currentUserId != nil && currentUserId != Kumulos.installId) {
-            getInstance().inAppHelper.handleAssociatedUserChange();//TODO: implement on inAppHelper
+            getInstance().inAppHelper.handleAssociatedUserChange();
         }
         #endif
     }
