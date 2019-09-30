@@ -100,16 +100,22 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
 
         if Thread.isMainThread {
             self.initViews()
+            
+            if (self.currentMessage != nil
+                && currentMessage!.id != (messageQueue[0] as! InAppMessage).id
+                && (messageQueue[0] as! InAppMessage).id == pendingTickleIds[0] as! Int64) {
+                presentFromQueue()
+            }
         } else {
             DispatchQueue.main.sync {
                 self.initViews()
+                
+                if (self.currentMessage != nil
+                    && currentMessage!.id != (messageQueue[0] as! InAppMessage).id
+                    && (messageQueue[0] as! InAppMessage).id == pendingTickleIds[0] as! Int64) {
+                    presentFromQueue()
+                }
             }
-        }
-
-        if (self.currentMessage != nil
-            && currentMessage!.id != (messageQueue[0] as! InAppMessage).id
-            && (messageQueue[0] as! InAppMessage).id == pendingTickleIds[0] as! Int64) {
-            presentFromQueue()
         }
     }
     
@@ -164,7 +170,10 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         self.pendingTickleIds.removeAllObjects()
         self.currentMessage = nil
       
-        if waitForViewCleanup == true {
+        if Thread.isMainThread && waitForViewCleanup == true {
+            self.destroyViews()
+        }
+        else if waitForViewCleanup == true {
             DispatchQueue.main.sync {
                 self.destroyViews()
             }
