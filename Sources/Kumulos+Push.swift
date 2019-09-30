@@ -5,6 +5,7 @@
 
 import Foundation
 import UserNotifications
+import ObjectiveC.runtime
 
 internal let KS_MESSAGE_TYPE_PUSH = 1
 
@@ -44,103 +45,6 @@ public class KSPushNotification: NSObject {
 
         return deepLink
     }
-}
-
-
-typealias kumulos_applicationDidRegisterForRemoteNotifications = @convention(c) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ deviceToken:Data) -> Void
-typealias didRegBlock = @convention(block) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ deviceToken:Data) -> Void
-typealias kumulos_applicationDidFailToRegisterForRemoteNotificaitons = @convention(c) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ error:Error) -> Void
-typealias didFailToRegBlock = @convention(block) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ error:Error) -> Void
-typealias kumulos_applicationDidReceiveRemoteNotificationFetchCompletionHandler = @convention(c) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ userInfo: [AnyHashable : Any], _ completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> Void
-typealias didReceiveBlock = @convention(block) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ userInfo: [AnyHashable : Any], _ completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> Void
-
-fileprivate var existingDidReg : IMP?
-fileprivate var existingDidFailToReg : IMP?
-fileprivate var existingDidReceive : IMP?
-
-class PushHelper {
-
-    let pushInit:Void = {
-        let klass : AnyClass = type(of: UIApplication.shared.delegate!)
-
-        // Did register push delegate
-        let didRegisterSelector = #selector(UIApplicationDelegate.application(_:didRegisterForRemoteNotificationsWithDeviceToken:))
-        let regType = NSString(string: "v@:@@").utf8String
-        let regBlock : didRegBlock = { (obj:Any, _cmd:Selector, application:UIApplication, deviceToken:Data) -> Void in
-            if let _ = existingDidReg {
-                unsafeBitCast(existingDidReg, to: kumulos_applicationDidRegisterForRemoteNotifications.self)(obj, _cmd, application, deviceToken)
-            }
-
-            Kumulos.pushRegister(deviceToken)
-        }
-        let kumulosDidRegister = imp_implementationWithBlock(unsafeBitCast(regBlock, to: AnyObject.self))
-        existingDidReg = class_replaceMethod(klass, didRegisterSelector, kumulosDidRegister, regType)
-
-        // Failed to register handler
-        let didFailToRegisterSelector = #selector(UIApplicationDelegate.application(_:didFailToRegisterForRemoteNotificationsWithError:))
-        let didFailToRegType = NSString(string: "v@:@@").utf8String
-        let didFailToRegBlock : didFailToRegBlock = { (obj:Any, _cmd:Selector, application:UIApplication, error:Error) -> Void in
-            if let _ = existingDidFailToReg {
-                unsafeBitCast(existingDidFailToReg, to: kumulos_applicationDidFailToRegisterForRemoteNotificaitons.self)(obj, _cmd, application, error)
-            }
-
-            print("Failed to register for remote notifications: \(error)")
-        }
-        let kumulosDidFailToRegister = imp_implementationWithBlock(unsafeBitCast(didFailToRegBlock, to: AnyObject.self))
-        existingDidFailToReg = class_replaceMethod(klass, didFailToRegisterSelector, kumulosDidFailToRegister, didFailToRegType)
-
-        // iOS9 did receive remote delegate
-        // iOS9+ content-available handler
-        let didReceiveSelector = #selector(UIApplicationDelegate.application(_:didReceiveRemoteNotification:fetchCompletionHandler:))
-        let receiveType = NSString(string: "v@:@@@?").utf8String
-        let didReceive : didReceiveBlock = { (obj:Any, _cmd:Selector, _ application: UIApplication, userInfo: [AnyHashable : Any], completionHandler: @escaping (UIBackgroundFetchResult) -> Void) in
-            var fetchResult : UIBackgroundFetchResult = .noData
-            let fetchBarrier = DispatchSemaphore(value: 0)
-
-            if let _ = existingDidReceive {
-                unsafeBitCast(existingDidReceive, to: kumulos_applicationDidReceiveRemoteNotificationFetchCompletionHandler.self)(obj, _cmd, application, userInfo, { (result : UIBackgroundFetchResult) in
-                    fetchResult = result
-                    fetchBarrier.signal()
-                })
-            } else {
-                fetchBarrier.signal()
-            }
-
-            if UIApplication.shared.applicationState == .inactive {
-                if #available(iOS 10, *) {
-                    // Noop (tap handler in delegate will deal with opening the URL)
-                } else {
-                    Kumulos.sharedInstance.pushHandleOpen(withUserInfo:userInfo)
-                }
-            }
-
-            let aps = userInfo["aps"] as! [AnyHashable:Any]
-            guard let contentAvailable = aps["content-available"] as? Int, contentAvailable != 1 else {
-                completionHandler(fetchResult)
-                return
-            }
-
-            Kumulos.sharedInstance.inAppHelper.sync { (result:Int) in
-                _ = fetchBarrier.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(20))
-
-                if result < 0 {
-                    fetchResult = .failed
-                } else if result > 1 {
-                    fetchResult = .newData
-                }
-                // No data case is default, allow override from other handler
-
-                completionHandler(fetchResult)
-            }
-        }
-        let kumulosDidReceive = imp_implementationWithBlock(unsafeBitCast(didReceive, to: AnyObject.self))
-        existingDidReceive = class_replaceMethod(klass, didReceiveSelector, kumulosDidReceive, receiveType)
-
-        if #available(iOS 10, *) {
-            let notificationCenterDelegate = KSUserNotificationCenterDelegate()
-            UNUserNotificationCenter.current().delegate = notificationCenterDelegate
-        }
-    }()
 }
 
 public extension Kumulos {
@@ -272,4 +176,105 @@ public extension Kumulos {
         
         return Kumulos.sharedInstance.pushNotificationProductionTokenType
     }
+}
+
+// MARK: Swizzling
+
+fileprivate var existingDidReg : IMP?
+fileprivate var existingDidFailToReg : IMP?
+fileprivate var existingDidReceive : IMP?
+
+class PushHelper {
+
+    typealias kumulos_applicationDidRegisterForRemoteNotifications = @convention(c) (_ obj:UIApplicationDelegate, _ _cmd:Selector, _ application:UIApplication, _ deviceToken:Data) -> Void
+    typealias didRegBlock = @convention(block) (_ obj:UIApplicationDelegate, _ application:UIApplication, _ deviceToken:Data) -> Void
+
+    typealias kumulos_applicationDidFailToRegisterForRemoteNotificaitons = @convention(c) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ error:Error) -> Void
+    typealias didFailToRegBlock = @convention(block) (_ obj:Any, _ application:UIApplication, _ error:Error) -> Void
+
+    typealias kumulos_applicationDidReceiveRemoteNotificationFetchCompletionHandler = @convention(c) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ userInfo: [AnyHashable : Any], _ completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> Void
+    typealias didReceiveBlock = @convention(block) (_ obj:Any, _ application:UIApplication, _ userInfo: [AnyHashable : Any], _ completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> Void
+
+    let pushInit:Void = {
+        let klass : AnyClass = type(of: UIApplication.shared.delegate!)
+
+        // Did register push delegate
+        let didRegisterSelector = #selector(UIApplicationDelegate.application(_:didRegisterForRemoteNotificationsWithDeviceToken:))
+        let meth = class_getInstanceMethod(klass, didRegisterSelector)
+        let regType = NSString(string: "v@:@@").utf8String
+        let regBlock : didRegBlock = { (obj:UIApplicationDelegate, application:UIApplication, deviceToken:Data) -> Void in
+            if let _ = existingDidReg {
+                unsafeBitCast(existingDidReg, to: kumulos_applicationDidRegisterForRemoteNotifications.self)(obj, didRegisterSelector, application, deviceToken)
+            }
+
+            Kumulos.pushRegister(deviceToken)
+        }
+        let kumulosDidRegister = imp_implementationWithBlock(regBlock as Any)
+        existingDidReg = class_replaceMethod(klass, didRegisterSelector, kumulosDidRegister, regType)
+
+        // Failed to register handler
+        let didFailToRegisterSelector = #selector(UIApplicationDelegate.application(_:didFailToRegisterForRemoteNotificationsWithError:))
+        let didFailToRegType = NSString(string: "v@:@@").utf8String
+        let didFailToRegBlock : didFailToRegBlock = { (obj:Any, application:UIApplication, error:Error) -> Void in
+            if let _ = existingDidFailToReg {
+                unsafeBitCast(existingDidFailToReg, to: kumulos_applicationDidFailToRegisterForRemoteNotificaitons.self)(obj, didFailToRegisterSelector, application, error)
+            }
+
+            print("Failed to register for remote notifications: \(error)")
+        }
+        let kumulosDidFailToRegister = imp_implementationWithBlock(didFailToRegBlock as Any)
+        existingDidFailToReg = class_replaceMethod(klass, didFailToRegisterSelector, kumulosDidFailToRegister, didFailToRegType)
+
+        // iOS9 did receive remote delegate
+        // iOS9+ content-available handler
+        let didReceiveSelector = #selector(UIApplicationDelegate.application(_:didReceiveRemoteNotification:fetchCompletionHandler:))
+        let receiveType = NSString(string: "v@:@@@?").utf8String
+        let didReceive : didReceiveBlock = { (obj:Any, _ application: UIApplication, userInfo: [AnyHashable : Any], completionHandler: @escaping (UIBackgroundFetchResult) -> Void) in
+            var fetchResult : UIBackgroundFetchResult = .noData
+            let fetchBarrier = DispatchSemaphore(value: 0)
+
+            if let _ = existingDidReceive {
+                unsafeBitCast(existingDidReceive, to: kumulos_applicationDidReceiveRemoteNotificationFetchCompletionHandler.self)(obj, didReceiveSelector, application, userInfo, { (result : UIBackgroundFetchResult) in
+                    fetchResult = result
+                    fetchBarrier.signal()
+                })
+            } else {
+                fetchBarrier.signal()
+            }
+
+            if UIApplication.shared.applicationState == .inactive {
+                if #available(iOS 10, *) {
+                    // Noop (tap handler in delegate will deal with opening the URL)
+                } else {
+                    Kumulos.sharedInstance.pushHandleOpen(withUserInfo:userInfo)
+                }
+            }
+
+            let aps = userInfo["aps"] as! [AnyHashable:Any]
+            guard let contentAvailable = aps["content-available"] as? Int, contentAvailable != 1 else {
+                completionHandler(fetchResult)
+                return
+            }
+
+            Kumulos.sharedInstance.inAppHelper.sync { (result:Int) in
+                _ = fetchBarrier.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(20))
+
+                if result < 0 {
+                    fetchResult = .failed
+                } else if result > 1 {
+                    fetchResult = .newData
+                }
+                // No data case is default, allow override from other handler
+
+                completionHandler(fetchResult)
+            }
+        }
+        let kumulosDidReceive = imp_implementationWithBlock(unsafeBitCast(didReceive, to: AnyObject.self))
+        existingDidReceive = class_replaceMethod(klass, didReceiveSelector, kumulosDidReceive, receiveType)
+
+        if #available(iOS 10, *) {
+            let notificationCenterDelegate = KSUserNotificationCenterDelegate()
+            UNUserNotificationCenter.current().delegate = notificationCenterDelegate
+        }
+    }()
 }
