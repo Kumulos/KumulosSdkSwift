@@ -61,7 +61,9 @@ open class Kumulos {
     var networkRequestsInProgress = 0
 
     fileprivate static var instance:Kumulos?
-
+    
+    internal var notificationCenter:Any?
+    
     internal static var sharedInstance:Kumulos {
         get {
             if(false == isInitialized()) {

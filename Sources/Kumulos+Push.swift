@@ -195,7 +195,7 @@ class PushHelper {
     typealias kumulos_applicationDidReceiveRemoteNotificationFetchCompletionHandler = @convention(c) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ userInfo: [AnyHashable : Any], _ completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> Void
     typealias didReceiveBlock = @convention(block) (_ obj:Any, _ application:UIApplication, _ userInfo: [AnyHashable : Any], _ completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> Void
 
-    let pushInit:Void = {
+    lazy var pushInit:Void = {
         let klass : AnyClass = type(of: UIApplication.shared.delegate!)
 
         // Did register push delegate
@@ -273,8 +273,10 @@ class PushHelper {
         existingDidReceive = class_replaceMethod(klass, didReceiveSelector, kumulosDidReceive, receiveType)
 
         if #available(iOS 10, *) {
-            let notificationCenterDelegate = KSUserNotificationCenterDelegate()
-            UNUserNotificationCenter.current().delegate = notificationCenterDelegate
+            let delegate = KSUserNotificationCenterDelegate()
+            
+            Kumulos.sharedInstance.notificationCenter = delegate
+            UNUserNotificationCenter.current().delegate = delegate
         }
     }()
 }
