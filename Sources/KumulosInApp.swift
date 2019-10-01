@@ -8,7 +8,7 @@
 import Foundation
 import CoreData
 
-public class InAppInboxItem: NSObject {
+public class InAppInboxItem {
     internal(set) open var id: Int64
     internal(set) open var title: String
     internal(set) open var subtitle: String
@@ -19,10 +19,12 @@ public class InAppInboxItem: NSObject {
      init(entity: InAppMessageEntity) {
         id = entity.id
         
-        //- TODO not sure how to access these from the entity?
-        title = "title"
-        subtitle = "sub"
-        
+        let inboxConfig = entity.inboxConfig as! [String:Any]
+        title = inboxConfig["title"] as! String
+        subtitle = inboxConfig["subtitle"] as! String
+        availableFrom = entity.inboxFrom as Date?
+        availableTo = entity.inboxTo as Date?
+        dismissedAt  = entity.dismissedAt as Date?
    }
     
     public func isAvailable() -> Bool {
