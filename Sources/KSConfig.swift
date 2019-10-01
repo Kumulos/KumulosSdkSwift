@@ -9,7 +9,7 @@
 import Foundation
 
 open class KSConfig: NSObject {
-    fileprivate init(apiKey: String, secretKey: String, enableCrash: Bool, sessionIdleTimeout: UInt, inAppConsentStrategy: InAppConsentStrategy, inAppDeepLinkHandlerBlock : InAppDeepLinkHandlerBlock?, pushOpenedHandlerBlock : PushOpenedHandlerBlock?) {
+    fileprivate init(apiKey: String, secretKey: String, enableCrash: Bool, sessionIdleTimeout: UInt, inAppConsentStrategy: InAppConsentStrategy, inAppDeepLinkHandlerBlock : InAppDeepLinkHandlerBlock?, pushOpenedHandlerBlock : PushOpenedHandlerBlock?, pushReceivedInForegroundHandlerBlock : Any?) {
         _apiKey = apiKey
         _secretKey = secretKey
         _enableCrash = enableCrash
@@ -17,6 +17,7 @@ open class KSConfig: NSObject {
         _inAppConsentStrategy = inAppConsentStrategy
         _inAppDeepLinkHandlerBlock = inAppDeepLinkHandlerBlock
         _pushOpenedHandlerBlock = pushOpenedHandlerBlock
+        _pushReceivedInForegroundHandlerBlock = pushReceivedInForegroundHandlerBlock
     }
     
     private var _apiKey: String
@@ -26,6 +27,10 @@ open class KSConfig: NSObject {
     private var _inAppConsentStrategy : InAppConsentStrategy
     private var _inAppDeepLinkHandlerBlock : InAppDeepLinkHandlerBlock?
     private var _pushOpenedHandlerBlock : PushOpenedHandlerBlock?
+    
+    
+    private var _pushReceivedInForegroundHandlerBlock : Any?
+    
     
     var apiKey: String {
         get { return _apiKey }
@@ -60,6 +65,13 @@ open class KSConfig: NSObject {
             return _pushOpenedHandlerBlock
         }
     }
+    
+    @available(iOS 10.0, *)
+    var pushReceivedInForegroundHandlerBlock: PushReceivedInForegroundHandlerBlock? {
+        get {
+            return _pushReceivedInForegroundHandlerBlock as? PushReceivedInForegroundHandlerBlock
+        }
+    }
 }
 
 open class KSConfigBuilder: NSObject {
@@ -70,6 +82,7 @@ open class KSConfigBuilder: NSObject {
     private var _inAppConsentStrategy = InAppConsentStrategy.NotEnabled
     private var _inAppDeepLinkHandlerBlock: InAppDeepLinkHandlerBlock?
     private var _pushOpenedHandlerBlock: PushOpenedHandlerBlock?
+    private var _pushReceivedInForegroundHandlerBlock: Any?
     
     public init(apiKey: String, secretKey: String) {
         _apiKey = apiKey
@@ -103,7 +116,13 @@ open class KSConfigBuilder: NSObject {
         return self
     }
     
+    @available(iOS 10.0, *)
+    public func setPushReceivedInForegroundHandlerBlock(pushReceivedInForegroundHandlerBlock: @escaping PushReceivedInForegroundHandlerBlock) -> KSConfigBuilder {
+        _pushReceivedInForegroundHandlerBlock = pushReceivedInForegroundHandlerBlock
+        return self
+    }
+    
     public func build() -> KSConfig {
-        return KSConfig(apiKey: _apiKey, secretKey: _secretKey, enableCrash: _enableCrash, sessionIdleTimeout: _sessionIdleTimeout, inAppConsentStrategy: _inAppConsentStrategy, inAppDeepLinkHandlerBlock: _inAppDeepLinkHandlerBlock, pushOpenedHandlerBlock: _pushOpenedHandlerBlock)
+        return KSConfig(apiKey: _apiKey, secretKey: _secretKey, enableCrash: _enableCrash, sessionIdleTimeout: _sessionIdleTimeout, inAppConsentStrategy: _inAppConsentStrategy, inAppDeepLinkHandlerBlock: _inAppDeepLinkHandlerBlock, pushOpenedHandlerBlock: _pushOpenedHandlerBlock, pushReceivedInForegroundHandlerBlock: _pushReceivedInForegroundHandlerBlock)
     }
 }

@@ -12,7 +12,13 @@ import UserNotifications
 class KSUserNotificationCenterDelegate : NSObject, UNUserNotificationCenterDelegate {
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        completionHandler(.alert)
+        if (Kumulos.sharedInstance.config.pushReceivedInForegroundHandlerBlock != nil) {
+            let push = KSPushNotification.init(userInfo: notification.request.content.userInfo)
+            Kumulos.sharedInstance.config.pushReceivedInForegroundHandlerBlock?(push, completionHandler);
+        }
+        else {
+            completionHandler(.alert)
+       }
     }
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
