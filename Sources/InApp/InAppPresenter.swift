@@ -97,24 +97,14 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         }
 
         messageQueueLock.signal()
-
-        if Thread.isMainThread {
+      
+        DispatchQueue.main.async {
             self.initViews()
             
             if (self.currentMessage != nil
-                && currentMessage!.id != (messageQueue[0] as! InAppMessage).id
-                && (messageQueue[0] as! InAppMessage).id == pendingTickleIds[0] as! Int64) {
-                presentFromQueue()
-            }
-        } else {
-            DispatchQueue.main.sync {
-                self.initViews()
-                
-                if (self.currentMessage != nil
-                    && currentMessage!.id != (messageQueue[0] as! InAppMessage).id
-                    && (messageQueue[0] as! InAppMessage).id == pendingTickleIds[0] as! Int64) {
-                    presentFromQueue()
-                }
+                && self.currentMessage!.id != (self.messageQueue[0] as! InAppMessage).id
+                && (self.messageQueue[0] as! InAppMessage).id == self.pendingTickleIds[0] as! Int64) {
+                self.presentFromQueue()
             }
         }
     }
@@ -198,7 +188,6 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         if #available(iOS 13.0, *) {
             window?.windowScene = UIApplication.shared
                 .connectedScenes
-                .filter { $0.activationState == .foregroundActive }
                 .first as? UIWindowScene
         } else {
             // Fallback on earlier versions
