@@ -545,9 +545,7 @@ internal class InAppHelper {
         if (!inAppEnabled() || deepLink == nil){
             return;
         }
-        
-        let isActive = UIApplication.shared.applicationState == .active
-        
+               
         DispatchQueue.global(qos: .default).async(execute: {
             let data = deepLink!["data"] as! [AnyHashable:Any];
             let inAppPartId:Int = data["id"] as! Int
@@ -556,10 +554,10 @@ internal class InAppHelper {
             defer { objc_sync_exit(self.pendingTickleIds) }
             
             self.pendingTickleIds.add(inAppPartId)
-            if (isActive){
-                let messagesToPresent = self.getMessagesToPresent([])
-                self.presenter.queueMessagesForPresentation(messages: messagesToPresent, tickleIds: self.pendingTickleIds)
-            }
+       
+            let messagesToPresent = self.getMessagesToPresent([])
+            self.presenter.queueMessagesForPresentation(messages: messagesToPresent, tickleIds: self.pendingTickleIds)
+
         })
     }
     
