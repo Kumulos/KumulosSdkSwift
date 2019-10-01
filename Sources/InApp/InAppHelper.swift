@@ -15,7 +15,7 @@ public enum InAppMessagePresentationResult : String {
 }
 
 typealias kumulos_applicationPerformFetchWithCompletionHandler = @convention(c) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> Void;
-typealias fetchBlock = @convention(block) (_ obj:Any, _ _cmd:Selector, _ application:UIApplication, _ completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> Void;
+typealias fetchBlock = @convention(block) (_ obj:Any, _ application:UIApplication, _ completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> Void;
 private var ks_existingBackgroundFetchDelegate: IMP? = nil
 
 internal class InAppHelper {
@@ -107,12 +107,12 @@ internal class InAppHelper {
         // Perform background fetch
         let performFetchSelector = #selector(UIApplicationDelegate.application(_:performFetchWithCompletionHandler:))
         let fetchType = NSString(string: "v@:@@?").utf8String
-        let block : fetchBlock = { (obj:Any, _cmd:Selector, application:UIApplication, completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> Void in
+        let block : fetchBlock = { (obj:Any, application:UIApplication, completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> Void in
             var fetchResult : UIBackgroundFetchResult = .noData
             let fetchBarrier = DispatchSemaphore(value: 0)
 
             if let _ = ks_existingBackgroundFetchDelegate {
-                unsafeBitCast(ks_existingBackgroundFetchDelegate, to: kumulos_applicationPerformFetchWithCompletionHandler.self)(obj, _cmd, application, { (result : UIBackgroundFetchResult) in
+                unsafeBitCast(ks_existingBackgroundFetchDelegate, to: kumulos_applicationPerformFetchWithCompletionHandler.self)(obj, performFetchSelector, application, { (result : UIBackgroundFetchResult) in
                     fetchResult = result
                     fetchBarrier.signal()
                 })
