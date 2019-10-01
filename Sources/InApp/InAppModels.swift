@@ -24,7 +24,6 @@ class InAppMessageEntity : NSManagedObject {
 public class InAppMessage: NSObject {
     internal(set) open var id: Int64
     internal(set) open var updatedAt: NSDate
-    internal(set) open var presentedWhen: InAppPresented//??? this not set in Objective-C
     internal(set) open var content: NSDictionary
     internal(set) open var data : NSDictionary?
     internal(set) open var badgeConfig : NSDictionary?
@@ -34,16 +33,6 @@ public class InAppMessage: NSObject {
     init(entity: InAppMessageEntity) {
         id = entity.id
         updatedAt = entity.updatedAt
-        presentedWhen = InAppPresented.NEVER
-        
-        if (entity.presentedWhen == InAppPresented.IMMEDIATELY.rawValue) {
-            presentedWhen = InAppPresented.IMMEDIATELY
-        }
-        
-        if (entity.presentedWhen == InAppPresented.NEXT_OPEN.rawValue){
-            presentedWhen = InAppPresented.NEXT_OPEN
-        }
-        
         content = entity.content
         data = entity.data
         badgeConfig = entity.badgeConfig
@@ -58,10 +47,4 @@ public class InAppMessage: NSObject {
 
         return super.isEqual(object)
     }
-
-    //
-    //    - (NSUInteger)hash
-    //    {
-    //    return [self.id hash];
-    //    }
 }
