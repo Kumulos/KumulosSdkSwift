@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import UserNotifications
 
 // MARK: delegate protocol
 /*!

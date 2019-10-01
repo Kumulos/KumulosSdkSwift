@@ -36,9 +36,9 @@ public class InAppInboxItem: NSObject {
     }
 }
 
-public extension Kumulos {
-    static func updateConsent(forUser consentGiven: Bool) {
-        if self.inAppConsentStrategy != InAppConsentStrategy.ExplicitByUser {
+public class KumulosInApp {
+    public static func updateConsent(forUser consentGiven: Bool) {
+        if Kumulos.inAppConsentStrategy != InAppConsentStrategy.ExplicitByUser {
             NSException(name:NSExceptionName(rawValue: "Kumulos: Invalid In-app consent strategy"), reason:"You can only manage in-app messaging consent when the feature is enabled and strategy is set to KSInAppConsentStrategyExplicitByUser", userInfo:nil).raise()
             
             return
@@ -47,7 +47,7 @@ public extension Kumulos {
         Kumulos.sharedInstance.inAppHelper.updateUserConsent(consentGiven: consentGiven)
     }
     
-    static func getInboxItems() -> [InAppInboxItem]
+    public static func getInboxItems() -> [InAppInboxItem]
      {
         if Kumulos.sharedInstance.inAppHelper.messagesContext == nil {
             return []
@@ -91,7 +91,7 @@ public extension Kumulos {
         return results
     }
     
-    static func presentInboxMessage(item: InAppInboxItem) -> InAppMessagePresentationResult {
+    public static func presentInboxMessage(item: InAppInboxItem) -> InAppMessagePresentationResult {
         if item.isAvailable() == false {
             return InAppMessagePresentationResult.EXPIRED
         }

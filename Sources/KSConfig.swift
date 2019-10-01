@@ -106,18 +106,18 @@ open class KSConfigBuilder: NSObject {
         return self
     }
     
-    public func setInAppDeepLinkHandlerBlock(inAppDeepLinkHandlerBlock: @escaping InAppDeepLinkHandlerBlock) -> KSConfigBuilder {
+    public func setInAppDeepLinkHandler(inAppDeepLinkHandlerBlock: @escaping InAppDeepLinkHandlerBlock) -> KSConfigBuilder {
         _inAppDeepLinkHandlerBlock = inAppDeepLinkHandlerBlock
         return self
     }
     
-    public func setPushOpenedHandlerBlock(pushOpenedHandlerBlock: @escaping PushOpenedHandlerBlock) -> KSConfigBuilder {
+    public func setPushOpenedHandler(pushOpenedHandlerBlock: @escaping PushOpenedHandlerBlock) -> KSConfigBuilder {
         _pushOpenedHandlerBlock = pushOpenedHandlerBlock
         return self
     }
     
     @available(iOS 10.0, *)
-    public func setPushReceivedInForegroundHandlerBlock(pushReceivedInForegroundHandlerBlock: @escaping PushReceivedInForegroundHandlerBlock) -> KSConfigBuilder {
+    public func setPushReceivedInForegroundHandler(pushReceivedInForegroundHandlerBlock: @escaping PushReceivedInForegroundHandlerBlock) -> KSConfigBuilder {
         _pushReceivedInForegroundHandlerBlock = pushReceivedInForegroundHandlerBlock
         return self
     }
