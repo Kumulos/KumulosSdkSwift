@@ -184,14 +184,14 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         window = UIWindow.init(frame: UIScreen.main.bounds)
         window!.windowLevel = UIWindow.Level.alert
         window!.rootViewController = UIViewController()
-                      
+              
+        #if swift(>=5.1)
         if #available(iOS 13.0, *) {
             window?.windowScene = UIApplication.shared
                 .connectedScenes
                 .first as? UIWindowScene
-        } else {
-            // Fallback on earlier versions
         }
+        #endif
              
         let frame = UIView.init(frame: window!.frame)
         self.frame = frame
