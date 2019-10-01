@@ -96,7 +96,7 @@ internal class InAppHelper {
             sync(onComplete)
         #else
             let lastSyncTime = UserDefaults.standard.object(forKey: KUMULOS_MESSAGES_LAST_SYNC_TIME) as? Date
-            if lastSyncTime != nil && lastSyncTime?.timeIntervalSinceNow < -3600 {
+            if lastSyncTime != nil && lastSyncTime!.timeIntervalSinceNow < -3600 as Double {
                 sync(onComplete)
             }
         #endif
