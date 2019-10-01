@@ -259,10 +259,7 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         
         frame.addSubview(loadingSpinner)
 
-        let horizontalConstraint = NSLayoutConstraint(item: loadingSpinner, attribute: .centerX, relatedBy: .equal, toItem: frame, attribute: .centerX, multiplier: 1, constant: 0)
-        let verticalConstraint = NSLayoutConstraint(item: loadingSpinner, attribute: .centerY, relatedBy: .equal, toItem: frame, attribute: .centerY, multiplier: 1, constant: 0)
-        
-        frame.addConstraints([horizontalConstraint,verticalConstraint])
+        loadingSpinner.center = frame.center
         frame.bringSubviewToFront(loadingSpinner)
     }
 
