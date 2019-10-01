@@ -251,7 +251,7 @@ class PushHelper {
             }
 
             let aps = userInfo["aps"] as! [AnyHashable:Any]
-            guard let contentAvailable = aps["content-available"] as? Int, contentAvailable != 1 else {
+            guard let contentAvailable = aps["content-available"] as? Int, contentAvailable == 1 else {
                 completionHandler(fetchResult)
                 return
             }
