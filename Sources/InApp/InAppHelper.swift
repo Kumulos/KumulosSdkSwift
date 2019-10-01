@@ -22,6 +22,7 @@ internal class InAppHelper {
    
     private var presenter: InAppPresenter
     private var pendingTickleIds: NSMutableOrderedSet = NSMutableOrderedSet(capacity: 1)
+    private var registered : Bool = false
     
     var messagesContext: NSManagedObjectContext? = nil;
     
@@ -194,6 +195,12 @@ internal class InAppHelper {
         if (!inAppEnabled()) {
             return;
         }
+        
+        if registered == true {
+            return
+        }
+        
+        registered = true
         
          _ = setupSyncTask
         NotificationCenter.default.addObserver(self, selector: #selector(appBecameActive), name: UIApplication.didBecomeActiveNotification, object: nil)
