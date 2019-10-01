@@ -27,10 +27,7 @@ open class KSConfig: NSObject {
     private var _inAppConsentStrategy : InAppConsentStrategy
     private var _inAppDeepLinkHandlerBlock : InAppDeepLinkHandlerBlock?
     private var _pushOpenedHandlerBlock : PushOpenedHandlerBlock?
-    
-    
     private var _pushReceivedInForegroundHandlerBlock : Any?
-    
     
     var apiKey: String {
         get { return _apiKey }
