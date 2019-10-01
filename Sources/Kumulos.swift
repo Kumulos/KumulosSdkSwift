@@ -88,8 +88,8 @@ open class Kumulos {
     fileprivate(set) var secretKey: String
     fileprivate(set) var inAppConsentStrategy:InAppConsentStrategy = InAppConsentStrategy.NotEnabled
     
-    public static var inAppConsentStrategy : InAppConsentStrategy {
-        get{
+    internal static var inAppConsentStrategy : InAppConsentStrategy {
+        get {
             return sharedInstance.inAppConsentStrategy
         }
     }
