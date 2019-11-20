@@ -33,13 +33,13 @@ public class InAppMessage: NSObject {
     internal(set) open var dismissedAt : NSDate?
     
     init(entity: InAppMessageEntity) {
-        id = entity.id
-        updatedAt = entity.updatedAt
-        content = entity.content
-        data = entity.data
-        badgeConfig = entity.badgeConfig
-        inboxConfig = entity.inboxConfig
-        dismissedAt = entity.dismissedAt
+        id = Int64(entity.id)
+        updatedAt = entity.updatedAt.copy()
+        content = entity.content.copy()
+        data = entity.data?.copy()
+        badgeConfig = entity.badgeConfig?.copy()
+        inboxConfig = entity.inboxConfig?.copy()
+        dismissedAt = entity.dismissedAt?.copy()
     }
 
     public override func isEqual(_ object: Any?) -> Bool {
