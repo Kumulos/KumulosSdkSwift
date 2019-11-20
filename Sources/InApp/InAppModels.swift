@@ -32,12 +32,12 @@ public class InAppMessage: NSObject {
     
     init(entity: InAppMessageEntity) {
         id = Int64(entity.id)
-        updatedAt = entity.updatedAt.copy()
-        content = entity.content.copy()
-        data = entity.data?.copy()
-        badgeConfig = entity.badgeConfig?.copy()
-        inboxConfig = entity.inboxConfig?.copy()
-        dismissedAt = entity.dismissedAt?.copy()
+        updatedAt = entity.updatedAt.copy() as! NSDate
+        content = entity.content.copy() as! NSDictionary
+        data = entity.data?.copy() as? NSDictionary
+        badgeConfig = entity.badgeConfig?.copy() as? NSDictionary
+        inboxConfig = entity.inboxConfig?.copy() as? NSDictionary
+        dismissedAt = entity.dismissedAt?.copy() as? NSDate
     }
 
     public override func isEqual(_ object: Any?) -> Bool {
