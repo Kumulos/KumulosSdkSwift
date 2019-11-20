@@ -19,6 +19,8 @@ class InAppMessageEntity : NSManagedObject {
     @NSManaged var dismissedAt : NSDate?
     @NSManaged var inboxFrom : NSDate?
     @NSManaged var inboxTo : NSDate?
+    @NSManaged var sentAt : NSDate?//TODO: not optional with default value 1970
+    @NSManaged var ttlHours : NSNumber?
 }
 
 public class InAppMessage: NSObject {

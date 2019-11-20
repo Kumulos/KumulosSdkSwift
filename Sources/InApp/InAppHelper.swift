@@ -369,6 +369,9 @@ internal class InAppHelper {
                     model.inboxTo = dateParser.date(from: inbox["to"] as? String ?? "") as NSDate?
                 }
                 
+                model.sentAt = dateParser.date(from: message["sentAt"] as! String)! as NSDate
+                model.ttlHours = message["ttlHours"] as? NSNumber
+                
                 if (model.updatedAt.timeIntervalSince1970 > lastSyncTime.timeIntervalSince1970) {
                     lastSyncTime = model.updatedAt
                 }
@@ -395,7 +398,9 @@ internal class InAppHelper {
         let fetchRequest:NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "Message")
         fetchRequest.includesPendingChanges = true
         
-        let predicate: NSPredicate? = NSPredicate(format: "((dismissedAt != nil AND inboxConfig = nil) OR (inboxTo != nil AND inboxTo < %@))", NSDate())
+        let messageExpiredCondition = "(ttlHours != nil AND (CAST(CAST(sentAt, 'NSNumber') + (ttlHours * 3600), 'NSDate') <= %@))"
+        let predicate: NSPredicate? =
+            NSPredicate(format: "(inboxConfig = nil AND dismissedAt != nil) OR (inboxConfig = nil AND "+messageExpiredCondition+") OR (inboxTo != nil AND inboxTo < %@ AND (dismissedAt != nil OR "+messageExpiredCondition+"))", NSDate(), NSDate())
         fetchRequest.predicate = predicate
         
         var toEvict: [InAppMessageEntity]
@@ -423,7 +428,7 @@ internal class InAppHelper {
             fetchRequest.includesPendingChanges = false
             fetchRequest.returnsObjectsAsFaults = false
 
-            let predicate = NSPredicate(format: "((presentedWhen IN %@) OR (id IN %@)) AND (dismissedAt = nil)", presentedWhenOptions, self.pendingTickleIds)
+            let predicate = NSPredicate(format: "((presentedWhen IN %@) OR (id IN %@)) AND (dismissedAt = nil AND (ttlHours = nil OR (CAST(CAST(sentAt, 'NSNumber') + (ttlHours * 3600), 'NSDate') > %@)))", presentedWhenOptions, self.pendingTickleIds, NSDate())
             fetchRequest.predicate = predicate
 
             let sortDescriptor = NSSortDescriptor(key: "updatedAt", ascending: true)
@@ -655,6 +660,18 @@ internal class InAppHelper {
         dismissedAt.attributeType = NSAttributeType.dateAttributeType;
         dismissedAt.isOptional = true;
         messageProps.append(dismissedAt);
+        
+        let sentAt = NSAttributeDescription();
+        sentAt.name = "sentAt";
+        sentAt.attributeType = NSAttributeType.dateAttributeType;
+        sentAt.isOptional = false;
+        messageProps.append(sentAt);
+        
+        let ttlHours = NSAttributeDescription();
+        ttlHours.name = "ttlHours";
+        ttlHours.attributeType = NSAttributeType.integer32AttributeType;
+        ttlHours.isOptional = true;
+        messageProps.append(ttlHours);
         
         messageEntity.properties = messageProps;
         
