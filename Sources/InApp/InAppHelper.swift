@@ -398,9 +398,8 @@ internal class InAppHelper {
         fetchRequest.includesPendingChanges = true
         
         let messageExpiredCondition = "(expiresAt != nil AND expiresAt <= %@)"
-       
         let predicate: NSPredicate? =
-            NSPredicate(format: "(inboxConfig = nil AND dismissedAt != nil) OR (inboxConfig = nil AND "+messageExpiredCondition+") OR (inboxTo != nil AND inboxTo < %@ AND (dismissedAt != nil OR "+messageExpiredCondition+"))", NSDate(), NSDate())
+            NSPredicate(format: "(inboxConfig = nil AND dismissedAt != nil) OR (inboxConfig = nil AND "+messageExpiredCondition+") OR (inboxTo != nil AND inboxTo < %@ AND (dismissedAt != nil OR "+messageExpiredCondition+"))", NSDate(), NSDate(), NSDate())
         fetchRequest.predicate = predicate
         
         var toEvict: [InAppMessageEntity]
