@@ -594,7 +594,7 @@ internal class InAppHelper {
         messageEntity.managedObjectClassName = NSStringFromClass(InAppMessageEntity.self);
         
         var messageProps: [NSAttributeDescription] = [];
-        messageProps.reserveCapacity(10);
+        messageProps.reserveCapacity(11);
         
         let partId = NSAttributeDescription();
         partId.name = "id";
