@@ -672,7 +672,8 @@ internal class InAppHelper {
                 
         return model;
     }
-    
+
+    @objc
     class KSJsonValueTransformer: ValueTransformer {
         override class func transformedValueClass() -> AnyClass {
             return NSDictionary.self
