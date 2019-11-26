@@ -21,6 +21,8 @@
 		128EF6F0233B6FF6006C7A71 /* KSUserNotificationCenterDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 128EF6EF233B6FF6006C7A71 /* KSUserNotificationCenterDelegate.swift */; };
 		129372092006355E00EBC8F4 /* Kumulos+Analytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 129372082006355E00EBC8F4 /* Kumulos+Analytics.swift */; };
 		1293720B2006378D00EBC8F4 /* AnalyticsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1293720A2006378D00EBC8F4 /* AnalyticsHelper.swift */; };
+		12985A67238D6FB600671FBF /* KumulosSDKExtension.h in Headers */ = {isa = PBXBuildFile; fileRef = 12985A65238D6FB600671FBF /* KumulosSDKExtension.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		12985A6A238D701500671FBF /* KumulosNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12985A69238D701500671FBF /* KumulosNotificationService.swift */; };
 		12A6BD871FCD7A7500D59D37 /* KSConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12A6BD861FCD7A7400D59D37 /* KSConfig.swift */; };
 		12B30580200906000036498F /* KSCrash.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 12937235200671EE00EBC8F4 /* KSCrash.framework */; };
 		6F469D1C205BCE720069D788 /* Kumulos+Engage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F469D1B205BCE720069D788 /* Kumulos+Engage.swift */; };
@@ -54,6 +56,10 @@
 		129372082006355E00EBC8F4 /* Kumulos+Analytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Kumulos+Analytics.swift"; path = "Sources/Kumulos+Analytics.swift"; sourceTree = "<group>"; };
 		1293720A2006378D00EBC8F4 /* AnalyticsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AnalyticsHelper.swift; path = Sources/AnalyticsHelper.swift; sourceTree = "<group>"; };
 		12937235200671EE00EBC8F4 /* KSCrash.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = KSCrash.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		12985A5A238D6F3100671FBF /* KumulosSDKExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = KumulosSDKExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		12985A65238D6FB600671FBF /* KumulosSDKExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KumulosSDKExtension.h; sourceTree = "<group>"; };
+		12985A66238D6FB600671FBF /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		12985A69238D701500671FBF /* KumulosNotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KumulosNotificationService.swift; sourceTree = "<group>"; };
 		12991B862007C2160000D492 /* KSCrash.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = KSCrash.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		12A6BD861FCD7A7400D59D37 /* KSConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = KSConfig.swift; path = Sources/KSConfig.swift; sourceTree = "<group>"; };
 		12F1E5CF2007C16E005151D5 /* KSCrash.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = KSCrash.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -75,6 +81,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		12985A57238D6F3100671FBF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DB481C161D3BC9D30021C627 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -109,6 +122,7 @@
 		127B22CD1D9BE58800D9C94B /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				12985A64238D6FB600671FBF /* Extension */,
 				B625D071233A7A17003AA551 /* InApp */,
 				6F469D1B205BCE720069D788 /* Kumulos+Engage.swift */,
 				127B22CE1D9BE59E00D9C94B /* CwlSysctl.swift */,
@@ -135,6 +149,17 @@
 			name = Sources;
 			sourceTree = "<group>";
 		};
+		12985A64238D6FB600671FBF /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+				12985A65238D6FB600671FBF /* KumulosSDKExtension.h */,
+				12985A66238D6FB600671FBF /* Info.plist */,
+				12985A69238D701500671FBF /* KumulosNotificationService.swift */,
+			);
+			name = Extension;
+			path = Sources/Extension;
+			sourceTree = "<group>";
+		};
 		B625D071233A7A17003AA551 /* InApp */ = {
 			isa = PBXGroup;
 			children = (
@@ -159,6 +184,7 @@
 			isa = PBXGroup;
 			children = (
 				DB481C1A1D3BC9D30021C627 /* KumulosSDK.framework */,
+				12985A5A238D6F3100671FBF /* KumulosSDKExtension.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -166,6 +192,14 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		12985A55238D6F3100671FBF /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				12985A67238D6FB600671FBF /* KumulosSDKExtension.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DB481C171D3BC9D30021C627 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -178,6 +212,24 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		12985A59238D6F3100671FBF /* KumulosSDKExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 12985A61238D6F3100671FBF /* Build configuration list for PBXNativeTarget "KumulosSDKExtension" */;
+			buildPhases = (
+				12985A55238D6F3100671FBF /* Headers */,
+				12985A56238D6F3100671FBF /* Sources */,
+				12985A57238D6F3100671FBF /* Frameworks */,
+				12985A58238D6F3100671FBF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = KumulosSDKExtension;
+			productName = KumulosSDKExtension;
+			productReference = 12985A5A238D6F3100671FBF /* KumulosSDKExtension.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 		DB481C191D3BC9D30021C627 /* KumulosSDK */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = DB481C2E1D3BC9D30021C627 /* Build configuration list for PBXNativeTarget "KumulosSDK" */;
@@ -206,6 +258,11 @@
 				LastUpgradeCheck = 1110;
 				ORGANIZATIONNAME = Kumulos;
 				TargetAttributes = {
+					12985A59238D6F3100671FBF = {
+						CreatedOnToolsVersion = 11.1;
+						LastSwiftMigration = 1110;
+						ProvisioningStyle = Automatic;
+					};
 					DB481C191D3BC9D30021C627 = {
 						CreatedOnToolsVersion = 7.3.1;
 						LastSwiftMigration = 1020;
@@ -226,11 +283,19 @@
 			projectRoot = "";
 			targets = (
 				DB481C191D3BC9D30021C627 /* KumulosSDK */,
+				12985A59238D6F3100671FBF /* KumulosSDKExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		12985A58238D6F3100671FBF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DB481C181D3BC9D30021C627 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -241,6 +306,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		12985A56238D6F3100671FBF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				12985A6A238D701500671FBF /* KumulosNotificationService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DB481C151D3BC9D30021C627 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -272,6 +345,69 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		12985A5F238D6F3100671FBF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = Sources/Extension/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MARKETING_VERSION = 7.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kumulos.swift.KumulosSDKExtension;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		12985A60238D6F3100671FBF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = Sources/Extension/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MARKETING_VERSION = 7.0.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kumulos.swift.KumulosSDKExtension;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		DB481C2C1D3BC9D30021C627 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -404,6 +540,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MARKETING_VERSION = 7.0.0;
 				OTHER_LDFLAGS = "-ObjC";
 				OTHER_SWIFT_FLAGS = "-DDEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.kumulos.swift;
@@ -431,6 +568,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MARKETING_VERSION = 7.0.0;
 				OTHER_LDFLAGS = "-ObjC";
 				OTHER_SWIFT_FLAGS = "-DRELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.kumulos.swift;
@@ -444,6 +582,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		12985A61238D6F3100671FBF /* Build configuration list for PBXNativeTarget "KumulosSDKExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				12985A5F238D6F3100671FBF /* Debug */,
+				12985A60238D6F3100671FBF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		DB481C141D3BC9D30021C627 /* Build configuration list for PBXProject "KumulosSDK" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
