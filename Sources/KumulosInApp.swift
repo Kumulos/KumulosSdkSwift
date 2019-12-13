@@ -16,17 +16,19 @@ public class InAppInboxItem {
     internal(set) open var availableTo: Date?
     internal(set) open var dismissedAt : Date?
     
-     init(entity: InAppMessageEntity) {
-        id = entity.id
-        
-        let inboxConfig = entity.inboxConfig as! [String:Any]
+    init(entity: InAppMessageEntity) {
+        id = Int64(entity.id)
+
+        let inboxConfig = entity.inboxConfig?.copy() as! [String:Any]
+
         title = inboxConfig["title"] as! String
         subtitle = inboxConfig["subtitle"] as! String
-        availableFrom = entity.inboxFrom as Date?
-        availableTo = entity.inboxTo as Date?
-        dismissedAt  = entity.dismissedAt as Date?
-   }
-    
+
+        availableFrom = entity.inboxFrom?.copy() as? Date
+        availableTo = entity.inboxTo?.copy() as? Date
+        dismissedAt = entity.dismissedAt?.copy() as? Date
+    }
+
     public func isAvailable() -> Bool {
         if (self.availableFrom != nil && self.availableFrom!.timeIntervalSinceNow > 0) {
             return false;
