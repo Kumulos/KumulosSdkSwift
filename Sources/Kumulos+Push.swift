@@ -16,8 +16,15 @@ public class KSPushNotification: NSObject {
     internal(set) open var aps: [AnyHashable:Any]
     internal(set) open var data : [AnyHashable:Any]
     internal(set) open var url: URL?
+    internal(set) open var actionIdentifier: String
 
-    init(userInfo: [AnyHashable:Any]) {
+    init(userInfo: [AnyHashable:Any], response: UNNotificationResponse?) {
+        if (response != nil) {
+            actionIdentifier = response!.actionIdentifier
+        } else {
+            actionIdentifier = ""
+        }
+        
         let custom = userInfo["custom"] as! [AnyHashable:Any]
         data = custom["a"] as! [AnyHashable:Any]
 
@@ -123,12 +130,13 @@ public extension Kumulos {
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_OPENED, properties:params)
     }
 
-    internal func pushHandleOpen(withUserInfo: [AnyHashable: Any]?) {
+    //FIXME? - duplicate this function without the
+    internal func pushHandleOpen(withUserInfo: [AnyHashable: Any]?, response: UNNotificationResponse?) {
         guard let userInfo = withUserInfo else {
             return
         }
-
-        let notification = KSPushNotification(userInfo: userInfo)
+        
+        let notification = KSPushNotification(userInfo: userInfo, response: response)
         Kumulos.pushTrackOpen(notification: notification)
 
         // Handle URL pushes
@@ -247,7 +255,7 @@ class PushHelper {
                 if #available(iOS 10, *) {
                     // Noop (tap handler in delegate will deal with opening the URL)
                 } else {
-                    Kumulos.sharedInstance.pushHandleOpen(withUserInfo:userInfo)
+                    Kumulos.sharedInstance.pushHandleOpen(withUserInfo:userInfo, response: nil)
                 }
             }
 

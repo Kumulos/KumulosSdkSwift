@@ -18,6 +18,16 @@ public class KumulosNotificationService {
         let bestAttemptContent =  (request.content.mutableCopy() as! UNMutableNotificationContent)
 
         let userInfo = request.content.userInfo
+        
+        let custom = userInfo["custom"] as! [AnyHashable:Any]
+        let data = custom["a"] as! [AnyHashable:Any]
+
+        let buttons = data["k.buttons"] as? NSArray
+        
+        if (buttons != nil && bestAttemptContent.categoryIdentifier == "") {
+            addButtons(bestAttemptContent: bestAttemptContent, buttons: buttons!)
+        }
+        
         let attachments = userInfo["attachments"] as? [AnyHashable : Any]
         let pictureUrl = attachments?["pictureUrl"] as? String
 
@@ -43,6 +53,38 @@ public class KumulosNotificationService {
 
     }
 
+    class func addButtons(bestAttemptContent: UNMutableNotificationContent, buttons: NSArray) {
+        if (buttons.count == 0) {
+            return;
+        }
+        
+        let actionArray = NSMutableArray()
+        
+        for button in buttons {
+            let buttonDict = button as! [AnyHashable:Any]
+            
+            //TODO: Should be a string in dict - update API
+            let id = buttonDict["id"] as! NSNumber
+            
+            let text = buttonDict["text"] as! String
+            
+            let action = UNNotificationAction(identifier: id.stringValue, title: text, options: .foreground)
+            actionArray.add(action);
+        }
+        
+        //TODO: Read / extend category
+        
+        let categoryIdentifer = "my-cat-1";
+        
+        let category = UNNotificationCategory(identifier: categoryIdentifer, actions: actionArray as! [UNNotificationAction], intentIdentifiers: [],  options: .customDismissAction)
+        
+        let allCategories:Set = [category]
+        
+        UNUserNotificationCenter.current().setNotificationCategories(allCategories)
+          
+        bestAttemptContent.categoryIdentifier = categoryIdentifer
+    }
+    
     class func getPictureExtension(_ pictureUrl: String?) -> String? {
         if (pictureUrl == nil){
             return nil;

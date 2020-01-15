@@ -13,7 +13,7 @@ class KSUserNotificationCenterDelegate : NSObject, UNUserNotificationCenterDeleg
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         if (Kumulos.sharedInstance.config.pushReceivedInForegroundHandlerBlock != nil) {
-            let push = KSPushNotification.init(userInfo: notification.request.content.userInfo)
+            let push = KSPushNotification.init(userInfo: notification.request.content.userInfo, response: nil)
             Kumulos.sharedInstance.config.pushReceivedInForegroundHandlerBlock?(push, completionHandler);
         }
         else {
@@ -28,7 +28,7 @@ class KSUserNotificationCenterDelegate : NSObject, UNUserNotificationCenterDeleg
         }
 
         let userInfo = response.notification.request.content.userInfo
-        Kumulos.sharedInstance.pushHandleOpen(withUserInfo: userInfo)
+        Kumulos.sharedInstance.pushHandleOpen(withUserInfo: userInfo, response: response)
 
         completionHandler()
     }
