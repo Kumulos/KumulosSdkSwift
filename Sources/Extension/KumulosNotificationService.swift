@@ -21,11 +21,15 @@ public class KumulosNotificationService {
         
         let custom = userInfo["custom"] as! [AnyHashable:Any]
         let data = custom["a"] as! [AnyHashable:Any]
-
+        
+        let msg = data["k.message"] as! [AnyHashable:Any]
+        let msgData = msg["data"] as! [AnyHashable:Any]
+        let id = msgData["id"] as! Int
+        
         let buttons = data["k.buttons"] as? NSArray
         
         if (buttons != nil && bestAttemptContent.categoryIdentifier == "") {
-            addButtons(bestAttemptContent: bestAttemptContent, buttons: buttons!)
+            addButtons(messageId: id, bestAttemptContent: bestAttemptContent, buttons: buttons!)
         }
         
         let attachments = userInfo["attachments"] as? [AnyHashable : Any]
@@ -50,10 +54,9 @@ public class KumulosNotificationService {
                }
                contentHandler(bestAttemptContent)
            })
-
     }
 
-    class func addButtons(bestAttemptContent: UNMutableNotificationContent, buttons: NSArray) {
+    class func addButtons(messageId: Int, bestAttemptContent: UNMutableNotificationContent, buttons: NSArray) {
         if (buttons.count == 0) {
             return;
         }
@@ -63,26 +66,20 @@ public class KumulosNotificationService {
         for button in buttons {
             let buttonDict = button as! [AnyHashable:Any]
             
-            //TODO: Should be a string in dict - update API
-            let id = buttonDict["id"] as! NSNumber
-            
+            let id = buttonDict["id"] as! String
             let text = buttonDict["text"] as! String
             
-            let action = UNNotificationAction(identifier: id.stringValue, title: text, options: .foreground)
+            let action = UNNotificationAction(identifier: id, title: text, options: .foreground)
             actionArray.add(action);
         }
         
-        //TODO: Read / extend category
+        let categoryIdentifier = CategoryHelper.getCategoryIdForMessageId(messageId: messageId)
         
-        let categoryIdentifer = "my-cat-1";
+        let category = UNNotificationCategory(identifier: categoryIdentifier, actions: actionArray as! [UNNotificationAction], intentIdentifiers: [],  options: .customDismissAction)
         
-        let category = UNNotificationCategory(identifier: categoryIdentifer, actions: actionArray as! [UNNotificationAction], intentIdentifiers: [],  options: .customDismissAction)
-        
-        let allCategories:Set = [category]
-        
-        UNUserNotificationCenter.current().setNotificationCategories(allCategories)
+        CategoryHelper.registerCategory(category: category)
           
-        bestAttemptContent.categoryIdentifier = categoryIdentifer
+        bestAttemptContent.categoryIdentifier = categoryIdentifier
     }
     
     class func getPictureExtension(_ pictureUrl: String?) -> String? {
