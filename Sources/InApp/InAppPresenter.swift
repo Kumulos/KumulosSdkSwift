@@ -208,7 +208,6 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
         
-
         #if DEBUG
             config.preferences.setValue(true, forKey:"developerExtrasEnabled")
         #endif
