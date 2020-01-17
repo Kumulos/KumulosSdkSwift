@@ -16,13 +16,13 @@ public class KSPushNotification: NSObject {
     internal(set) open var aps: [AnyHashable:Any]
     internal(set) open var data : [AnyHashable:Any]
     internal(set) open var url: URL?
-    internal(set) open var actionIdentifier: String
+    internal(set) open var actionIdentifier: String?
 
     init(userInfo: [AnyHashable:Any], response: UNNotificationResponse?) {
-        if (response != nil) {
-            actionIdentifier = response!.actionIdentifier
-        } else {
-            actionIdentifier = ""
+        if let notificationResponse = response {
+            if (notificationResponse.actionIdentifier != UNNotificationDefaultActionIdentifier) {
+                actionIdentifier = notificationResponse.actionIdentifier
+            }
         }
         
         let custom = userInfo["custom"] as! [AnyHashable:Any]

@@ -14,25 +14,39 @@ internal let DYNAMIC_CATEGORY_USER_DEFAULTS_KEY = "__kumulos__dynamic__categorie
 internal let DYNAMIC_CATEGORY_IDENTIFIER = "__kumulos_category_%d__"
 
 internal class CategoryHelper {
+    let blocker = DispatchSemaphore(value: 0)
+    
+    fileprivate static var instance:CategoryHelper?
+    
+    internal static var sharedInstance:CategoryHelper {
+       get {
+           if(instance == nil) {
+               instance = CategoryHelper()
+           }
+
+           return instance!
+       }
+    }
+    
     internal static func getCategoryIdForMessageId(messageId: Int) -> String {
         return String(format: DYNAMIC_CATEGORY_IDENTIFIER, messageId)
     }
     
     internal static func registerCategory(category: UNNotificationCategory) -> Void {
-        var categorySet = getExistingCategories()
-        var storedDynamicCategories = getExistingDynamicCategoriesList()
+        var categorySet = sharedInstance.getExistingCategories()
+        var storedDynamicCategories = sharedInstance.getExistingDynamicCategoriesList()
         
         categorySet.insert(category)
         storedDynamicCategories.append(category.identifier)
         
-        pruneCategoriesAndSave(categories: categorySet, dynamicCategories: storedDynamicCategories)
+        sharedInstance.pruneCategoriesAndSave(categories: categorySet, dynamicCategories: storedDynamicCategories)
         
         // Force a reload of the categories
-        _ = getExistingCategories()
+        _ = sharedInstance.getExistingCategories()
     }
     
-    internal static func getExistingCategories()-> Set<UNNotificationCategory> {
-        let blocker = DispatchSemaphore(value: 0)
+    internal  func getExistingCategories()-> Set<UNNotificationCategory> {
+        
         var returnedCategories=Set<UNNotificationCategory>()
         
         UNUserNotificationCenter.current().getNotificationCategories { (categories: Set<UNNotificationCategory>) in
@@ -40,7 +54,7 @@ internal class CategoryHelper {
                 return true
             }
             
-            blocker.signal();
+            self.blocker.signal();
         }
         
         _ = blocker.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(5));
@@ -48,7 +62,7 @@ internal class CategoryHelper {
         return returnedCategories
     }
     
-    internal static func getExistingDynamicCategoriesList() -> [String] {
+    internal  func getExistingDynamicCategoriesList() -> [String] {
         let blocker = DispatchSemaphore(value: 1)
         blocker.wait()
         defer {
@@ -67,7 +81,7 @@ internal class CategoryHelper {
         return newArray
     }
         
-    internal static func pruneCategoriesAndSave(categories: Set<UNNotificationCategory>, dynamicCategories: [String]) -> Void {
+    internal  func pruneCategoriesAndSave(categories: Set<UNNotificationCategory>, dynamicCategories: [String]) -> Void {
         if (dynamicCategories.count <= MAX_DYNAMIC_CATEGORIES) {
             UNUserNotificationCenter.current().setNotificationCategories(categories)
             UserDefaults.standard.set(dynamicCategories, forKey: DYNAMIC_CATEGORY_USER_DEFAULTS_KEY)
