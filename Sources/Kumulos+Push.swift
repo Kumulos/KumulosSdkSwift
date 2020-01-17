@@ -112,12 +112,11 @@ public extension Kumulos {
         guard let userInfo = withUserInfo else {
             return
         }
-        
+
         let notification = KSPushNotification(userInfo: userInfo, response: response)
         Kumulos.pushTrackOpen(notification: notification)
 
         // Handle URL pushes
-
         if let url = notification.url {
             UIApplication.shared.open(url, options: [:]) { (success) in
                 // noop
@@ -248,6 +247,5 @@ class PushHelper {
         
         Kumulos.sharedInstance.notificationCenter = delegate
         UNUserNotificationCenter.current().delegate = delegate
-        
     }()
 }
