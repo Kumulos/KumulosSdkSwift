@@ -402,16 +402,10 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
             guard let url = URL(string: userAction.value(forKeyPath: "data.url") as! String) else {
                 return
             }
-
-            if #available(iOS 10.0.0, *) {
-                UIApplication.shared.open(url, options: [:]) { (win) in
-                    // noop
-                }
-            } else {
-                DispatchQueue.main.async {
-                    UIApplication.shared.openURL(url)
-                }
-            }
+            
+            UIApplication.shared.open(url, options: [:]) { (win) in
+                // noop
+            }            
         } else if (type == InAppAction.REQUEST_RATING.rawValue) {
             if #available(iOS 10.3.0, *) {
                 SKStoreReviewController.requestReview()

@@ -10,10 +10,8 @@ import UIKit
 import UserNotifications
 
 public class KumulosNotificationService {
-
     internal static let KS_MEDIA_RESIZER_BASE_URL = "https://i.app.delivery"
 
-    @available(iOS 10.0, *)
     public class func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         let bestAttemptContent =  (request.content.mutableCopy() as! UNMutableNotificationContent)
 
@@ -106,7 +104,6 @@ public class KumulosNotificationService {
         return URL(string: completeString)
     }
 
-    @available(iOS 10.0, *)
     class func loadAttachment(_ url: URL, withExtension pictureExtension: String?, completionHandler: @escaping (UNNotificationAttachment?) -> Void) {
         let session = URLSession(configuration: URLSessionConfiguration.default)
 
@@ -140,7 +137,6 @@ public class KumulosNotificationService {
                 return
             }
 
-
             var attachment: UNNotificationAttachment? = nil
             do {
                 attachment = try UNNotificationAttachment(identifier: "", url: localURL, options: nil)
@@ -151,5 +147,4 @@ public class KumulosNotificationService {
             completionHandler(attachment)
         })).resume()
     }
-    
 }
