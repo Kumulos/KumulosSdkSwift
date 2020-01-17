@@ -2,7 +2,6 @@
 //  CategoryHelper.swift
 //  KumulosSDK
 //
-//  Created by Andrew Lindsay on 16/01/2020.
 //  Copyright © 2020 Kumulos. All rights reserved.
 //
 
