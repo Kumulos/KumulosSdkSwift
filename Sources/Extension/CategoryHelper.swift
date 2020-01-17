@@ -14,6 +14,7 @@ internal let DYNAMIC_CATEGORY_IDENTIFIER = "__kumulos_category_%d__"
 
 internal class CategoryHelper {
     let categoryReadLock = DispatchSemaphore(value: 0)
+    let dynamicCategoryLock = DispatchSemaphore(value: 1)
     
     fileprivate static var instance:CategoryHelper?
     
@@ -59,10 +60,9 @@ internal class CategoryHelper {
     }
     
     fileprivate func getExistingDynamicCategoriesList() -> [String] {
-        let blocker = DispatchSemaphore(value: 1)
-        blocker.wait()
+        dynamicCategoryLock.wait()
         defer {
-            blocker.signal()
+            dynamicCategoryLock.signal()
         }
             
         if let existingArray = UserDefaults.standard.object(forKey: DYNAMIC_CATEGORY_USER_DEFAULTS_KEY) {
