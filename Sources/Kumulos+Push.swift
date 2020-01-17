@@ -18,21 +18,44 @@ public class KSPushNotification: NSObject {
     internal(set) open var url: URL?
     internal(set) open var actionIdentifier: String?
 
-    init(userInfo: [AnyHashable:Any], response: UNNotificationResponse?) {
+    init(userInfo: [AnyHashable:Any]?, response: UNNotificationResponse?) {
+        self.id = 0
+        self.aps = [:]
+        self.data = [:]
+
         if let notificationResponse = response {
             if (notificationResponse.actionIdentifier != UNNotificationDefaultActionIdentifier) {
                 actionIdentifier = notificationResponse.actionIdentifier
             }
         }
-        
-        let custom = userInfo["custom"] as! [AnyHashable:Any]
-        data = custom["a"] as! [AnyHashable:Any]
 
-        let msg = data["k.message"] as! [AnyHashable:Any]
+        guard let userInfo = userInfo else {
+            return
+        }
+
+        guard let aps = userInfo["aps"] as? [AnyHashable:Any] else {
+            return
+        }
+
+        self.aps = aps
+        
+        guard let custom = userInfo["custom"] as? [AnyHashable:Any] else {
+            return
+        }
+
+        guard let data = custom["a"] as? [AnyHashable:Any] else {
+            return
+        }
+
+        self.data = data
+
+        guard let msg = data["k.message"] as? [AnyHashable:Any] else {
+            return
+        }
+
         let msgData = msg["data"] as! [AnyHashable:Any]
         
         id = msgData["id"] as! Int
-        aps = userInfo["aps"] as! [AnyHashable:Any]
 
         if let urlStr = custom["u"] as? String {
             url = URL(string: urlStr)
@@ -108,12 +131,13 @@ public extension Kumulos {
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_OPENED, properties:params)
     }
 
-    internal func pushHandleOpen(withUserInfo: [AnyHashable: Any]?, response: UNNotificationResponse?) {
-        guard let userInfo = withUserInfo else {
-            return
+    internal func pushHandleOpen(withUserInfo: [AnyHashable: Any]?, response: UNNotificationResponse?) -> Bool {
+        let notification = KSPushNotification(userInfo: withUserInfo, response: response)
+
+        if notification.id == 0 {
+            return false
         }
 
-        let notification = KSPushNotification(userInfo: userInfo, response: response)
         Kumulos.pushTrackOpen(notification: notification)
 
         // Handle URL pushes
@@ -130,6 +154,8 @@ public extension Kumulos {
                 userOpenedHandler(notification)
             }
         }
+
+        return true
     }
 
     fileprivate static func serializeDeviceToken(_ deviceToken: Data) -> String {
