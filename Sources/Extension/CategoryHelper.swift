@@ -44,9 +44,8 @@ internal class CategoryHelper {
         _ = sharedInstance.getExistingCategories()
     }
     
-    internal  func getExistingCategories()-> Set<UNNotificationCategory> {
-        
-        var returnedCategories=Set<UNNotificationCategory>()
+    fileprivate func getExistingCategories()-> Set<UNNotificationCategory> {
+        var returnedCategories = Set<UNNotificationCategory>()
         
         UNUserNotificationCenter.current().getNotificationCategories { (categories: Set<UNNotificationCategory>) in
             returnedCategories = categories.filter { (_) -> Bool in
@@ -61,7 +60,7 @@ internal class CategoryHelper {
         return returnedCategories
     }
     
-    internal  func getExistingDynamicCategoriesList() -> [String] {
+    fileprivate func getExistingDynamicCategoriesList() -> [String] {
         let blocker = DispatchSemaphore(value: 1)
         blocker.wait()
         defer {
@@ -80,7 +79,7 @@ internal class CategoryHelper {
         return newArray
     }
         
-    internal  func pruneCategoriesAndSave(categories: Set<UNNotificationCategory>, dynamicCategories: [String]) -> Void {
+    fileprivate func pruneCategoriesAndSave(categories: Set<UNNotificationCategory>, dynamicCategories: [String]) -> Void {
         if (dynamicCategories.count <= MAX_DYNAMIC_CATEGORIES) {
             UNUserNotificationCenter.current().setNotificationCategories(categories)
             UserDefaults.standard.set(dynamicCategories, forKey: DYNAMIC_CATEGORY_USER_DEFAULTS_KEY)
