@@ -108,7 +108,6 @@ public extension Kumulos {
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_OPENED, properties:params)
     }
 
-    //FIXME? - duplicate this function without the
     internal func pushHandleOpen(withUserInfo: [AnyHashable: Any]?, response: UNNotificationResponse?) {
         guard let userInfo = withUserInfo else {
             return
