@@ -48,9 +48,7 @@ internal class CategoryHelper {
         var returnedCategories = Set<UNNotificationCategory>()
         
         UNUserNotificationCenter.current().getNotificationCategories { (categories: Set<UNNotificationCategory>) in
-            returnedCategories = categories.filter { (_) -> Bool in
-                return true
-            }
+            returnedCategories = Set<UNNotificationCategory>(categories)
             
             self.categoryReadLock.signal();
         }
