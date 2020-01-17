@@ -127,10 +127,8 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
             return
         }
 
-        if #available(iOS 10, *) {
-            let tickleNotificationId = "k-in-app-message:\(message.id)"
-            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [tickleNotificationId])
-        }
+        let tickleNotificationId = "k-in-app-message:\(message.id)"
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [tickleNotificationId])
         
         messageQueueLock.wait()
         defer {
@@ -208,16 +206,8 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         let config = WKWebViewConfiguration()
         config.userContentController = self.contentController!
         config.allowsInlineMediaPlayback = true
-                
-        if #available(iOS 10.0, *) {
-            config.mediaTypesRequiringUserActionForPlayback = []
-        } else {
-            if #available(iOS 9.0, *) {
-                config.requiresUserActionForMediaPlayback = false
-            } else {
-                config.mediaPlaybackRequiresUserAction = false
-            }
-        }
+        config.mediaTypesRequiringUserActionForPlayback = []
+        
 
         #if DEBUG
             config.preferences.setValue(true, forKey:"developerExtrasEnabled")
