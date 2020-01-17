@@ -18,7 +18,7 @@ Bump versions in:
 -   [ ] `Sources/Kumulos.swift`
 -   [ ] `KumulosSdkSwift.podspec`
 -   [ ] `KumulosSdkSwiftExtension.podspec`
--   [ ] `Sources/Info-*.plist`
+-   [ ] `Build target version for plist`
 -   [ ] `README.md`
 
 Release:
