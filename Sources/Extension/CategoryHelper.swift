@@ -13,7 +13,7 @@ internal let DYNAMIC_CATEGORY_USER_DEFAULTS_KEY = "__kumulos__dynamic__categorie
 internal let DYNAMIC_CATEGORY_IDENTIFIER = "__kumulos_category_%d__"
 
 internal class CategoryHelper {
-    let blocker = DispatchSemaphore(value: 0)
+    let categoryReadLock = DispatchSemaphore(value: 0)
     
     fileprivate static var instance:CategoryHelper?
     
@@ -52,10 +52,10 @@ internal class CategoryHelper {
                 return true
             }
             
-            self.blocker.signal();
+            self.categoryReadLock.signal();
         }
         
-        _ = blocker.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(5));
+        _ = categoryReadLock.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(5));
         
         return returnedCategories
     }
