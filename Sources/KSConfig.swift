@@ -63,6 +63,7 @@ open class KSConfig: NSObject {
         }
     }
     
+    @available(iOS 10.0, *)
     var pushReceivedInForegroundHandlerBlock: PushReceivedInForegroundHandlerBlock? {
         get {
             return _pushReceivedInForegroundHandlerBlock as? PushReceivedInForegroundHandlerBlock
@@ -112,6 +113,7 @@ open class KSConfigBuilder: NSObject {
         return self
     }
     
+    @available(iOS 10.0, *)
     public func setPushReceivedInForegroundHandler(pushReceivedInForegroundHandlerBlock: @escaping PushReceivedInForegroundHandlerBlock) -> KSConfigBuilder {
         _pushReceivedInForegroundHandlerBlock = pushReceivedInForegroundHandlerBlock
         return self

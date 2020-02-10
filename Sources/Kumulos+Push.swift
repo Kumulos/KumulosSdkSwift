@@ -18,6 +18,7 @@ public class KSPushNotification: NSObject {
     internal(set) open var url: URL?
     internal(set) open var actionIdentifier: String?
 
+    @available(iOS 10.0, *)
     init(userInfo: [AnyHashable:Any]?, response: UNNotificationResponse?) {
         self.id = 0
         self.aps = [:]
@@ -85,13 +86,35 @@ public extension Kumulos {
         On success will raise the didRegisterForRemoteNotificationsWithDeviceToken UIApplication event
     */
     static func pushRequestDeviceToken() {
-        let center = UNUserNotificationCenter.current()
-        center.requestAuthorization(options: [.alert, .badge, .sound]) { (granted, error) in
-            // actions based on whether notifications were authorized or not
+       if #available(iOS 10.0, *) {
+            let center = UNUserNotificationCenter.current()
+            center.requestAuthorization(options: [.alert, .badge, .sound]) { (granted, error) in
+                // actions based on whether notifications were authorized or not
+            }
+            DispatchQueue.main.async {
+                UIApplication.shared.registerForRemoteNotifications()
+            }
+        } else {
+            DispatchQueue.main.async {
+                requestTokenLegacy()
+            }
         }
-        DispatchQueue.main.async {
-            UIApplication.shared.registerForRemoteNotifications()
-        }
+    }
+        
+    private static func requestTokenLegacy() {
+         // Determine the type of notifications we want to ask permission for, for example we may want to alert the user, update the badge number and play a sound
+         let notificationTypes: UIUserNotificationType = [UIUserNotificationType.alert, UIUserNotificationType.badge, UIUserNotificationType.sound]
+
+         // Create settings  based on those notification types we want the user to accept
+         let pushNotificationSettings = UIUserNotificationSettings(types: notificationTypes, categories: nil)
+
+         // Get the main application
+         let application = UIApplication.shared
+
+         // Register the settings created above - will show alert first if the user hasn't previously done this
+         // See delegate methods in AppDelegate - the AppDelegate conforms to the UIApplicationDelegate protocol
+         application.registerUserNotificationSettings(pushNotificationSettings)
+         application.registerForRemoteNotifications()
     }
 
     /**
@@ -131,6 +154,10 @@ public extension Kumulos {
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_OPENED, properties:params)
     }
 
+    
+  
+
+    @available(iOS 10.0, *)
     internal func pushHandleOpen(withUserInfo: [AnyHashable: Any]?, response: UNNotificationResponse?) -> Bool {
         let notification = KSPushNotification(userInfo: withUserInfo, response: response)
 
@@ -268,10 +295,11 @@ class PushHelper {
         }
         let kumulosDidReceive = imp_implementationWithBlock(unsafeBitCast(didReceive, to: AnyObject.self))
         existingDidReceive = class_replaceMethod(klass, didReceiveSelector, kumulosDidReceive, receiveType)
-
-        let delegate = KSUserNotificationCenterDelegate()
-        
-        Kumulos.sharedInstance.notificationCenter = delegate
-        UNUserNotificationCenter.current().delegate = delegate
+        if #available(iOS 10, *) {
+            let delegate = KSUserNotificationCenterDelegate()
+            
+            Kumulos.sharedInstance.notificationCenter = delegate
+            UNUserNotificationCenter.current().delegate = delegate
+        }
     }()
 }

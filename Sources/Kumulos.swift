@@ -34,6 +34,7 @@ internal enum KumulosEvent : String {
 public typealias InAppDeepLinkHandlerBlock = ([AnyHashable:Any]) -> Void
 public typealias PushOpenedHandlerBlock = (KSPushNotification) -> Void
 
+@available(iOS 10.0, *)
 public typealias PushReceivedInForegroundHandlerBlock = (KSPushNotification, (UNNotificationPresentationOptions)->Void) -> Void
 
 public enum InAppConsentStrategy : String {

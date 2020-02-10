@@ -12,6 +12,7 @@ internal let MAX_DYNAMIC_CATEGORIES = 128
 internal let DYNAMIC_CATEGORY_USER_DEFAULTS_KEY = "__kumulos__dynamic__categories__"
 internal let DYNAMIC_CATEGORY_IDENTIFIER = "__kumulos_category_%d__"
 
+@available(iOS 10.0, *)
 internal class CategoryHelper {
     let categoryReadLock = DispatchSemaphore(value: 0)
     let dynamicCategoryLock = DispatchSemaphore(value: 1)

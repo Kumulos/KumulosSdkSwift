@@ -127,8 +127,10 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
             return
         }
 
-        let tickleNotificationId = "k-in-app-message:\(message.id)"
-        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [tickleNotificationId])
+        if #available(iOS 10, *) {
+            let tickleNotificationId = "k-in-app-message:\(message.id)"
+            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [tickleNotificationId])
+        }
         
         messageQueueLock.wait()
         defer {
@@ -206,7 +208,16 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         let config = WKWebViewConfiguration()
         config.userContentController = self.contentController!
         config.allowsInlineMediaPlayback = true
-        config.mediaTypesRequiringUserActionForPlayback = []
+        
+        if #available(iOS 10.0, *) {
+            config.mediaTypesRequiringUserActionForPlayback = []
+        } else {
+            if #available(iOS 9.0, *) {
+                config.requiresUserActionForMediaPlayback = false
+            } else {
+                config.mediaPlaybackRequiresUserAction = false
+            }
+        }
         
         #if DEBUG
             config.preferences.setValue(true, forKey:"developerExtrasEnabled")
@@ -403,9 +414,15 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
                 return
             }
             
-            UIApplication.shared.open(url, options: [:]) { (win) in
-                // noop
-            }            
+            if #available(iOS 10.0.0, *) {
+                UIApplication.shared.open(url, options: [:]) { (win) in
+                    // noop
+                }
+            } else {
+                DispatchQueue.main.async {
+                    UIApplication.shared.openURL(url)
+               }
+           }
         } else if (type == InAppAction.REQUEST_RATING.rawValue) {
             if #available(iOS 10.3.0, *) {
                 SKStoreReviewController.requestReview()

@@ -8,6 +8,7 @@
 import Foundation
 import UserNotifications
 
+@available(iOS 10.0, *)
 class KSUserNotificationCenterDelegate : NSObject, UNUserNotificationCenterDelegate {
 
     let existingDelegate: UNUserNotificationCenterDelegate?
