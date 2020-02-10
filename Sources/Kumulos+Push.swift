@@ -18,17 +18,10 @@ public class KSPushNotification: NSObject {
     internal(set) open var url: URL?
     internal(set) open var actionIdentifier: String?
 
-    @available(iOS 10.0, *)
-    init(userInfo: [AnyHashable:Any]?, response: UNNotificationResponse?) {
+    init(userInfo: [AnyHashable:Any]?) {
         self.id = 0
         self.aps = [:]
         self.data = [:]
-
-        if let notificationResponse = response {
-            if (notificationResponse.actionIdentifier != UNNotificationDefaultActionIdentifier) {
-                actionIdentifier = notificationResponse.actionIdentifier
-            }
-        }
 
         guard let userInfo = userInfo else {
             return
@@ -39,7 +32,7 @@ public class KSPushNotification: NSObject {
         }
 
         self.aps = aps
-        
+
         guard let custom = userInfo["custom"] as? [AnyHashable:Any] else {
             return
         }
@@ -55,13 +48,24 @@ public class KSPushNotification: NSObject {
         }
 
         let msgData = msg["data"] as! [AnyHashable:Any]
-        
+
         id = msgData["id"] as! Int
 
         if let urlStr = custom["u"] as? String {
             url = URL(string: urlStr)
         } else {
             url = nil
+        }
+    }
+    
+    @available(iOS 10.0, *)
+    convenience init(userInfo: [AnyHashable:Any]?, response: UNNotificationResponse?) {
+        self.init(userInfo: userInfo)
+
+        if let notificationResponse = response {
+            if (notificationResponse.actionIdentifier != UNNotificationDefaultActionIdentifier) {
+                actionIdentifier = notificationResponse.actionIdentifier
+            }
         }
     }
 
@@ -154,7 +158,15 @@ public extension Kumulos {
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_OPENED, properties:params)
     }
 
-    
+    internal func pushHandleOpen(withUserInfo: [AnyHashable: Any]?) {
+        guard let userInfo = withUserInfo else {
+            return
+        }
+
+        let notification = KSPushNotification(userInfo: userInfo)
+        
+        self.pushHandleOpen(notification: notification)
+    }
   
 
     @available(iOS 10.0, *)
@@ -165,24 +177,35 @@ public extension Kumulos {
             return false
         }
 
-        Kumulos.pushTrackOpen(notification: notification)
-
-        // Handle URL pushes
-        if let url = notification.url {
-            UIApplication.shared.open(url, options: [:]) { (success) in
-                // noop
-            }
-        }
-
-        self.inAppHelper.handlePushOpen(notification: notification)
-
-        if let userOpenedHandler = self.config.pushOpenedHandlerBlock {
-            DispatchQueue.main.async {
-                userOpenedHandler(notification)
-            }
-        }
+        self.pushHandleOpen(notification: notification)
 
         return true
+    }
+    
+    private func pushHandleOpen(notification: KSPushNotification) {
+        Kumulos.pushTrackOpen(notification: notification)
+
+       // Handle URL pushes
+
+       if let url = notification.url {
+           if #available(iOS 10, *) {
+               UIApplication.shared.open(url, options: [:]) { (success) in
+                   // noop
+               }
+           } else {
+               DispatchQueue.main.async {
+                   UIApplication.shared.openURL(url)
+               }
+           }
+       }
+
+       self.inAppHelper.handlePushOpen(notification: notification)
+
+       if let userOpenedHandler = self.config.pushOpenedHandlerBlock {
+           DispatchQueue.main.async {
+               userOpenedHandler(notification)
+           }
+       }
     }
 
     fileprivate static func serializeDeviceToken(_ deviceToken: Data) -> String {
