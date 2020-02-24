@@ -265,8 +265,9 @@ internal class InAppHelper {
                     after = "?after=\(self.urlEncode(url: formatter.string(from: lastSyncTime as Date))!)" ;
                 }
             }
-            
-            let path = "/v1/users/\(Kumulos.currentUserIdentifier)/messages\(after)"
+
+            let encodedIdentifier = self.urlEncode(url: Kumulos.currentUserIdentifier)
+            let path = "/v1/users/\(encodedIdentifier!)/messages\(after)"
         
             Kumulos.sharedInstance.pushHttpClient.sendRequest(.GET, toPath: path, data: nil, onSuccess: { response, decodedBody in
                 let messagesToPersist = decodedBody as? [[AnyHashable : Any]]
