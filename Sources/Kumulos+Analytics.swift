@@ -91,13 +91,10 @@ public extension Kumulos {
         userIdLock.wait()
         UserDefaults.standard.removeObject(forKey: USER_ID_KEY)
         userIdLock.signal()
-        
-        
-        #if os(iOS)
+
         if (currentUserId != nil && currentUserId != Kumulos.installId) {
             getInstance().inAppHelper.handleAssociatedUserChange();
         }
-        #endif
     }
 
     fileprivate static func associateUserWithInstallImpl(userIdentifier: String, attributes: [String:AnyObject]?) {
@@ -120,12 +117,10 @@ public extension Kumulos {
         userIdLock.signal()
 
         Kumulos.trackEvent(eventType: KumulosEvent.STATS_ASSOCIATE_USER, properties: params, immediateFlush: true)
-        
-        #if os(iOS)
-        if (currentUserId != nil && currentUserId != userIdentifier) {
+
+        if (currentUserId != nil || currentUserId != userIdentifier) {
             getInstance().inAppHelper.handleAssociatedUserChange();
         }
-        #endif
     }
     
 }
