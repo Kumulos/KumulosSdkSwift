@@ -118,7 +118,7 @@ public extension Kumulos {
 
         Kumulos.trackEvent(eventType: KumulosEvent.STATS_ASSOCIATE_USER, properties: params, immediateFlush: true)
 
-        if (currentUserId != nil || currentUserId != userIdentifier) {
+        if (currentUserId == nil || currentUserId != userIdentifier) {
             getInstance().inAppHelper.handleAssociatedUserChange();
         }
     }
