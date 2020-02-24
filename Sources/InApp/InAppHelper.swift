@@ -565,10 +565,19 @@ internal class InAppHelper {
             defer { objc_sync_exit(self.pendingTickleIds) }
             
             self.pendingTickleIds.add(inAppPartId)
-       
-            let messagesToPresent = self.getMessagesToPresent([])
-            self.presenter.queueMessagesForPresentation(messages: messagesToPresent, tickleIds: self.pendingTickleIds)
 
+            let messagesToPresent = self.getMessagesToPresent([])
+
+            let tickleMessageFound = messagesToPresent.contains(where: { (message) -> Bool in
+                return message.id == inAppPartId
+            })
+
+            if (!tickleMessageFound) {
+                self.sync()
+                return
+            }
+
+            self.presenter.queueMessagesForPresentation(messages: messagesToPresent, tickleIds: self.pendingTickleIds)
         })
     }
     
