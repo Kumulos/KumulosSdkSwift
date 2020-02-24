@@ -308,7 +308,7 @@ class PushHelper {
 
                 if result < 0 {
                     fetchResult = .failed
-                } else if result > 1 {
+                } else if result > 0 {
                     fetchResult = .newData
                 }
                 // No data case is default, allow override from other handler
