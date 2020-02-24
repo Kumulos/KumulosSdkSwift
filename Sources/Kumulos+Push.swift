@@ -93,10 +93,13 @@ public extension Kumulos {
        if #available(iOS 10.0, *) {
             let center = UNUserNotificationCenter.current()
             center.requestAuthorization(options: [.alert, .badge, .sound]) { (granted, error) in
-                // actions based on whether notifications were authorized or not
-            }
-            DispatchQueue.main.async {
-                UIApplication.shared.registerForRemoteNotifications()
+                if (!granted || error != nil) {
+                    return
+                }
+
+                DispatchQueue.main.async {
+                    UIApplication.shared.registerForRemoteNotifications()
+                }
             }
         } else {
             DispatchQueue.main.async {
