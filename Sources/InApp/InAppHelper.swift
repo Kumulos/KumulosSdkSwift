@@ -377,6 +377,9 @@ internal class InAppHelper {
                     model.inboxConfig = nil;
                     model.inboxFrom = nil;
                     model.inboxTo = nil;
+                    if (model.dismissedAt == nil){
+                        model.dismissedAt = dateParser.date(from: inboxDeletedAt!) as NSDate?
+                    }
                 }
                 
                 model.expiresAt = dateParser.date(from: message["expiresAt"] as? String ?? "") as NSDate?
@@ -614,12 +617,12 @@ internal class InAppHelper {
                 return;
             }
             
-            //setting inbox columns to nil turns this message into a message without inbox.
-            //it can still be displayed if wasn't open. It will be evicted like other messages without inbox
+            //setting inbox columns to nil and dismissedAt to now turns this message into a message to be evicted
             if (messageEntities.count == 1){
                 messageEntities[0].inboxTo = nil
                 messageEntities[0].inboxFrom = nil
                 messageEntities[0].inboxConfig = nil
+                messageEntities[0].dismissedAt = NSDate()
             }
             
             do{
