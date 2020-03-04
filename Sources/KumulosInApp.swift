@@ -104,4 +104,8 @@ public class KumulosInApp {
         
         return result ? InAppMessagePresentationResult.PRESENTED : InAppMessagePresentationResult.FAILED 
     }
+    
+    public static func deleteMessageFromInbox(item: InAppInboxItem) -> Bool {
+        return Kumulos.sharedInstance.inAppHelper.deleteMessageFromInbox(withId: item.id)
+    }
 }

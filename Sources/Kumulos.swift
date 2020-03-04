@@ -29,6 +29,7 @@ internal enum KumulosEvent : String {
     case MESSAGE_OPENED = "k.message.opened"
     case MESSAGE_DISMISSED = "k.message.dismissed"
     case MESSAGE_DELIVERED = "k.message.delivered"
+    case MESSAGE_DELETED_FROM_INBOX = "k.message.inbox.deleted"
 }
 
 public typealias InAppDeepLinkHandlerBlock = ([AnyHashable:Any]) -> Void

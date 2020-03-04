@@ -355,7 +355,10 @@ internal class InAppHelper {
                
                 model.id = partId
                 model.updatedAt = dateParser.date(from: message["updatedAt"] as! String)! as NSDate
-                model.dismissedAt =  dateParser.date(from: message["openedAt"] as? String ?? "") as NSDate?
+                if (model.dismissedAt == nil){
+                    print("dismissedAt is nil, updating...");
+                    model.dismissedAt =  dateParser.date(from: message["openedAt"] as? String ?? "") as NSDate?
+                }
                 model.presentedWhen = message["presentedWhen"] as! String
 
                 model.content = message["content"] as! NSDictionary
@@ -368,6 +371,14 @@ internal class InAppHelper {
                     
                     model.inboxFrom = dateParser.date(from: inbox["from"] as? String ?? "") as NSDate?
                     model.inboxTo = dateParser.date(from: inbox["to"] as? String ?? "") as NSDate?
+                }
+                
+                let inboxDeletedAt = message["inboxDeletedAt"] as! String?
+                if (inboxDeletedAt != nil){
+                    print("inboxDeletedAt not nil");
+                    model.inboxConfig = nil;
+                    model.inboxFrom = nil;
+                    model.inboxTo = nil;
                 }
                 
                 model.expiresAt = dateParser.date(from: message["expiresAt"] as? String ?? "") as NSDate?
@@ -580,6 +591,50 @@ internal class InAppHelper {
 
             self.presenter.queueMessagesForPresentation(messages: messagesToPresent, tickleIds: self.pendingTickleIds)
         })
+    }
+    
+    func deleteMessageFromInbox(withId : Int64) -> Bool {
+        let props: [String:Any] = ["type" : MESSAGE_TYPE_IN_APP, "id":withId]
+        Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_DELETED_FROM_INBOX, properties: props)
+
+        var result = true;
+        messagesContext!.performAndWait({
+            let context = self.messagesContext!
+            let entity: NSEntityDescription? = NSEntityDescription.entity(forEntityName: "Message", in: context)
+            
+            let fetchRequest:NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "Message")
+            fetchRequest.entity = entity
+            fetchRequest.includesPendingChanges = false
+            fetchRequest.predicate = NSPredicate(format: "id = %i", withId)
+
+            var messageEntities: [InAppMessageEntity]
+            do {
+                messageEntities = try context.fetch(fetchRequest) as! [InAppMessageEntity]
+            } catch let err {
+                result = false;
+                print("Failed to delete message with id: \(withId) \(err)")
+                return;
+            }
+            
+            //setting inbox columns to nil turns this message into a message without inbox.
+            //it can still be displayed if wasn't open. It will be evicted like other messages without inbox
+            if (messageEntities.count == 1){
+                messageEntities[0].inboxTo = nil
+                messageEntities[0].inboxFrom = nil
+                messageEntities[0].inboxConfig = nil
+            }
+            
+            do{
+                try context.save()
+            }
+            catch let err {
+                result = false;
+                print("Failed to delete message with id: \(withId) \(err)")
+                return
+            }
+        });
+
+        return result
     }
     
     // MARK: Data model
