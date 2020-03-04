@@ -380,6 +380,8 @@ internal class InAppHelper {
                     if (model.dismissedAt == nil){
                         model.dismissedAt = dateParser.date(from: inboxDeletedAt!) as NSDate?
                     }
+                    
+                    removeNotificationTickle(id: model.id)
                 }
                 
                 model.expiresAt = dateParser.date(from: message["expiresAt"] as? String ?? "") as NSDate?
@@ -404,6 +406,17 @@ internal class InAppHelper {
             
             trackMessageDelivery(messages: messages)
         })
+    }
+    
+    private func removeNotificationTickle(id: Int64) -> Void {
+        if (pendingTickleIds.contains(id)){
+            pendingTickleIds.remove(id)
+        }
+        
+        if #available(iOS 10, *) {
+           let tickleNotificationId = "k-in-app-message:\(id)"
+           UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [tickleNotificationId])
+        }
     }
     
     private func evictMessages(context: NSManagedObjectContext) -> Void {
@@ -474,9 +487,7 @@ internal class InAppHelper {
     internal func markMessageDismissed(message: InAppMessage) -> Void {
 
         let props: [String:Any] = ["type" : MESSAGE_TYPE_IN_APP, "id":message.id]
-        
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_DISMISSED, properties: props)
-        
         
         if (pendingTickleIds.contains(message.id)){
             pendingTickleIds.remove(message.id)
@@ -598,6 +609,8 @@ internal class InAppHelper {
         let props: [String:Any] = ["type" : MESSAGE_TYPE_IN_APP, "id":withId]
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_DELETED_FROM_INBOX, properties: props)
 
+        removeNotificationTickle(id: withId)
+        
         var result = true;
         messagesContext!.performAndWait({
             let context = self.messagesContext!
