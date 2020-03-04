@@ -356,7 +356,6 @@ internal class InAppHelper {
                 model.id = partId
                 model.updatedAt = dateParser.date(from: message["updatedAt"] as! String)! as NSDate
                 if (model.dismissedAt == nil){
-                    print("dismissedAt is nil, updating...");
                     model.dismissedAt =  dateParser.date(from: message["openedAt"] as? String ?? "") as NSDate?
                 }
                 model.presentedWhen = message["presentedWhen"] as! String
@@ -373,9 +372,8 @@ internal class InAppHelper {
                     model.inboxTo = dateParser.date(from: inbox["to"] as? String ?? "") as NSDate?
                 }
                 
-                let inboxDeletedAt = message["inboxDeletedAt"] as! String?
+                let inboxDeletedAt = message["inboxDeletedAt"] as? String
                 if (inboxDeletedAt != nil){
-                    print("inboxDeletedAt not nil");
                     model.inboxConfig = nil;
                     model.inboxFrom = nil;
                     model.inboxTo = nil;
