@@ -311,12 +311,11 @@ internal class InAppHelper {
     }
     
     private func urlEncode(url: String) -> String? {
-        let unreserved = "*-._ "
+        let unreserved = "-._~"
         var allowed = CharacterSet.alphanumerics
         allowed.insert(charactersIn: unreserved)
-        
-        var encoded = url.addingPercentEncoding(withAllowedCharacters: allowed)
-        encoded = encoded?.replacingOccurrences(of: " ", with: "+")
+
+        let encoded = url.addingPercentEncoding(withAllowedCharacters: allowed)
         
         return encoded
     }
