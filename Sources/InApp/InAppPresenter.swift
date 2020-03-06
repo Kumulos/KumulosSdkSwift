@@ -381,7 +381,7 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
             }
 
             if let trackEvent = trackEvent {
-                Kumulos.trackEvent(eventType: trackEvent, properties: [:]);
+                Kumulos.trackEventImmediately(eventType: trackEvent, properties: [:]);
             }
 
             if let subscribeToChannelUuid = subscribeToChannelUuid {
