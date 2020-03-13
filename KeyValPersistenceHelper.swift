@@ -1,5 +1,5 @@
 //
-//  PersistenceHelper.swift
+//  KeyValPersistenceHelper.swift
 //  KumulosSDK
 //
 //  Created by Vladislav Voicehovics on 13/03/2020.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-internal class PersistenceHelper {
+internal class KeyValPersistenceHelper {
 
     static func set(_ value: Any?, forKey: String)
     {

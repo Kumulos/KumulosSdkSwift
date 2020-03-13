@@ -66,13 +66,13 @@ internal class CategoryHelper {
             dynamicCategoryLock.signal()
         }
             
-        if let existingArray = PersistenceHelper.object(forKey: DYNAMIC_CATEGORY_USER_DEFAULTS_KEY) {
+        if let existingArray = KeyValPersistenceHelper.object(forKey: DYNAMIC_CATEGORY_USER_DEFAULTS_KEY) {
             return existingArray as! [String]
         }
 
         let newArray = [String]()
         
-        PersistenceHelper.set(newArray, forKey: DYNAMIC_CATEGORY_USER_DEFAULTS_KEY)
+        KeyValPersistenceHelper.set(newArray, forKey: DYNAMIC_CATEGORY_USER_DEFAULTS_KEY)
         
         return newArray
     }
@@ -80,7 +80,7 @@ internal class CategoryHelper {
     fileprivate func pruneCategoriesAndSave(categories: Set<UNNotificationCategory>, dynamicCategories: [String]) -> Void {
         if (dynamicCategories.count <= MAX_DYNAMIC_CATEGORIES) {
             UNUserNotificationCenter.current().setNotificationCategories(categories)
-            PersistenceHelper.set(dynamicCategories, forKey: DYNAMIC_CATEGORY_USER_DEFAULTS_KEY)
+            KeyValPersistenceHelper.set(dynamicCategories, forKey: DYNAMIC_CATEGORY_USER_DEFAULTS_KEY)
             return
         }
         
@@ -95,6 +95,6 @@ internal class CategoryHelper {
         }
         
         UNUserNotificationCenter.current().setNotificationCategories(prunedCategories)
-        PersistenceHelper.set(prunedDynamicCategories, forKey: DYNAMIC_CATEGORY_USER_DEFAULTS_KEY)
+        KeyValPersistenceHelper.set(prunedDynamicCategories, forKey: DYNAMIC_CATEGORY_USER_DEFAULTS_KEY)
     }
 }

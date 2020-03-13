@@ -68,7 +68,7 @@ public extension Kumulos {
         get {
             userIdLock.wait()
             defer { userIdLock.signal() }
-            if let userId = PersistenceHelper.object(forKey: USER_ID_KEY) as! String? {
+            if let userId = KeyValPersistenceHelper.object(forKey: USER_ID_KEY) as! String? {
                 return userId;
             }
 
@@ -83,13 +83,13 @@ public extension Kumulos {
      */
     static func clearUserAssociation() {
         userIdLock.wait()
-        let currentUserId = PersistenceHelper.object(forKey: USER_ID_KEY) as! String?
+        let currentUserId = KeyValPersistenceHelper.object(forKey: USER_ID_KEY) as! String?
         userIdLock.signal()
 
         Kumulos.trackEvent(eventType: KumulosEvent.STATS_USER_ASSOCIATION_CLEARED, properties: ["oldUserIdentifier": currentUserId ?? NSNull()])
 
         userIdLock.wait()
-        PersistenceHelper.removeObject(forKey: USER_ID_KEY)
+        KeyValPersistenceHelper.removeObject(forKey: USER_ID_KEY)
         userIdLock.signal()
 
         if (currentUserId != nil && currentUserId != Kumulos.installId) {
@@ -112,8 +112,8 @@ public extension Kumulos {
         }
 
         userIdLock.wait()
-        let currentUserId = PersistenceHelper.object(forKey: USER_ID_KEY) as! String?
-        PersistenceHelper.set(userIdentifier, forKey: USER_ID_KEY)
+        let currentUserId = KeyValPersistenceHelper.object(forKey: USER_ID_KEY) as! String?
+        KeyValPersistenceHelper.set(userIdentifier, forKey: USER_ID_KEY)
         userIdLock.signal()
 
         Kumulos.trackEvent(eventType: KumulosEvent.STATS_ASSOCIATE_USER, properties: params, immediateFlush: true)
