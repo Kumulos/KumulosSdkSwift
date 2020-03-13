@@ -143,13 +143,12 @@ open class Kumulos {
                 installIdLock.signal()
             }
             
-            if let existingID = UserDefaults.standard.object(forKey: "KumulosUUID") {
+            if let existingID = PersistenceHelper.object(forKey: "KumulosUUID") {
                 return existingID as! String
             }
 
             let newID = UUID().uuidString
-            UserDefaults.standard.set(newID, forKey: "KumulosUUID")
-            UserDefaults.standard.synchronize()
+            PersistenceHelper.set(newID, forKey: "KumulosUUID")
             
             return newID
         }
