@@ -149,7 +149,7 @@ internal class InAppHelper {
     }
     
     func userConsented() -> Bool {
-        return PersistenceHelper.object(forKey: KUMULOS_IN_APP_CONSENTED_KEY) as! Bool;
+        return PersistenceHelper.object(forKey: KUMULOS_IN_APP_CONSENTED_KEY) as? Bool ?? false;
     }
     
     func updateUserConsent(consentGiven: Bool) {
