@@ -25,7 +25,6 @@ internal class KeyValPersistenceHelper {
         getUserDefaults().removeObject(forKey: forKey)
     }
     
-    
     fileprivate static func getUserDefaults() -> UserDefaults {
         maybeMigrateUserDefaultsToAppGroups()
     
