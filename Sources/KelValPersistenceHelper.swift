@@ -12,16 +12,55 @@ internal class KeyValPersistenceHelper {
 
     static func set(_ value: Any?, forKey: String)
     {
-        UserDefaults.standard.set(value, forKey: forKey)
+        getUserDefaults().set(value, forKey: forKey)
     }
     
     static func object(forKey: String) -> Any?
     {
-        return UserDefaults.standard.object(forKey: forKey)
+        return getUserDefaults().object(forKey: forKey)
     }
     
     static func removeObject(forKey: String)
     {
-        UserDefaults.standard.removeObject(forKey: forKey)
+        getUserDefaults().removeObject(forKey: forKey)
+    }
+    
+    
+    fileprivate static func getUserDefaults() -> UserDefaults {
+        maybeMigrateUserDefaultsToAppGroups()
+    
+        if let suiteUserDefaults = UserDefaults(suiteName: "group.com.kumulos") {
+           return suiteUserDefaults
+        }
+               
+        return UserDefaults.standard
+    }
+    
+    fileprivate static func maybeMigrateUserDefaultsToAppGroups() {
+        
+        //dont migrate if called from extension
+        let bundleUrl: URL = Bundle.main.bundleURL
+        let bundlePathExtension: String = bundleUrl.pathExtension
+        let isAppex: Bool = bundlePathExtension == "appex"
+        if (isAppex){
+            print("CALLED FROM EXT")
+            return
+        }
+        
+        let userDefaults = UserDefaults.standard
+        let groupDefaults =  UserDefaults(suiteName: "group.com.kumulos")
+        let didMigrateToAppGroups = "DidMigrateToAppGroups"
+        if (groupDefaults == nil){
+            return
+        }
+        
+        if (groupDefaults!.bool(forKey: didMigrateToAppGroups) ){
+            return
+        }
+        
+        for key in userDefaults.dictionaryRepresentation().keys {
+            groupDefaults!.set(userDefaults.dictionaryRepresentation()[key], forKey: key)
+        }
+        groupDefaults!.set(true, forKey: didMigrateToAppGroups)
     }
 }
