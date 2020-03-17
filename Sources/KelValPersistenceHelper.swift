@@ -42,24 +42,23 @@ internal class KeyValPersistenceHelper {
         let bundlePathExtension: String = bundleUrl.pathExtension
         let isAppex: Bool = bundlePathExtension == "appex"
         if (isAppex){
-            print("CALLED FROM EXT")
             return
         }
         
         let userDefaults = UserDefaults.standard
-        let groupDefaults =  UserDefaults(suiteName: "group.com.kumulos")
-        let didMigrateToAppGroups = "DidMigrateToAppGroups"
+        let groupDefaults = UserDefaults(suiteName: "group.com.kumulos")
         if (groupDefaults == nil){
+            userDefaults.set(false, forKey: "KumulosDidMigrateToAppGroups")
             return
         }
         
-        if (groupDefaults!.bool(forKey: didMigrateToAppGroups) ){
+        if (userDefaults.bool(forKey: "KumulosDidMigrateToAppGroups")){
             return
         }
         
         for key in userDefaults.dictionaryRepresentation().keys {
             groupDefaults!.set(userDefaults.dictionaryRepresentation()[key], forKey: key)
         }
-        groupDefaults!.set(true, forKey: didMigrateToAppGroups)
+        userDefaults.set(true, forKey: "KumulosDidMigrateToAppGroups")
     }
 }
