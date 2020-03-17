@@ -70,6 +70,7 @@ class AnalyticsHelper {
         sessionIdleTimer = nil
         bgTask = UIBackgroundTaskIdentifier.invalid
         analyticsContext = nil
+        migrationAnalyticsContext = nil
         becameInactiveAt = nil
     }
     
@@ -79,9 +80,16 @@ class AnalyticsHelper {
         initContext()
         registerListeners()
         
+        
         DispatchQueue.global().async {
-            self.syncEvents()
+            if (self.migrationAnalyticsContext != nil){
+               self.syncEvents(context: self.migrationAnalyticsContext)
+            }
+            self.syncEvents(context: self.analyticsContext)
+            
+           
         }
+        
     }
     
     private func doesAppGroupExist() -> Bool {
@@ -201,7 +209,7 @@ class AnalyticsHelper {
                 
                 if (immediateFlush) {
                     DispatchQueue.global().async {
-                        self.syncEvents()
+                        self.syncEvents(context: self.analyticsContext)
                     }
                 }
             }
@@ -219,12 +227,12 @@ class AnalyticsHelper {
         }
     }
     
-    private func syncEvents() {
-        analyticsContext?.performAndWait {
-            let results = fetchEventsBatch()
+    private func syncEvents(context: NSManagedObjectContext?) {
+        context?.performAndWait {
+            let results = fetchEventsBatch(context)
 
             if results.count > 0 {
-                syncEventsBatch(events: results)
+                syncEventsBatch(context, events: results)
             }
             else if bgTask != UIBackgroundTaskIdentifier.invalid {
                 UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(bgTask.rawValue))
@@ -233,7 +241,7 @@ class AnalyticsHelper {
         }
     }
     
-    private func syncEventsBatch(events: [KSEventModel]) {
+    private func syncEventsBatch(_ context: NSManagedObjectContext?, events: [KSEventModel]) {
         var data = [] as [[String : Any?]]
         var eventIds = [] as [NSManagedObjectID]
         
@@ -256,11 +264,11 @@ class AnalyticsHelper {
         let path = "/v1/app-installs/\(Kumulos.installId)/events"
 
         kumulos.eventsHttpClient.sendRequest(.POST, toPath: path, data: data, onSuccess: { (response, data) in
-            if let err = self.pruneEventsBatch(eventIds) {
+            if let err = self.pruneEventsBatch(context, eventIds) {
                 print("Failed to prune events batch: " + err.localizedDescription)
                 return
             }
-            self.syncEvents()
+            self.syncEvents(context: context)
         }) { (response, error) in
             // Failed so assume will be retried some other time
             if self.bgTask != UIBackgroundTaskIdentifier.invalid {
@@ -270,14 +278,14 @@ class AnalyticsHelper {
         }
     }
     
-    private func pruneEventsBatch(_ eventIds: [NSManagedObjectID]) -> Error? {
+    private func pruneEventsBatch(_ context: NSManagedObjectContext?, _ eventIds: [NSManagedObjectID]) -> Error? {
         var err : Error? = nil
 
-        analyticsContext?.performAndWait {
+        context?.performAndWait {
             let request = NSBatchDeleteRequest(objectIDs: eventIds)
 
             do {
-                try self.analyticsContext?.execute(request)
+                try context?.execute(request)
             }
             catch {
                 err = error
@@ -287,8 +295,8 @@ class AnalyticsHelper {
         return err
     }
     
-    private func fetchEventsBatch() -> [KSEventModel] {
-        guard let context = analyticsContext else {
+    private func fetchEventsBatch(_ context: NSManagedObjectContext?) -> [KSEventModel] {
+        guard let context = context else {
             return []
         }
         
