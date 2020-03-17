@@ -57,6 +57,7 @@ class AnalyticsHelper {
     }
     
     private var analyticsContext : NSManagedObjectContext?
+    private var migrationAnalyticsContext : NSManagedObjectContext?
     private var startNewSession : Bool
     private var sessionIdleTimer : SessionIdleTimer?
     private var becameInactiveAt : Date?
@@ -83,27 +84,70 @@ class AnalyticsHelper {
         }
     }
     
-    private func initContext() {
-        let objectModel = getCoreDataModel()
+    private func doesAppGroupExist() -> Bool {
+        return FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.kumulos") != nil
+    }
+    
+    private func getMainStoreUrl(appGroupExists: Bool) -> URL? {
+        if (!appGroupExists){
+           return getAppDbUrl()
+        }
         
-        let storeCoordinator = NSPersistentStoreCoordinator(managedObjectModel: objectModel)
-        
+        return getSharedDbUrl()
+    }
+    
+    private func getAppDbUrl() -> URL? {
         let docsUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last
-        let storeUrl = URL(string: "KAnalyticsDb.sqlite", relativeTo: docsUrl)
-        let opts = [NSMigratePersistentStoresAutomaticallyOption: true, NSInferMappingModelAutomaticallyOption: true]
+        let appDbUrl = URL(string: "KAnalyticsDb.sqlite", relativeTo: docsUrl)
+       
+        return appDbUrl
+    }
+   
+    private func getSharedDbUrl() -> URL? {
+        let sharedContainerPath: URL? = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.kumulos")
+        if (sharedContainerPath == nil){
+            return nil
+        }
+       
+        return URL(string: "KAnalyticsDbShared.sqlite", relativeTo: sharedContainerPath)
+    }
+    
+    private func initContext() {
+        let appDbUrl = getAppDbUrl()
+        let appDbExists = appDbUrl == nil ? false : FileManager.default.fileExists(atPath: appDbUrl!.path)
+        let appGroupExists = doesAppGroupExist()
+
         
+        let storeUrl = getMainStoreUrl(appGroupExists: appGroupExists)
+
+        if (appGroupExists && appDbExists){
+            migrationAnalyticsContext = getManagedObjectContext(storeUrl: appDbUrl)
+        }
+
+        analyticsContext = getManagedObjectContext(storeUrl: storeUrl)
+       
+    }
+    
+    private func getManagedObjectContext(storeUrl : URL?) -> NSManagedObjectContext? {
+        let objectModel = getCoreDataModel()
+        let storeCoordinator = NSPersistentStoreCoordinator(managedObjectModel: objectModel)
+        let opts = [NSMigratePersistentStoresAutomaticallyOption: true, NSInferMappingModelAutomaticallyOption: true]
+       
+       
         do {
             try storeCoordinator.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: nil, at: storeUrl, options: opts)
         }
         catch {
             print("Failed to set up persistent store: " + error.localizedDescription)
-            return
+            return nil
         }
 
-        analyticsContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
-        analyticsContext?.performAndWait {
-            analyticsContext?.persistentStoreCoordinator = storeCoordinator
+        let context = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
+        context.performAndWait {
+            context.persistentStoreCoordinator = storeCoordinator
         }
+        
+        return context
     }
     
     private func registerListeners() {
