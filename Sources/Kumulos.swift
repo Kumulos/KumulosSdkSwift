@@ -171,6 +171,10 @@ open class Kumulos {
 
         instance = Kumulos(config: config)
         
+        KeyValPersistenceHelper.set(config.apiKey, forKey: "KumulosApiKey")
+        KeyValPersistenceHelper.set(config.secretKey, forKey: "KumulosSecretKey")
+        
+        
         instance!.initializeHelpers()
         
         DispatchQueue.global().async {
@@ -181,6 +185,26 @@ open class Kumulos {
             instance!.trackAndReportCrashes()
         }
     }
+    
+ 
+    internal static func initializeFromExtension() {
+        if (instance !== nil) {
+            assertionFailure("The KumulosSDK has already been initialized")
+        }
+    
+        let apiKey = KeyValPersistenceHelper.object(forKey: "KumulosApiKey") as! String?
+        let secretKey = KeyValPersistenceHelper.object(forKey: "KumulosSecretKey") as! String?
+        if (apiKey == nil || secretKey == nil){
+            print("Extension: authorization credentials not present")
+            return;
+        }
+    
+        let builder = KSConfigBuilder(apiKey: apiKey!, secretKey: secretKey!)
+            
+        instance = Kumulos(config: builder.build())
+      
+        instance!.initializeHelpers()
+  }
 
     fileprivate init(config: KSConfig) {
         self.config = config
