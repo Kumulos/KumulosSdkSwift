@@ -186,7 +186,6 @@ open class Kumulos {
         }
     }
     
- 
     internal static func initializeFromExtension() {
         if (instance !== nil) {
             assertionFailure("The KumulosSDK has already been initialized")

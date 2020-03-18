@@ -66,6 +66,4 @@ internal class KeyValPersistenceHelper {
         
         return containerUrl != nil
     }
-    
-
 }

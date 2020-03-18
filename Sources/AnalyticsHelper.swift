@@ -80,16 +80,12 @@ class AnalyticsHelper {
         initContext()
         registerListeners()
         
-        
         DispatchQueue.global().async {
             if (self.migrationAnalyticsContext != nil){
                self.syncEvents(context: self.migrationAnalyticsContext)
             }
             self.syncEvents(context: self.analyticsContext)
-            
-           
         }
-        
     }
     
     private func doesAppGroupExist() -> Bool {
@@ -124,7 +120,6 @@ class AnalyticsHelper {
         let appDbUrl = getAppDbUrl()
         let appDbExists = appDbUrl == nil ? false : FileManager.default.fileExists(atPath: appDbUrl!.path)
         let appGroupExists = doesAppGroupExist()
-
         
         let storeUrl = getMainStoreUrl(appGroupExists: appGroupExists)
 
@@ -133,14 +128,12 @@ class AnalyticsHelper {
         }
 
         analyticsContext = getManagedObjectContext(storeUrl: storeUrl)
-       
     }
     
     private func getManagedObjectContext(storeUrl : URL?) -> NSManagedObjectContext? {
         let objectModel = getCoreDataModel()
         let storeCoordinator = NSPersistentStoreCoordinator(managedObjectModel: objectModel)
         let opts = [NSMigratePersistentStoresAutomaticallyOption: true, NSInferMappingModelAutomaticallyOption: true]
-       
        
         do {
             try storeCoordinator.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: nil, at: storeUrl, options: opts)
