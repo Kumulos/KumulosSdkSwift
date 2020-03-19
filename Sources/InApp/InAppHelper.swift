@@ -94,7 +94,7 @@ internal class InAppHelper {
         #if DEBUG
             sync(onComplete)
         #else
-        let lastSyncTime = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.MESSAGES_LAST_SYNC_TIME.rawValue) as? Date
+        let lastSyncTime = UserDefaults.standard.object(forKey: KumulosUserDefaultsKey.MESSAGES_LAST_SYNC_TIME.rawValue) as? Date
             if lastSyncTime != nil && lastSyncTime!.timeIntervalSinceNow < -3600 as Double {
                 sync(onComplete)
             }
@@ -148,7 +148,7 @@ internal class InAppHelper {
     }
     
     func userConsented() -> Bool {
-        return KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.IN_APP_CONSENTED.rawValue) as? Bool ?? false;
+        return UserDefaults.standard.object(forKey: KumulosUserDefaultsKey.IN_APP_CONSENTED.rawValue) as? Bool ?? false;
     }
     
     func updateUserConsent(consentGiven: Bool) {
@@ -157,7 +157,7 @@ internal class InAppHelper {
         Kumulos.trackEventImmediately(eventType: KumulosEvent.IN_APP_CONSENT_CHANGED.rawValue, properties: props)
         
         if (consentGiven) {
-            KeyValPersistenceHelper.set(consentGiven, forKey: KumulosUserDefaultsKey.IN_APP_CONSENTED.rawValue)
+            UserDefaults.standard.set(consentGiven, forKey: KumulosUserDefaultsKey.IN_APP_CONSENTED.rawValue)
             handleEnrollmentAndSyncSetup()
         }
         else {
@@ -222,8 +222,8 @@ internal class InAppHelper {
 
     private func resetMessagingState() -> Void {
         NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
-        KeyValPersistenceHelper.removeObject(forKey: KumulosUserDefaultsKey.IN_APP_CONSENTED.rawValue)
-        KeyValPersistenceHelper.removeObject(forKey: KumulosUserDefaultsKey.MESSAGES_LAST_SYNC_TIME.rawValue)
+        UserDefaults.standard.removeObject(forKey: KumulosUserDefaultsKey.IN_APP_CONSENTED.rawValue)
+        UserDefaults.standard.removeObject(forKey: KumulosUserDefaultsKey.MESSAGES_LAST_SYNC_TIME.rawValue)
         
         messagesContext!.performAndWait({
             let context = self.messagesContext
@@ -252,7 +252,7 @@ internal class InAppHelper {
     // MARK: Message management
     func sync(_ onComplete: ((_ result: Int) -> Void)? = nil) {
         syncQueue.async(execute: {
-            let lastSyncTime = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.MESSAGES_LAST_SYNC_TIME.rawValue) as? NSDate
+            let lastSyncTime = UserDefaults.standard.object(forKey: KumulosUserDefaultsKey.MESSAGES_LAST_SYNC_TIME.rawValue) as? NSDate
             var after = ""
             
             if lastSyncTime != nil {
@@ -400,7 +400,7 @@ internal class InAppHelper {
                 return
             }
             
-            KeyValPersistenceHelper.set(lastSyncTime, forKey: KumulosUserDefaultsKey.MESSAGES_LAST_SYNC_TIME.rawValue)
+            UserDefaults.standard.set(lastSyncTime, forKey: KumulosUserDefaultsKey.MESSAGES_LAST_SYNC_TIME.rawValue)
             
             trackMessageDelivery(messages: messages)
         })
