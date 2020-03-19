@@ -38,8 +38,9 @@ internal class KeyValPersistenceHelper {
         
         guard let groupDefaults = UserDefaults(suiteName: AppGroupsHelper.getKumulosGroupName()) else { return }
         
+        let defaultsAsDict : [String: Any] = standardDefaults.dictionaryRepresentation()
         for key in KumulosUserDefaultsKey.sharedKeys{
-            groupDefaults.set(standardDefaults.dictionaryRepresentation()[key.rawValue], forKey: key.rawValue)
+            groupDefaults.set(defaultsAsDict[key.rawValue], forKey: key.rawValue)
         }
         
         standardDefaults.set(true, forKey: KumulosUserDefaultsKey.MIGRATED_TO_GROUPS.rawValue)
