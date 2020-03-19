@@ -37,14 +37,11 @@ internal class KeyValPersistenceHelper {
         if (standardDefaults.bool(forKey: MIGRATED_TO_GROUPS_KEY)){
             return
         }
-       
-        let groupDefaults = UserDefaults(suiteName: "group.com.kumulos")
-        if (groupDefaults == nil){
-            return
-        }
+        
+        guard let groupDefaults = UserDefaults(suiteName: "group.com.kumulos") else { return }
         
         for key in standardDefaults.dictionaryRepresentation().keys {
-            groupDefaults!.set(standardDefaults.dictionaryRepresentation()[key], forKey: key)
+            groupDefaults.set(standardDefaults.dictionaryRepresentation()[key], forKey: key)
         }
         standardDefaults.set(true, forKey: MIGRATED_TO_GROUPS_KEY)
     }
