@@ -8,7 +8,6 @@
 
 import Foundation
 
-
 internal class AppGroupsHelper {
 
     internal static func isKumulosAppGroupDefined() -> Bool {
