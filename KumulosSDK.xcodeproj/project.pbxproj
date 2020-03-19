@@ -42,6 +42,10 @@
 		B62FB896242384020070A79D /* KumulosUserDefaultsKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62FB894242384020070A79D /* KumulosUserDefaultsKey.swift */; };
 		B62FB8982423997E0070A79D /* AppGroupsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62FB8972423997E0070A79D /* AppGroupsHelper.swift */; };
 		B62FB8992423997E0070A79D /* AppGroupsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62FB8972423997E0070A79D /* AppGroupsHelper.swift */; };
+		B62FB89B2423A7630070A79D /* KumulosForExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62FB89A2423A7630070A79D /* KumulosForExtension.swift */; };
+		B62FB89E2423A8C30070A79D /* KSConfigForExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62FB89D2423A8C30070A79D /* KSConfigForExtension.swift */; };
+		B62FB8A02423ACE60070A79D /* KumulosHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62FB89F2423ACE60070A79D /* KumulosHelper.swift */; };
+		B62FB8A12423ACE60070A79D /* KumulosHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62FB89F2423ACE60070A79D /* KumulosHelper.swift */; };
 		B66094EE241BEADF005C3B34 /* KelValPersistenceHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B66094ED241BEADF005C3B34 /* KelValPersistenceHelper.swift */; };
 		B66094EF241FB29F005C3B34 /* KelValPersistenceHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B66094ED241BEADF005C3B34 /* KelValPersistenceHelper.swift */; };
 /* End PBXBuildFile section */
@@ -87,7 +91,10 @@
 		B625D074233A7A17003AA551 /* InAppModels.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InAppModels.swift; sourceTree = "<group>"; };
 		B62FB894242384020070A79D /* KumulosUserDefaultsKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KumulosUserDefaultsKey.swift; sourceTree = "<group>"; };
 		B62FB8972423997E0070A79D /* AppGroupsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupsHelper.swift; sourceTree = "<group>"; };
-		B66094ED241BEADF005C3B34 /* KelValPersistenceHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KelValPersistenceHelper.swift; path = Sources/KelValPersistenceHelper.swift; sourceTree = "<group>"; };
+		B62FB89A2423A7630070A79D /* KumulosForExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KumulosForExtension.swift; sourceTree = "<group>"; };
+		B62FB89D2423A8C30070A79D /* KSConfigForExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSConfigForExtension.swift; sourceTree = "<group>"; };
+		B62FB89F2423ACE60070A79D /* KumulosHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KumulosHelper.swift; sourceTree = "<group>"; };
+		B66094ED241BEADF005C3B34 /* KelValPersistenceHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KelValPersistenceHelper.swift; sourceTree = "<group>"; };
 		DB481C1A1D3BC9D30021C627 /* KumulosSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = KumulosSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -157,7 +164,6 @@
 				1293720A2006378D00EBC8F4 /* AnalyticsHelper.swift */,
 				123D90A722A160CF004B8392 /* KSHttp.swift */,
 				128EF6EF233B6FF6006C7A71 /* KSUserNotificationCenterDelegate.swift */,
-				B66094ED241BEADF005C3B34 /* KelValPersistenceHelper.swift */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
@@ -169,6 +175,8 @@
 				12985A66238D6FB600671FBF /* Info.plist */,
 				6F0EB56723D06509007EDA84 /* CategoryHelper.swift */,
 				12985A69238D701500671FBF /* KumulosNotificationService.swift */,
+				B62FB89A2423A7630070A79D /* KumulosForExtension.swift */,
+				B62FB89D2423A8C30070A79D /* KSConfigForExtension.swift */,
 			);
 			name = Extension;
 			path = Sources/Extension;
@@ -188,8 +196,10 @@
 		B62FB893242383DD0070A79D /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				B66094ED241BEADF005C3B34 /* KelValPersistenceHelper.swift */,
 				B62FB894242384020070A79D /* KumulosUserDefaultsKey.swift */,
 				B62FB8972423997E0070A79D /* AppGroupsHelper.swift */,
+				B62FB89F2423ACE60070A79D /* KumulosHelper.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -335,9 +345,12 @@
 			files = (
 				B66094EF241FB29F005C3B34 /* KelValPersistenceHelper.swift in Sources */,
 				12985A6A238D701500671FBF /* KumulosNotificationService.swift in Sources */,
+				B62FB8A12423ACE60070A79D /* KumulosHelper.swift in Sources */,
 				B62FB8992423997E0070A79D /* AppGroupsHelper.swift in Sources */,
 				B62FB896242384020070A79D /* KumulosUserDefaultsKey.swift in Sources */,
+				B62FB89B2423A7630070A79D /* KumulosForExtension.swift in Sources */,
 				6F0EB56923D067F3007EDA84 /* CategoryHelper.swift in Sources */,
+				B62FB89E2423A8C30070A79D /* KSConfigForExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -354,6 +367,7 @@
 				123D90A822A160D0004B8392 /* KSHttp.swift in Sources */,
 				127B22DB1D9BE59E00D9C94B /* KSAPIOperation.swift in Sources */,
 				127B22DE1D9BE59E00D9C94B /* Kumulos+API.swift in Sources */,
+				B62FB8A02423ACE60070A79D /* KumulosHelper.swift in Sources */,
 				B62FB8982423997E0070A79D /* AppGroupsHelper.swift in Sources */,
 				127B22DD1D9BE59E00D9C94B /* Kumulos.swift in Sources */,
 				B625D076233A7A18003AA551 /* InAppHelper.swift in Sources */,

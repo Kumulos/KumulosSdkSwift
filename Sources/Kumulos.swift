@@ -46,9 +46,6 @@ public enum InAppConsentStrategy : String {
 
 // MARK: class
 open class Kumulos {
-
-    private static let installIdLock = DispatchSemaphore(value: 1)
-    
     internal let baseApiUrl = "https://api.kumulos.com"
     internal let basePushUrl = "https://push.kumulos.com"
     internal let baseCrashUrl = "https://crash.kumulos.com/v1"
@@ -138,19 +135,7 @@ open class Kumulos {
     */
     public static var installId :String {
         get {
-            installIdLock.wait()
-            defer {
-                installIdLock.signal()
-            }
-            
-            if let existingID = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.INSTALL_UUID.rawValue) {
-                return existingID as! String
-            }
-
-            let newID = UUID().uuidString
-            KeyValPersistenceHelper.set(newID, forKey: KumulosUserDefaultsKey.INSTALL_UUID.rawValue)
-            
-            return newID
+            return KumulosHelper.getInstallId()
         }
     }
 
@@ -185,25 +170,6 @@ open class Kumulos {
             instance!.trackAndReportCrashes()
         }
     }
-    
-    internal static func initializeFromExtension() {
-        if (instance !== nil) {
-            assertionFailure("The KumulosSDK has already been initialized")
-        }
-    
-        let apiKey = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.API_KEY.rawValue) as! String?
-        let secretKey = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.SECRET_KEY.rawValue) as! String?
-        if (apiKey == nil || secretKey == nil){
-            print("Extension: authorization credentials not present")
-            return;
-        }
-    
-        let builder = KSConfigBuilder(apiKey: apiKey!, secretKey: secretKey!)
-            
-        instance = Kumulos(config: builder.build())
-      
-        instance!.initializeHelpers()
-  }
 
     fileprivate init(config: KSConfig) {
         self.config = config
@@ -226,7 +192,7 @@ open class Kumulos {
     }
     
     private func initializeHelpers() {
-        analyticsHelper.initialize(kumulos: self)
+        analyticsHelper.initialize()
         inAppHelper.initialize()
         _ = pushHelper.pushInit
     }

@@ -48,14 +48,6 @@ class KSEventModel : NSManagedObject {
 }
 
 class AnalyticsHelper {
-    private var k : Kumulos?
-    
-    private var kumulos : Kumulos {
-        get{
-            return k!
-        }
-    }
-    
     private var analyticsContext : NSManagedObjectContext?
     private var migrationAnalyticsContext : NSManagedObjectContext?
     private var startNewSession : Bool
@@ -74,9 +66,7 @@ class AnalyticsHelper {
         becameInactiveAt = nil
     }
     
-    public func initialize(kumulos:Kumulos) {
-        self.k = kumulos;
-                
+    public func initialize() {
         initContext()
         registerListeners()
         
@@ -184,7 +174,7 @@ class AnalyticsHelper {
             event.uuid = UUID().uuidString.lowercased()
             event.happenedAt = NSNumber(value: Int64(atTime.timeIntervalSince1970 * 1000))
             event.eventType = eventType
-            event.userIdentifier = Kumulos.currentUserIdentifier
+            event.userIdentifier = KumulosBase.currentUserIdentifier
 
             if properties != nil {
                 let propsJson = try? JSONSerialization.data(withJSONObject: properties as Any, options: JSONSerialization.WritingOptions(rawValue: 0))
@@ -250,7 +240,7 @@ class AnalyticsHelper {
             eventIds.append(event.objectID)
         }
 
-        let path = "/v1/app-installs/\(Kumulos.installId)/events"
+        let path = "/v1/app-installs/\(KumulosHelper.getInstallId())/events"
 
         kumulos.eventsHttpClient.sendRequest(.POST, toPath: path, data: data, onSuccess: { (response, data) in
             if let err = self.pruneEventsBatch(context, eventIds) {
@@ -328,7 +318,7 @@ class AnalyticsHelper {
     @objc private func appBecameInactive() {
         becameInactiveAt = Date()
         
-        sessionIdleTimer = SessionIdleTimer(self, timeout: kumulos.config.sessionIdleTimeout)
+        sessionIdleTimer = SessionIdleTimer(self, timeout: kumulos.config.sessionIdleTimeout)//TODO: beda
     }
     
     @objc private func appBecameBackground() {
