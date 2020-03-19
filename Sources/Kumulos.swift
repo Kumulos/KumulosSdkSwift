@@ -185,25 +185,6 @@ open class Kumulos {
             instance!.trackAndReportCrashes()
         }
     }
-    
-    internal static func initializeFromExtension() {
-        if (instance !== nil) {
-            assertionFailure("The KumulosSDK has already been initialized")
-        }
-    
-        let apiKey = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.API_KEY.rawValue) as! String?
-        let secretKey = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.SECRET_KEY.rawValue) as! String?
-        if (apiKey == nil || secretKey == nil){
-            print("Extension: authorization credentials not present")
-            return;
-        }
-    
-        let builder = KSConfigBuilder(apiKey: apiKey!, secretKey: secretKey!)
-            
-        instance = Kumulos(config: builder.build())
-      
-        instance!.initializeHelpers()
-  }
 
     fileprivate init(config: KSConfig) {
         self.config = config
