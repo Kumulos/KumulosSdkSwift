@@ -10,7 +10,7 @@ import Foundation
 
 internal class KeyValPersistenceHelper {
 
-    internal static let MIGRATED_TO_GROUPS_KEY = "KumulosDidMigrateToAppGroups"
+   
     
     static func set(_ value: Any?, forKey: String)
     {
@@ -30,20 +30,21 @@ internal class KeyValPersistenceHelper {
     internal static func maybeMigrateUserDefaultsToAppGroups() {
         let standardDefaults = UserDefaults.standard
         if (!isKumulosAppGroupDefined()){
-            standardDefaults.set(false, forKey: MIGRATED_TO_GROUPS_KEY)
+            standardDefaults.set(false, forKey: KumulosUserDefaultsKey.MIGRATED_TO_GROUPS.rawValue)
             return;
         }
         
-        if (standardDefaults.bool(forKey: MIGRATED_TO_GROUPS_KEY)){
+        if (standardDefaults.bool(forKey: KumulosUserDefaultsKey.MIGRATED_TO_GROUPS.rawValue)){
             return
         }
         
         guard let groupDefaults = UserDefaults(suiteName: "group.com.kumulos") else { return }
         
-        for key in standardDefaults.dictionaryRepresentation().keys {
-            groupDefaults.set(standardDefaults.dictionaryRepresentation()[key], forKey: key)
+        for key in KumulosUserDefaultsKey.sharedKeys{
+            groupDefaults.set(standardDefaults.dictionaryRepresentation()[key.rawValue], forKey: key.rawValue)
         }
-        standardDefaults.set(true, forKey: MIGRATED_TO_GROUPS_KEY)
+        
+        standardDefaults.set(true, forKey: KumulosUserDefaultsKey.MIGRATED_TO_GROUPS.rawValue)
     }
     
     fileprivate static func getUserDefaults() -> UserDefaults {
