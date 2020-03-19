@@ -88,10 +88,6 @@ class AnalyticsHelper {
         }
     }
     
-    private func doesAppGroupExist() -> Bool {
-        return FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.kumulos") != nil
-    }
-    
     private func getMainStoreUrl(appGroupExists: Bool) -> URL? {
         if (!appGroupExists){
            return getAppDbUrl()
@@ -108,7 +104,7 @@ class AnalyticsHelper {
     }
    
     private func getSharedDbUrl() -> URL? {
-        let sharedContainerPath: URL? = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.kumulos")
+        let sharedContainerPath: URL? = AppGroupsHelper.getSharedContainerPath()
         if (sharedContainerPath == nil){
             return nil
         }
@@ -119,7 +115,7 @@ class AnalyticsHelper {
     private func initContext() {
         let appDbUrl = getAppDbUrl()
         let appDbExists = appDbUrl == nil ? false : FileManager.default.fileExists(atPath: appDbUrl!.path)
-        let appGroupExists = doesAppGroupExist()
+        let appGroupExists = AppGroupsHelper.isKumulosAppGroupDefined()
         
         let storeUrl = getMainStoreUrl(appGroupExists: appGroupExists)
 

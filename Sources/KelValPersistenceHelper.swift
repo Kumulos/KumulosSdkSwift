@@ -9,8 +9,6 @@
 import Foundation
 
 internal class KeyValPersistenceHelper {
-
-   
     
     static func set(_ value: Any?, forKey: String)
     {
@@ -29,7 +27,7 @@ internal class KeyValPersistenceHelper {
     
     internal static func maybeMigrateUserDefaultsToAppGroups() {
         let standardDefaults = UserDefaults.standard
-        if (!isKumulosAppGroupDefined()){
+        if (!AppGroupsHelper.isKumulosAppGroupDefined()){
             standardDefaults.set(false, forKey: KumulosUserDefaultsKey.MIGRATED_TO_GROUPS.rawValue)
             return;
         }
@@ -38,7 +36,7 @@ internal class KeyValPersistenceHelper {
             return
         }
         
-        guard let groupDefaults = UserDefaults(suiteName: "group.com.kumulos") else { return }
+        guard let groupDefaults = UserDefaults(suiteName: AppGroupsHelper.getKumulosGroupName()) else { return }
         
         for key in KumulosUserDefaultsKey.sharedKeys{
             groupDefaults.set(standardDefaults.dictionaryRepresentation()[key.rawValue], forKey: key.rawValue)
@@ -48,20 +46,14 @@ internal class KeyValPersistenceHelper {
     }
     
     fileprivate static func getUserDefaults() -> UserDefaults {
-        if (!isKumulosAppGroupDefined()){
+        if (!AppGroupsHelper.isKumulosAppGroupDefined()){
             return UserDefaults.standard
         }
         
-        if let suiteUserDefaults = UserDefaults(suiteName: "group.com.kumulos") {
+        if let suiteUserDefaults = UserDefaults(suiteName: AppGroupsHelper.getKumulosGroupName()) {
             return suiteUserDefaults
         }
         
         return UserDefaults.standard
-    }
-    
-    fileprivate static func isKumulosAppGroupDefined() -> Bool {
-        let containerUrl = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.kumulos")//TODO: normal name
-        
-        return containerUrl != nil
     }
 }
