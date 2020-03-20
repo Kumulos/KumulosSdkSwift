@@ -75,7 +75,10 @@ public class KumulosNotificationService {
     }
     
     class func trackDeliveredEvent(notificationId: Int){
-        KumulosForExtension.initialize()
+        let res = KumulosForExtension.initialize()
+        if (!res){
+            return
+        }
         
         let props: [String:Any] = ["type" : KS_MESSAGE_TYPE_PUSH, "id":notificationId]
         KumulosForExtension.trackEventImmediately(eventType: KumulosSharedEvent.MESSAGE_DELIVERED.rawValue, properties: props)

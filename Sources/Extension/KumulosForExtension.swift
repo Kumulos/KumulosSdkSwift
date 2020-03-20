@@ -18,7 +18,7 @@ class KumulosForExtension  {
         analyticsHelper.initialize(apiKey: apiKey, secretKey: secretKey, sessionIdleTimeout: nil)
     }
     
-    internal static func initialize() {
+    internal static func initialize() -> Bool {
         if (instance !== nil) {
             assertionFailure("The KumulosSDK has already been initialized in extension")
         }
@@ -27,10 +27,12 @@ class KumulosForExtension  {
         let secretKey = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.SECRET_KEY.rawValue) as! String?
         if (apiKey == nil || secretKey == nil){
             print("Extension: authorization credentials not present")
-            return;
+            return false;
         }
         
         instance = KumulosForExtension(apiKey: apiKey!, secretKey: secretKey!)
+        
+        return true
     }
     
     internal static func getInstance() -> KumulosForExtension
