@@ -62,6 +62,8 @@ class AnalyticsHelper {
     private var sessionIdleTimer : SessionIdleTimer?
     private var becameInactiveAt : Date?
     private var bgTask : UIBackgroundTaskIdentifier
+    private var eventsHttpClient:KSHttpClient
+    private let baseEventsUrl = "https://events.kumulos.com"
     
     // MARK: Initialization
     
@@ -72,10 +74,13 @@ class AnalyticsHelper {
         analyticsContext = nil
         migrationAnalyticsContext = nil
         becameInactiveAt = nil
+        eventsHttpClient =  KSHttpClient(baseUrl: URL(string: baseEventsUrl)!, requestFormat: .json, responseFormat: .json)
     }
     
     public func initialize(kumulos:Kumulos) {
         self.k = kumulos;
+        
+        eventsHttpClient.setBasicAuth(user: kumulos.config.apiKey, password: kumulos.config.secretKey)
         
         initContext()
         registerListeners()
@@ -86,6 +91,10 @@ class AnalyticsHelper {
             }
             self.syncEvents(context: self.analyticsContext)
         }
+    }
+    
+    deinit {
+        eventsHttpClient.invalidateSessionCancellingTasks(false)
     }
     
     private func getMainStoreUrl(appGroupExists: Bool) -> URL? {
@@ -252,7 +261,7 @@ class AnalyticsHelper {
 
         let path = "/v1/app-installs/\(KumulosHelper.installId)/events"
 
-        kumulos.eventsHttpClient.sendRequest(.POST, toPath: path, data: data, onSuccess: { (response, data) in
+        self.eventsHttpClient.sendRequest(.POST, toPath: path, data: data, onSuccess: { (response, data) in
             if let err = self.pruneEventsBatch(context, eventIds) {
                 print("Failed to prune events batch: " + err.localizedDescription)
                 return
