@@ -54,6 +54,16 @@ public extension Kumulos {
     static func associateUserWithInstall(userIdentifier: String, attributes: [String:AnyObject]) {
         associateUserWithInstallImpl(userIdentifier: userIdentifier, attributes: attributes)
     }
+    
+    /**
+     Returns the identifier for the user currently associated with the Kumulos installation record
+     If no user is associated, it returns the Kumulos installation ID
+    */
+    static var currentUserIdentifier : String {
+        get {
+            return KumulosHelper.currentUserIdentifier
+        }
+    }
 
     /**
      Clears any existing association between this install record and a user identifier.
