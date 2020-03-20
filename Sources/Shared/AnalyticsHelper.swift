@@ -226,13 +226,6 @@ internal class AnalyticsHelper {
                 syncEventsBatch(context, events: results)
                 return
             }
-
-            #if !KS_EXTENSION
-                if bgTask != UIBackgroundTaskIdentifier.invalid {
-                    UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(bgTask.rawValue))
-                    bgTask = UIBackgroundTaskIdentifier.invalid
-                }
-            #endif
         }
     }
 
@@ -265,13 +258,7 @@ internal class AnalyticsHelper {
             }
             self.syncEvents(context: context)
         }) { (response, error) in
-            #if !KS_EXTENSION
-                // Failed so assume will be retried some other time
-                if self.bgTask != UIBackgroundTaskIdentifier.invalid {
-                    UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(self.bgTask.rawValue))
-                    self.bgTask = UIBackgroundTaskIdentifier.invalid
-                }
-            #endif
+            print("Failed to send events")
         }
     }
 
@@ -370,6 +357,11 @@ internal class AnalyticsHelper {
 
         trackEvent(eventType: KumulosEvent.STATS_BACKGROUND.rawValue, atTime: becameInactiveAt!, properties: nil, asynchronously: false, immediateFlush: true)
         becameInactiveAt = nil
+        
+        if bgTask != UIBackgroundTaskIdentifier.invalid {
+            UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(bgTask.rawValue))
+            bgTask = UIBackgroundTaskIdentifier.invalid
+        }
     }
 
 #endif
