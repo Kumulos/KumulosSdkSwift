@@ -13,22 +13,6 @@ public class KumulosNotificationService {
     internal static let KS_MEDIA_RESIZER_BASE_URL = "https://i.app.delivery"
 
     public class func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
-        
-        
-
-        var value1 = "wtf";
-        
-        if let suiteUserDefaults = UserDefaults(suiteName: AppGroupsHelper.getKumulosGroupName()) {//TODO: test1
-      
-            let res2 = suiteUserDefaults.object(forKey: "KumulosApiKey") as! String? ?? "1"
-        
-            
-            
-            value1 = String(format: "%@ [modified]", res2)
-         }
-        
-        
-
         let bestAttemptContent =  (request.content.mutableCopy() as! UNMutableNotificationContent)
 
         let userInfo = request.content.userInfo
@@ -41,8 +25,6 @@ public class KumulosNotificationService {
         let id = msgData["id"] as! Int
         
         trackDeliveredEvent(notificationId: id)
-        
-        bestAttemptContent.title = value1
         
         let buttons = data["k.buttons"] as? NSArray
         
@@ -74,7 +56,7 @@ public class KumulosNotificationService {
            })
     }
     
-    class func trackDeliveredEvent(notificationId: Int){
+    class func trackDeliveredEvent(notificationId: Int) {
         let res = KumulosForExtension.initialize()
         if (!res){
             return
