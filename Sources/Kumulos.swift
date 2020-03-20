@@ -135,7 +135,7 @@ open class Kumulos {
     */
     public static var installId :String {
         get {
-            return KumulosHelper.getInstallId()
+            return KumulosHelper.installId
         }
     }
 
@@ -192,7 +192,7 @@ open class Kumulos {
     }
     
     private func initializeHelpers() {
-        analyticsHelper.initialize()
+        analyticsHelper.initialize(kumulos: self)
         inAppHelper.initialize()
         _ = pushHelper.pushInit
     }

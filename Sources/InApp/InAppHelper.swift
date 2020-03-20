@@ -265,7 +265,7 @@ internal class InAppHelper {
                 }
             }
 
-            let encodedIdentifier = self.urlEncode(url: Kumulos.currentUserIdentifier)
+            let encodedIdentifier = self.urlEncode(url: KumulosHelper.currentUserIdentifier)
             let path = "/v1/users/\(encodedIdentifier!)/messages\(after)"
         
             Kumulos.sharedInstance.pushHttpClient.sendRequest(.GET, toPath: path, data: nil, onSuccess: { response, decodedBody in
