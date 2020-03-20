@@ -8,38 +8,7 @@
 import Foundation
 import CoreData
 
-#if !KS_EXTENSION
-    class SessionIdleTimer {
-        private let helper : AnalyticsHelper
-        private var invalidationLock : DispatchSemaphore
-        private var invalidated : Bool
 
-        init(_ helper : AnalyticsHelper, timeout: UInt) {
-            self.invalidationLock = DispatchSemaphore(value: 1)
-            self.invalidated = false
-            self.helper = helper
-
-            DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(Int(timeout))) {
-                self.invalidationLock.wait()
-
-                if self.invalidated {
-                    self.invalidationLock.signal()
-                    return
-                }
-
-                self.invalidationLock.signal()
-
-                helper.sessionDidEnd()
-            }
-        }
-
-        internal func invalidate() {
-            invalidationLock.wait()
-            invalidated = true
-            invalidationLock.signal()
-        }
-    }
-#endif
 
 class KSEventModel : NSManagedObject {
     @NSManaged var uuid : String
@@ -50,43 +19,25 @@ class KSEventModel : NSManagedObject {
 }
 
 internal class AnalyticsHelper {
-    #if !KS_EXTENSION
-        private var startNewSession : Bool
-        private var becameInactiveAt : Date?
-        private var sessionIdleTimer : SessionIdleTimer?
-        private var bgTask : UIBackgroundTaskIdentifier
-    #endif
-
+ 
     private var analyticsContext : NSManagedObjectContext?
     private var migrationAnalyticsContext : NSManagedObjectContext?
     private var eventsHttpClient:KSHttpClient
     private let baseEventsUrl = "https://events.kumulos.com"
-    private var sessionIdleTimeout : UInt?
 
     // MARK: Initialization
 
     init() {
-        #if !KS_EXTENSION
-            startNewSession = true
-            sessionIdleTimer = nil
-            bgTask = UIBackgroundTaskIdentifier.invalid
-            becameInactiveAt = nil
-        #endif
-
         analyticsContext = nil
         migrationAnalyticsContext = nil
 
         eventsHttpClient = KSHttpClient(baseUrl: URL(string: baseEventsUrl)!, requestFormat: .json, responseFormat: .json)
     }
 
-    public func initialize(apiKey: String, secretKey: String, sessionIdleTimeout: UInt?) {
+    public func initialize(apiKey: String, secretKey: String) {
         eventsHttpClient.setBasicAuth(user: apiKey, password: secretKey)
-        self.sessionIdleTimeout = sessionIdleTimeout
-
+        
         initContext()
-        #if !KS_EXTENSION
-            registerListeners()
-        #endif
 
         DispatchQueue.global().async {
             if (self.migrationAnalyticsContext != nil){
@@ -300,72 +251,6 @@ internal class AnalyticsHelper {
         }
     }
 
-#if !KS_EXTENSION
-    private func registerListeners() {
-        NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appBecameActive), name: UIApplication.didBecomeActiveNotification, object: nil)
-
-        NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appBecameInactive), name: UIApplication.willResignActiveNotification, object: nil)
-
-        NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appBecameBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
-
-        NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appWillTerminate), name: UIApplication.willTerminateNotification, object: nil)
-    }
-
-    // MARK: App lifecycle delegates
-
-    @objc private func appBecameActive() {
-        if startNewSession {
-            trackEvent(eventType: KumulosEvent.STATS_FOREGROUND.rawValue, properties: nil)
-            startNewSession = false
-            return
-        }
-
-        if sessionIdleTimer != nil {
-            sessionIdleTimer?.invalidate()
-            sessionIdleTimer = nil
-        }
-
-        if bgTask != UIBackgroundTaskIdentifier.invalid {
-            UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(bgTask.rawValue))
-            bgTask = UIBackgroundTaskIdentifier.invalid
-        }
-    }
-
-    @objc private func appBecameInactive() {
-        becameInactiveAt = Date()
-
-        sessionIdleTimer = SessionIdleTimer(self, timeout: self.sessionIdleTimeout!)
-    }
-
-    @objc private func appBecameBackground() {
-        bgTask = UIApplication.shared.beginBackgroundTask(withName: "sync", expirationHandler: {
-            UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(self.bgTask.rawValue))
-            self.bgTask = UIBackgroundTaskIdentifier.invalid
-        })
-    }
-
-    @objc private func appWillTerminate() {
-        if sessionIdleTimer != nil {
-            sessionIdleTimer?.invalidate()
-            sessionDidEnd()
-        }
-    }
-
-    fileprivate func sessionDidEnd() {
-        startNewSession = true
-        sessionIdleTimer = nil
-
-        trackEvent(eventType: KumulosEvent.STATS_BACKGROUND.rawValue, atTime: becameInactiveAt!, properties: nil, asynchronously: false, immediateFlush: true)
-        becameInactiveAt = nil
-        
-        if bgTask != UIBackgroundTaskIdentifier.invalid {
-            UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(bgTask.rawValue))
-            bgTask = UIBackgroundTaskIdentifier.invalid
-        }
-    }
-
-#endif
-
     // MARK: CoreData model definition
     fileprivate func getCoreDataModel() -> NSManagedObjectModel {
         let model = NSManagedObjectModel()
@@ -412,13 +297,4 @@ internal class AnalyticsHelper {
 
         return model;
     }
-
 }
-
-
-#if !KS_EXTENSION
-    // Helper function inserted by Swift 4.2 migrator.
-    fileprivate func convertToUIBackgroundTaskIdentifier(_ input: Int) -> UIBackgroundTaskIdentifier {
-        return UIBackgroundTaskIdentifier(rawValue: input)
-    }
-#endif

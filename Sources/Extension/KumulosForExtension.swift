@@ -15,7 +15,7 @@ internal class KumulosForExtension  {
     
     fileprivate init(apiKey: String, secretKey: String) {
         analyticsHelper = AnalyticsHelper()
-        analyticsHelper.initialize(apiKey: apiKey, secretKey: secretKey, sessionIdleTimeout: nil)
+        analyticsHelper.initialize(apiKey: apiKey, secretKey: secretKey)
     }
     
     internal static func initialize() -> Bool {

@@ -92,6 +92,7 @@ open class Kumulos {
     fileprivate(set) var inAppHelper: InAppHelper
 
     fileprivate(set) var analyticsHelper: AnalyticsHelper
+    fileprivate(set) var sessionHelper: SessionHelper
 
     fileprivate var pushHelper: PushHelper
 
@@ -182,12 +183,14 @@ open class Kumulos {
         rpcHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
 
         analyticsHelper = AnalyticsHelper()
+        sessionHelper = SessionHelper(sessionIdleTimeout: config.sessionIdleTimeout)
         inAppHelper = InAppHelper()
         pushHelper = PushHelper()
     }
 
     private func initializeHelpers() {
-        analyticsHelper.initialize(apiKey: self.config.apiKey, secretKey: self.config.secretKey, sessionIdleTimeout: self.config.sessionIdleTimeout)
+        analyticsHelper.initialize(apiKey: self.config.apiKey, secretKey: self.config.secretKey)
+        sessionHelper.initialize()
         inAppHelper.initialize()
         _ = pushHelper.pushInit
     }

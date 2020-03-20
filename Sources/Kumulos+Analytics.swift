@@ -11,7 +11,11 @@ public extension Kumulos {
     internal static func trackEvent(eventType: KumulosEvent, properties: [String:Any]?, immediateFlush: Bool = false) {
         getInstance().analyticsHelper.trackEvent(eventType: eventType.rawValue, properties: properties, immediateFlush: immediateFlush)
     }
-
+    
+    internal static func trackEvent(eventType: String, atTime: Date, properties: [String:Any]?, asynchronously : Bool = true, immediateFlush: Bool = false) {
+        getInstance().analyticsHelper.trackEvent(eventType: eventType, atTime: atTime, properties: properties, asynchronously: asynchronously, immediateFlush: immediateFlush)
+    }
+    
     /**
      Logs an analytics event to the local database
 

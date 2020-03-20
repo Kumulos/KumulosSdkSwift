@@ -49,6 +49,7 @@
 		B62FB8AF242461C70070A79D /* AnalyticsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1293720A2006378D00EBC8F4 /* AnalyticsHelper.swift */; };
 		B62FB8B02424622F0070A79D /* KSHttp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 123D90A722A160CF004B8392 /* KSHttp.swift */; };
 		B66094EE241BEADF005C3B34 /* KelValPersistenceHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B66094ED241BEADF005C3B34 /* KelValPersistenceHelper.swift */; };
+		B6E48F5F2425057E00E8B3B9 /* SessionHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E48F5E2425057E00E8B3B9 /* SessionHelper.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -95,6 +96,7 @@
 		B62FB8A5242448520070A79D /* KumulosHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = KumulosHelper.swift; path = Sources/Shared/KumulosHelper.swift; sourceTree = SOURCE_ROOT; };
 		B62FB8AC2424583F0070A79D /* KumulosForExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KumulosForExtension.swift; sourceTree = "<group>"; };
 		B66094ED241BEADF005C3B34 /* KelValPersistenceHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KelValPersistenceHelper.swift; sourceTree = "<group>"; };
+		B6E48F5E2425057E00E8B3B9 /* SessionHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SessionHelper.swift; path = Sources/SessionHelper.swift; sourceTree = "<group>"; };
 		DB481C1A1D3BC9D30021C627 /* KumulosSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = KumulosSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -162,6 +164,7 @@
 				A16790831E49DCDE00C276AF /* PushChannel.swift */,
 				129372082006355E00EBC8F4 /* Kumulos+Analytics.swift */,
 				128EF6EF233B6FF6006C7A71 /* KSUserNotificationCenterDelegate.swift */,
+				B6E48F5E2425057E00E8B3B9 /* SessionHelper.swift */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
@@ -379,6 +382,7 @@
 				A16790821E49D8BD00C276AF /* KumulosPushChannels.swift in Sources */,
 				127B22E31D9BE59E00D9C94B /* MobileProvision.m in Sources */,
 				129372092006355E00EBC8F4 /* Kumulos+Analytics.swift in Sources */,
+				B6E48F5F2425057E00E8B3B9 /* SessionHelper.swift in Sources */,
 				128EF6F0233B6FF6006C7A71 /* KSUserNotificationCenterDelegate.swift in Sources */,
 				6FDBD0EA233CF8C2000398EE /* KumulosInApp.swift in Sources */,
 				B62FB895242384020070A79D /* KumulosUserDefaultsKey.swift in Sources */,
@@ -413,7 +417,7 @@
 				MARKETING_VERSION = 8.3.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				OTHER_SWIFT_FLAGS = "-DKS_EXTENSION";
+				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.kumulos.swift.KumulosSDKExtension;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -446,7 +450,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MARKETING_VERSION = 8.3.2;
 				MTL_FAST_MATH = YES;
-				OTHER_SWIFT_FLAGS = "-DKS_EXTENSION";
+				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.kumulos.swift.KumulosSDKExtension;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
