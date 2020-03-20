@@ -54,15 +54,15 @@ open class Kumulos {
 
     internal let pushNotificationDeviceType = 1
     internal let pushNotificationProductionTokenType:Int = 1
-    
+
     internal let sdkVersion : String = "8.3.2"
 
     var networkRequestsInProgress = 0
 
     fileprivate static var instance:Kumulos?
-    
+
     internal var notificationCenter:Any?
-    
+
     internal static var sharedInstance:Kumulos {
         get {
             if(false == isInitialized()) {
@@ -72,7 +72,7 @@ open class Kumulos {
             return instance!
         }
     }
-    
+
     public static func getInstance() -> Kumulos
     {
         return sharedInstance;
@@ -82,15 +82,15 @@ open class Kumulos {
     fileprivate(set) var apiKey: String
     fileprivate(set) var secretKey: String
     fileprivate(set) var inAppConsentStrategy:InAppConsentStrategy = InAppConsentStrategy.NotEnabled
-    
+
     internal static var inAppConsentStrategy : InAppConsentStrategy {
         get {
             return sharedInstance.inAppConsentStrategy
         }
     }
-    
+
     fileprivate(set) var inAppHelper: InAppHelper
-        
+
     fileprivate(set) var analyticsHelper: AnalyticsHelper
 
     fileprivate var pushHelper: PushHelper
@@ -152,17 +152,17 @@ open class Kumulos {
         }
 
         instance = Kumulos(config: config)
-        
+
         KeyValPersistenceHelper.maybeMigrateUserDefaultsToAppGroups()
         KeyValPersistenceHelper.set(config.apiKey, forKey: KumulosUserDefaultsKey.API_KEY.rawValue)
         KeyValPersistenceHelper.set(config.secretKey, forKey: KumulosUserDefaultsKey.API_KEY.rawValue)
-        
+
         instance!.initializeHelpers()
-        
+
         DispatchQueue.global().async {
             instance!.sendDeviceInformation()
         }
-        
+
         if (config.enableCrash) {
             instance!.trackAndReportCrashes()
         }
@@ -180,12 +180,12 @@ open class Kumulos {
         pushHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
         rpcHttpClient = KSHttpClient(baseUrl: URL(string: baseApiUrl)!, requestFormat: .json, responseFormat: .plist)
         rpcHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
-        
+
         analyticsHelper = AnalyticsHelper()
         inAppHelper = InAppHelper()
         pushHelper = PushHelper()
     }
-    
+
     private func initializeHelpers() {
         analyticsHelper.initialize(apiKey: self.config.apiKey, secretKey: self.config.secretKey, sessionIdleTimeout: self.config.sessionIdleTimeout)
         inAppHelper.initialize()
