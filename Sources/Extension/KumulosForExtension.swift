@@ -8,30 +8,41 @@
 
 import Foundation
 
-
 class KumulosForExtension  {
     
-//      fileprivate static var instance:KumulosExt?
-//
-//      internal static func initializeFromExtension() {
-//          if (instance !== nil) {
-//              assertionFailure("The KumulosSDK has already been initialized in extension")
-//          }
-//      
-//          let apiKey = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.API_KEY.rawValue) as! String?
-//          let secretKey = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.SECRET_KEY.rawValue) as! String?
-//          if (apiKey == nil || secretKey == nil){
-//              print("Extension: authorization credentials not present")
-//              return;
-//          }
-//      
-//          let builder = KSConfigBuilder(apiKey: apiKey!, secretKey: secretKey!)
-//              
-//          instance = KumulosExt(config: builder.build())
-//        
-//          instance!.initializeHelpers()
-//    }
+    fileprivate static var instance:KumulosForExtension?
+    fileprivate let analyticsHelper: AnalyticsHelper
     
+    fileprivate init(apiKey: String, secretKey: String) {
+        analyticsHelper = AnalyticsHelper()
+        analyticsHelper.initialize(apiKey: apiKey, secretKey: secretKey, sessionIdleTimeout: nil)
+    }
     
-
+    internal static func initializeFromExtension() {
+        if (instance !== nil) {
+            assertionFailure("The KumulosSDK has already been initialized in extension")
+        }
+        
+        let apiKey = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.API_KEY.rawValue) as! String?
+        let secretKey = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.SECRET_KEY.rawValue) as! String?
+        if (apiKey == nil || secretKey == nil){
+            print("Extension: authorization credentials not present")
+            return;
+        }
+        
+        instance = KumulosForExtension(apiKey: apiKey!, secretKey: secretKey!)
+    }
+    
+    internal static func getInstance() -> KumulosForExtension
+    {
+        if(instance == nil) {
+            assertionFailure("The KumulosSDK has not been initialized")
+        }
+        
+        return instance!
+    }
+    
+    internal static func trackEventImmediately(eventType: String, properties: [String:Any]?) {
+        getInstance().analyticsHelper.trackEvent(eventType: eventType, properties: properties, immediateFlush: true)
+    }
 }

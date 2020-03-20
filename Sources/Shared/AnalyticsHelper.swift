@@ -8,36 +8,38 @@
 import Foundation
 import CoreData
 
-class SessionIdleTimer {
-    private let helper : AnalyticsHelper
-    private var invalidationLock : DispatchSemaphore
-    private var invalidated : Bool
-    
-    init(_ helper : AnalyticsHelper, timeout: UInt) {
-        self.invalidationLock = DispatchSemaphore(value: 1)
-        self.invalidated = false
-        self.helper = helper
+#if !EXTENSION
+    class SessionIdleTimer {
+        private let helper : AnalyticsHelper
+        private var invalidationLock : DispatchSemaphore
+        private var invalidated : Bool
         
-        DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(Int(timeout))) {
-            self.invalidationLock.wait()
+        init(_ helper : AnalyticsHelper, timeout: UInt) {
+            self.invalidationLock = DispatchSemaphore(value: 1)
+            self.invalidated = false
+            self.helper = helper
+            
+            DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(Int(timeout))) {
+                self.invalidationLock.wait()
 
-            if self.invalidated {
+                if self.invalidated {
+                    self.invalidationLock.signal()
+                    return
+                }
+                
                 self.invalidationLock.signal()
-                return
+                
+                helper.sessionDidEnd()
             }
-            
-            self.invalidationLock.signal()
-            
-            helper.sessionDidEnd()
+        }
+        
+        internal func invalidate() {
+            invalidationLock.wait()
+            invalidated = true
+            invalidationLock.signal()
         }
     }
-    
-    internal func invalidate() {
-        invalidationLock.wait()
-        invalidated = true
-        invalidationLock.signal()
-    }
-}
+#endif
 
 class KSEventModel : NSManagedObject {
     @NSManaged var uuid : String
@@ -48,12 +50,15 @@ class KSEventModel : NSManagedObject {
 }
 
 class AnalyticsHelper {
+    #if !EXTENSION
+        private var startNewSession : Bool
+        private var becameInactiveAt : Date?
+        private var sessionIdleTimer : SessionIdleTimer?
+        private var bgTask : UIBackgroundTaskIdentifier
+    #endif
+    
     private var analyticsContext : NSManagedObjectContext?
     private var migrationAnalyticsContext : NSManagedObjectContext?
-    private var startNewSession : Bool
-    private var sessionIdleTimer : SessionIdleTimer?
-    private var becameInactiveAt : Date?
-    private var bgTask : UIBackgroundTaskIdentifier
     private var eventsHttpClient:KSHttpClient
     private let baseEventsUrl = "https://events.kumulos.com"
     private var sessionIdleTimeout : UInt?
@@ -61,13 +66,17 @@ class AnalyticsHelper {
     // MARK: Initialization
     
     init() {
-        startNewSession = true
-        sessionIdleTimer = nil
-        bgTask = UIBackgroundTaskIdentifier.invalid
+        #if !EXTENSION
+            startNewSession = true
+            sessionIdleTimer = nil
+            bgTask = UIBackgroundTaskIdentifier.invalid
+            becameInactiveAt = nil
+        #endif
+        
         analyticsContext = nil
         migrationAnalyticsContext = nil
-        becameInactiveAt = nil
-        eventsHttpClient =  KSHttpClient(baseUrl: URL(string: baseEventsUrl)!, requestFormat: .json, responseFormat: .json)
+       
+        eventsHttpClient = KSHttpClient(baseUrl: URL(string: baseEventsUrl)!, requestFormat: .json, responseFormat: .json)
     }
     
     public func initialize(apiKey: String, secretKey: String, sessionIdleTimeout: UInt?) {
@@ -75,7 +84,9 @@ class AnalyticsHelper {
         self.sessionIdleTimeout = sessionIdleTimeout
         
         initContext()
-        registerListeners()
+        #if !EXTENSION
+            registerListeners()
+        #endif
         
         DispatchQueue.global().async {
             if (self.migrationAnalyticsContext != nil){
@@ -147,16 +158,6 @@ class AnalyticsHelper {
         
         return context
     }
-    
-    private func registerListeners() {
-        NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appBecameActive), name: UIApplication.didBecomeActiveNotification, object: nil)
-
-        NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appBecameInactive), name: UIApplication.willResignActiveNotification, object: nil)
-
-        NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appBecameBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
-
-        NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appWillTerminate), name: UIApplication.willTerminateNotification, object: nil)
-    }
 
     // MARK: Event Tracking
     func trackEvent(eventType: String, properties: [String:Any]?, immediateFlush: Bool = false) {
@@ -223,11 +224,15 @@ class AnalyticsHelper {
 
             if results.count > 0 {
                 syncEventsBatch(context, events: results)
+                return
             }
-            else if bgTask != UIBackgroundTaskIdentifier.invalid {
-                UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(bgTask.rawValue))
-                bgTask = UIBackgroundTaskIdentifier.invalid
-            }
+            
+            #if !EXTENSION
+                if bgTask != UIBackgroundTaskIdentifier.invalid {
+                    UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(bgTask.rawValue))
+                    bgTask = UIBackgroundTaskIdentifier.invalid
+                }
+            #endif
         }
     }
     
@@ -260,11 +265,13 @@ class AnalyticsHelper {
             }
             self.syncEvents(context: context)
         }) { (response, error) in
-            // Failed so assume will be retried some other time
-            if self.bgTask != UIBackgroundTaskIdentifier.invalid {
-                UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(self.bgTask.rawValue))
-                self.bgTask = UIBackgroundTaskIdentifier.invalid
-            }
+            #if !EXTENSION
+                // Failed so assume will be retried some other time
+                if self.bgTask != UIBackgroundTaskIdentifier.invalid {
+                    UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(self.bgTask.rawValue))
+                    self.bgTask = UIBackgroundTaskIdentifier.invalid
+                }
+            #endif
         }
     }
     
@@ -304,6 +311,17 @@ class AnalyticsHelper {
             print("Failed to fetch events batch: " + error.localizedDescription)
             return []
         }
+    }
+    
+#if !EXTENSION
+    private func registerListeners() {
+        NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appBecameActive), name: UIApplication.didBecomeActiveNotification, object: nil)
+
+        NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appBecameInactive), name: UIApplication.willResignActiveNotification, object: nil)
+
+        NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appBecameBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
+
+        NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appWillTerminate), name: UIApplication.willTerminateNotification, object: nil)
     }
     
     // MARK: App lifecycle delegates
@@ -353,6 +371,8 @@ class AnalyticsHelper {
         trackEvent(eventType: KumulosEvent.STATS_BACKGROUND.rawValue, atTime: becameInactiveAt!, properties: nil, asynchronously: false, immediateFlush: true)
         becameInactiveAt = nil
     }
+    
+#endif
 
     // MARK: CoreData model definition
     fileprivate func getCoreDataModel() -> NSManagedObjectModel {
@@ -403,7 +423,10 @@ class AnalyticsHelper {
     
 }
 
-// Helper function inserted by Swift 4.2 migrator.
-fileprivate func convertToUIBackgroundTaskIdentifier(_ input: Int) -> UIBackgroundTaskIdentifier {
-	return UIBackgroundTaskIdentifier(rawValue: input)
-}
+
+#if !EXTENSION
+    // Helper function inserted by Swift 4.2 migrator.
+    fileprivate func convertToUIBackgroundTaskIdentifier(_ input: Int) -> UIBackgroundTaskIdentifier {
+        return UIBackgroundTaskIdentifier(rawValue: input)
+    }
+#endif
