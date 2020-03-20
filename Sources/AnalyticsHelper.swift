@@ -48,14 +48,6 @@ class KSEventModel : NSManagedObject {
 }
 
 class AnalyticsHelper {
-    private var k : Kumulos?
-
-    private var kumulos : Kumulos {
-        get{
-            return k!
-        }
-    }
-    
     private var analyticsContext : NSManagedObjectContext?
     private var migrationAnalyticsContext : NSManagedObjectContext?
     private var startNewSession : Bool
@@ -64,7 +56,8 @@ class AnalyticsHelper {
     private var bgTask : UIBackgroundTaskIdentifier
     private var eventsHttpClient:KSHttpClient
     private let baseEventsUrl = "https://events.kumulos.com"
-    
+    private var sessionIdleTimeout : UInt?
+
     // MARK: Initialization
     
     init() {
@@ -77,10 +70,9 @@ class AnalyticsHelper {
         eventsHttpClient =  KSHttpClient(baseUrl: URL(string: baseEventsUrl)!, requestFormat: .json, responseFormat: .json)
     }
     
-    public func initialize(kumulos:Kumulos) {
-        self.k = kumulos;
-        
-        eventsHttpClient.setBasicAuth(user: kumulos.config.apiKey, password: kumulos.config.secretKey)
+    public func initialize(apiKey: String, secretKey: String, sessionIdleTimeout: UInt?) {
+        eventsHttpClient.setBasicAuth(user: apiKey, password: secretKey)
+        self.sessionIdleTimeout = sessionIdleTimeout
         
         initContext()
         registerListeners()
@@ -337,7 +329,7 @@ class AnalyticsHelper {
     @objc private func appBecameInactive() {
         becameInactiveAt = Date()
         
-        sessionIdleTimer = SessionIdleTimer(self, timeout: kumulos.config.sessionIdleTimeout)//TODO: beda
+        sessionIdleTimer = SessionIdleTimer(self, timeout: self.sessionIdleTimeout!)
     }
     
     @objc private func appBecameBackground() {

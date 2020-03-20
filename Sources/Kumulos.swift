@@ -188,7 +188,7 @@ open class Kumulos {
     }
     
     private func initializeHelpers() {
-        analyticsHelper.initialize(kumulos: self)
+        analyticsHelper.initialize(apiKey: self.config.apiKey, secretKey: self.config.secretKey, sessionIdleTimeout: self.config.sessionIdleTimeout)
         inAppHelper.initialize()
         _ = pushHelper.pushInit
     }
