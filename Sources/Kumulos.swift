@@ -143,12 +143,12 @@ open class Kumulos {
                 installIdLock.signal()
             }
             
-            if let existingID = KeyValPersistenceHelper.object(forKey: "KumulosUUID") {
+            if let existingID = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.INSTALL_UUID.rawValue) {
                 return existingID as! String
             }
 
             let newID = UUID().uuidString
-            KeyValPersistenceHelper.set(newID, forKey: "KumulosUUID")
+            KeyValPersistenceHelper.set(newID, forKey: KumulosUserDefaultsKey.INSTALL_UUID.rawValue)
             
             return newID
         }
@@ -170,6 +170,10 @@ open class Kumulos {
         }
 
         instance = Kumulos(config: config)
+        
+        KeyValPersistenceHelper.maybeMigrateUserDefaultsToAppGroups()
+        KeyValPersistenceHelper.set(config.apiKey, forKey: KumulosUserDefaultsKey.API_KEY.rawValue)
+        KeyValPersistenceHelper.set(config.secretKey, forKey: KumulosUserDefaultsKey.API_KEY.rawValue)
         
         instance!.initializeHelpers()
         

@@ -10,7 +10,7 @@ import Foundation
 public extension Kumulos {
 
     private static let userIdLock = DispatchSemaphore(value: 1)
-    internal static let USER_ID_KEY = "KumulosCurrentUserID"
+    
     
     internal static func trackEvent(eventType: KumulosEvent, properties: [String:Any]?, immediateFlush: Bool = false) {
         getInstance().analyticsHelper.trackEvent(eventType: eventType.rawValue, properties: properties, immediateFlush: immediateFlush)
@@ -68,7 +68,7 @@ public extension Kumulos {
         get {
             userIdLock.wait()
             defer { userIdLock.signal() }
-            if let userId = KeyValPersistenceHelper.object(forKey: USER_ID_KEY) as! String? {
+            if let userId = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.USER_ID.rawValue) as! String? {
                 return userId;
             }
 
@@ -83,13 +83,13 @@ public extension Kumulos {
      */
     static func clearUserAssociation() {
         userIdLock.wait()
-        let currentUserId = KeyValPersistenceHelper.object(forKey: USER_ID_KEY) as! String?
+        let currentUserId = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.USER_ID.rawValue) as! String?
         userIdLock.signal()
 
         Kumulos.trackEvent(eventType: KumulosEvent.STATS_USER_ASSOCIATION_CLEARED, properties: ["oldUserIdentifier": currentUserId ?? NSNull()])
 
         userIdLock.wait()
-        KeyValPersistenceHelper.removeObject(forKey: USER_ID_KEY)
+        KeyValPersistenceHelper.removeObject(forKey: KumulosUserDefaultsKey.USER_ID.rawValue)
         userIdLock.signal()
 
         if (currentUserId != nil && currentUserId != Kumulos.installId) {
@@ -112,8 +112,8 @@ public extension Kumulos {
         }
 
         userIdLock.wait()
-        let currentUserId = KeyValPersistenceHelper.object(forKey: USER_ID_KEY) as! String?
-        KeyValPersistenceHelper.set(userIdentifier, forKey: USER_ID_KEY)
+        let currentUserId = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.USER_ID.rawValue) as! String?
+        KeyValPersistenceHelper.set(userIdentifier, forKey: KumulosUserDefaultsKey.USER_ID.rawValue)
         userIdLock.signal()
 
         Kumulos.trackEvent(eventType: KumulosEvent.STATS_ASSOCIATE_USER, properties: params, immediateFlush: true)

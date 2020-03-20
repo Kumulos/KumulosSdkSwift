@@ -57,6 +57,7 @@ class AnalyticsHelper {
     }
     
     private var analyticsContext : NSManagedObjectContext?
+    private var migrationAnalyticsContext : NSManagedObjectContext?
     private var startNewSession : Bool
     private var sessionIdleTimer : SessionIdleTimer?
     private var becameInactiveAt : Date?
@@ -69,6 +70,7 @@ class AnalyticsHelper {
         sessionIdleTimer = nil
         bgTask = UIBackgroundTaskIdentifier.invalid
         analyticsContext = nil
+        migrationAnalyticsContext = nil
         becameInactiveAt = nil
     }
     
@@ -79,31 +81,70 @@ class AnalyticsHelper {
         registerListeners()
         
         DispatchQueue.global().async {
-            self.syncEvents()
+            if (self.migrationAnalyticsContext != nil){
+               self.syncEvents(context: self.migrationAnalyticsContext)
+            }
+            self.syncEvents(context: self.analyticsContext)
         }
     }
     
-    private func initContext() {
-        let objectModel = getCoreDataModel()
+    private func getMainStoreUrl(appGroupExists: Bool) -> URL? {
+        if (!appGroupExists){
+           return getAppDbUrl()
+        }
         
-        let storeCoordinator = NSPersistentStoreCoordinator(managedObjectModel: objectModel)
-        
+        return getSharedDbUrl()
+    }
+    
+    private func getAppDbUrl() -> URL? {
         let docsUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last
-        let storeUrl = URL(string: "KAnalyticsDb.sqlite", relativeTo: docsUrl)
-        let opts = [NSMigratePersistentStoresAutomaticallyOption: true, NSInferMappingModelAutomaticallyOption: true]
+        let appDbUrl = URL(string: "KAnalyticsDb.sqlite", relativeTo: docsUrl)
+       
+        return appDbUrl
+    }
+   
+    private func getSharedDbUrl() -> URL? {
+        let sharedContainerPath: URL? = AppGroupsHelper.getSharedContainerPath()
+        if (sharedContainerPath == nil){
+            return nil
+        }
+       
+        return URL(string: "KAnalyticsDbShared.sqlite", relativeTo: sharedContainerPath)
+    }
+    
+    private func initContext() {
+        let appDbUrl = getAppDbUrl()
+        let appDbExists = appDbUrl == nil ? false : FileManager.default.fileExists(atPath: appDbUrl!.path)
+        let appGroupExists = AppGroupsHelper.isKumulosAppGroupDefined()
         
+        let storeUrl = getMainStoreUrl(appGroupExists: appGroupExists)
+
+        if (appGroupExists && appDbExists){
+            migrationAnalyticsContext = getManagedObjectContext(storeUrl: appDbUrl)
+        }
+
+        analyticsContext = getManagedObjectContext(storeUrl: storeUrl)
+    }
+    
+    private func getManagedObjectContext(storeUrl : URL?) -> NSManagedObjectContext? {
+        let objectModel = getCoreDataModel()
+        let storeCoordinator = NSPersistentStoreCoordinator(managedObjectModel: objectModel)
+        let opts = [NSMigratePersistentStoresAutomaticallyOption: true, NSInferMappingModelAutomaticallyOption: true]
+       
         do {
             try storeCoordinator.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: nil, at: storeUrl, options: opts)
         }
         catch {
             print("Failed to set up persistent store: " + error.localizedDescription)
-            return
+            return nil
         }
 
-        analyticsContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
-        analyticsContext?.performAndWait {
-            analyticsContext?.persistentStoreCoordinator = storeCoordinator
+        let context = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
+        context.performAndWait {
+            context.persistentStoreCoordinator = storeCoordinator
         }
+        
+        return context
     }
     
     private func registerListeners() {
@@ -157,7 +198,7 @@ class AnalyticsHelper {
                 
                 if (immediateFlush) {
                     DispatchQueue.global().async {
-                        self.syncEvents()
+                        self.syncEvents(context: self.analyticsContext)
                     }
                 }
             }
@@ -175,12 +216,12 @@ class AnalyticsHelper {
         }
     }
     
-    private func syncEvents() {
-        analyticsContext?.performAndWait {
-            let results = fetchEventsBatch()
+    private func syncEvents(context: NSManagedObjectContext?) {
+        context?.performAndWait {
+            let results = fetchEventsBatch(context)
 
             if results.count > 0 {
-                syncEventsBatch(events: results)
+                syncEventsBatch(context, events: results)
             }
             else if bgTask != UIBackgroundTaskIdentifier.invalid {
                 UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(bgTask.rawValue))
@@ -189,7 +230,7 @@ class AnalyticsHelper {
         }
     }
     
-    private func syncEventsBatch(events: [KSEventModel]) {
+    private func syncEventsBatch(_ context: NSManagedObjectContext?, events: [KSEventModel]) {
         var data = [] as [[String : Any?]]
         var eventIds = [] as [NSManagedObjectID]
         
@@ -212,11 +253,11 @@ class AnalyticsHelper {
         let path = "/v1/app-installs/\(Kumulos.installId)/events"
 
         kumulos.eventsHttpClient.sendRequest(.POST, toPath: path, data: data, onSuccess: { (response, data) in
-            if let err = self.pruneEventsBatch(eventIds) {
+            if let err = self.pruneEventsBatch(context, eventIds) {
                 print("Failed to prune events batch: " + err.localizedDescription)
                 return
             }
-            self.syncEvents()
+            self.syncEvents(context: context)
         }) { (response, error) in
             // Failed so assume will be retried some other time
             if self.bgTask != UIBackgroundTaskIdentifier.invalid {
@@ -226,14 +267,14 @@ class AnalyticsHelper {
         }
     }
     
-    private func pruneEventsBatch(_ eventIds: [NSManagedObjectID]) -> Error? {
+    private func pruneEventsBatch(_ context: NSManagedObjectContext?, _ eventIds: [NSManagedObjectID]) -> Error? {
         var err : Error? = nil
 
-        analyticsContext?.performAndWait {
+        context?.performAndWait {
             let request = NSBatchDeleteRequest(objectIDs: eventIds)
 
             do {
-                try self.analyticsContext?.execute(request)
+                try context?.execute(request)
             }
             catch {
                 err = error
@@ -243,8 +284,8 @@ class AnalyticsHelper {
         return err
     }
     
-    private func fetchEventsBatch() -> [KSEventModel] {
-        guard let context = analyticsContext else {
+    private func fetchEventsBatch(_ context: NSManagedObjectContext?) -> [KSEventModel] {
+        guard let context = context else {
             return []
         }
         

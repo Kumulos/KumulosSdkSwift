@@ -9,19 +9,52 @@
 import Foundation
 
 internal class KeyValPersistenceHelper {
-
+    
     static func set(_ value: Any?, forKey: String)
     {
-        UserDefaults.standard.set(value, forKey: forKey)
+        getUserDefaults().set(value, forKey: forKey)
     }
     
     static func object(forKey: String) -> Any?
     {
-        return UserDefaults.standard.object(forKey: forKey)
+        return getUserDefaults().object(forKey: forKey)
     }
     
     static func removeObject(forKey: String)
     {
-        UserDefaults.standard.removeObject(forKey: forKey)
+        getUserDefaults().removeObject(forKey: forKey)
+    }
+    
+    internal static func maybeMigrateUserDefaultsToAppGroups() {
+        let standardDefaults = UserDefaults.standard
+        if (!AppGroupsHelper.isKumulosAppGroupDefined()){
+            standardDefaults.set(false, forKey: KumulosUserDefaultsKey.MIGRATED_TO_GROUPS.rawValue)
+            return;
+        }
+        
+        if (standardDefaults.bool(forKey: KumulosUserDefaultsKey.MIGRATED_TO_GROUPS.rawValue)){
+            return
+        }
+        
+        guard let groupDefaults = UserDefaults(suiteName: AppGroupsHelper.getKumulosGroupName()) else { return }
+        
+        let defaultsAsDict : [String: Any] = standardDefaults.dictionaryRepresentation()
+        for key in KumulosUserDefaultsKey.sharedKeys{
+            groupDefaults.set(defaultsAsDict[key.rawValue], forKey: key.rawValue)
+        }
+        
+        standardDefaults.set(true, forKey: KumulosUserDefaultsKey.MIGRATED_TO_GROUPS.rawValue)
+    }
+    
+    fileprivate static func getUserDefaults() -> UserDefaults {
+        if (!AppGroupsHelper.isKumulosAppGroupDefined()){
+            return UserDefaults.standard
+        }
+        
+        if let suiteUserDefaults = UserDefaults(suiteName: AppGroupsHelper.getKumulosGroupName()) {
+            return suiteUserDefaults
+        }
+        
+        return UserDefaults.standard
     }
 }
