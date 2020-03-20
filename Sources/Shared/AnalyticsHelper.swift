@@ -49,7 +49,7 @@ class KSEventModel : NSManagedObject {
     @NSManaged var properties : Data?
 }
 
-class AnalyticsHelper {
+internal class AnalyticsHelper {
     #if !KS_EXTENSION
         private var startNewSession : Bool
         private var becameInactiveAt : Date?

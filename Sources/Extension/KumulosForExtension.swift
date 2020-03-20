@@ -8,7 +8,7 @@
 
 import Foundation
 
-class KumulosForExtension  {
+internal class KumulosForExtension  {
     
     fileprivate static var instance:KumulosForExtension?
     fileprivate let analyticsHelper: AnalyticsHelper

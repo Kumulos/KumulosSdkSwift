@@ -14,7 +14,7 @@ internal enum KumulosSharedEvent : String {
     case MESSAGE_DELIVERED = "k.message.delivered"
 }
 
-class KumulosHelper {
+internal class KumulosHelper {
     
     private static let installIdLock = DispatchSemaphore(value: 1)
     static let userIdLock = DispatchSemaphore(value: 1)
