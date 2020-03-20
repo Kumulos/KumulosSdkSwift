@@ -8,7 +8,7 @@
 import Foundation
 import CoreData
 
-#if !EXTENSION
+#if !KS_EXTENSION
     class SessionIdleTimer {
         private let helper : AnalyticsHelper
         private var invalidationLock : DispatchSemaphore
@@ -50,7 +50,7 @@ class KSEventModel : NSManagedObject {
 }
 
 class AnalyticsHelper {
-    #if !EXTENSION
+    #if !KS_EXTENSION
         private var startNewSession : Bool
         private var becameInactiveAt : Date?
         private var sessionIdleTimer : SessionIdleTimer?
@@ -66,7 +66,7 @@ class AnalyticsHelper {
     // MARK: Initialization
 
     init() {
-        #if !EXTENSION
+        #if !KS_EXTENSION
             startNewSession = true
             sessionIdleTimer = nil
             bgTask = UIBackgroundTaskIdentifier.invalid
@@ -84,7 +84,7 @@ class AnalyticsHelper {
         self.sessionIdleTimeout = sessionIdleTimeout
 
         initContext()
-        #if !EXTENSION
+        #if !KS_EXTENSION
             registerListeners()
         #endif
 
@@ -227,7 +227,7 @@ class AnalyticsHelper {
                 return
             }
 
-            #if !EXTENSION
+            #if !KS_EXTENSION
                 if bgTask != UIBackgroundTaskIdentifier.invalid {
                     UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(bgTask.rawValue))
                     bgTask = UIBackgroundTaskIdentifier.invalid
@@ -265,7 +265,7 @@ class AnalyticsHelper {
             }
             self.syncEvents(context: context)
         }) { (response, error) in
-            #if !EXTENSION
+            #if !KS_EXTENSION
                 // Failed so assume will be retried some other time
                 if self.bgTask != UIBackgroundTaskIdentifier.invalid {
                     UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(self.bgTask.rawValue))
@@ -313,7 +313,7 @@ class AnalyticsHelper {
         }
     }
 
-#if !EXTENSION
+#if !KS_EXTENSION
     private func registerListeners() {
         NotificationCenter.default.addObserver(self, selector: #selector(AnalyticsHelper.appBecameActive), name: UIApplication.didBecomeActiveNotification, object: nil)
 
@@ -424,7 +424,7 @@ class AnalyticsHelper {
 }
 
 
-#if !EXTENSION
+#if !KS_EXTENSION
     // Helper function inserted by Swift 4.2 migrator.
     fileprivate func convertToUIBackgroundTaskIdentifier(_ input: Int) -> UIBackgroundTaskIdentifier {
         return UIBackgroundTaskIdentifier(rawValue: input)
