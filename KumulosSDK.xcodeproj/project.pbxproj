@@ -85,8 +85,8 @@
 		B625D072233A7A17003AA551 /* InAppPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InAppPresenter.swift; sourceTree = "<group>"; };
 		B625D073233A7A17003AA551 /* InAppHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InAppHelper.swift; sourceTree = "<group>"; };
 		B625D074233A7A17003AA551 /* InAppModels.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InAppModels.swift; sourceTree = "<group>"; };
-		B62FB894242384020070A79D /* KumulosUserDefaultsKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KumulosUserDefaultsKey.swift; sourceTree = "<group>"; };
-		B62FB8972423997E0070A79D /* AppGroupsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupsHelper.swift; sourceTree = "<group>"; };
+		B62FB894242384020070A79D /* KumulosUserDefaultsKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KumulosUserDefaultsKey.swift; path = ../Sources/Shared/KumulosUserDefaultsKey.swift; sourceTree = "<group>"; };
+		B62FB8972423997E0070A79D /* AppGroupsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppGroupsHelper.swift; path = ../Sources/Shared/AppGroupsHelper.swift; sourceTree = "<group>"; };
 		B66094ED241BEADF005C3B34 /* KelValPersistenceHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KelValPersistenceHelper.swift; path = Sources/KelValPersistenceHelper.swift; sourceTree = "<group>"; };
 		DB481C1A1D3BC9D30021C627 /* KumulosSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = KumulosSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
