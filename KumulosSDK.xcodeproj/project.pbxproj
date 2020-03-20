@@ -40,10 +40,6 @@
 		B625D077233A7A18003AA551 /* InAppModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B625D074233A7A17003AA551 /* InAppModels.swift */; };
 		B62FB895242384020070A79D /* KumulosUserDefaultsKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62FB894242384020070A79D /* KumulosUserDefaultsKey.swift */; };
 		B62FB8982423997E0070A79D /* AppGroupsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62FB8972423997E0070A79D /* AppGroupsHelper.swift */; };
-		B62FB89B2423A7630070A79D /* (null) in Sources */ = {isa = PBXBuildFile; };
-		B62FB89E2423A8C30070A79D /* (null) in Sources */ = {isa = PBXBuildFile; };
-		B62FB8A02423ACE60070A79D /* (null) in Sources */ = {isa = PBXBuildFile; };
-		B62FB8A12423ACE60070A79D /* (null) in Sources */ = {isa = PBXBuildFile; };
 		B62FB8A6242448520070A79D /* KumulosHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62FB8A5242448520070A79D /* KumulosHelper.swift */; };
 		B62FB8A824244EF50070A79D /* KumulosUserDefaultsKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62FB894242384020070A79D /* KumulosUserDefaultsKey.swift */; };
 		B62FB8A924244EF90070A79D /* KumulosHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62FB8A5242448520070A79D /* KumulosHelper.swift */; };
@@ -351,14 +347,11 @@
 				12985A6A238D701500671FBF /* KumulosNotificationService.swift in Sources */,
 				B62FB8A824244EF50070A79D /* KumulosUserDefaultsKey.swift in Sources */,
 				B62FB8A924244EF90070A79D /* KumulosHelper.swift in Sources */,
-				B62FB8A12423ACE60070A79D /* (null) in Sources */,
 				B62FB8B02424622F0070A79D /* KSHttp.swift in Sources */,
 				B62FB8AA24244EFC0070A79D /* KelValPersistenceHelper.swift in Sources */,
-				B62FB89B2423A7630070A79D /* (null) in Sources */,
 				B62FB8AF242461C70070A79D /* AnalyticsHelper.swift in Sources */,
 				B62FB8AB24244EFE0070A79D /* AppGroupsHelper.swift in Sources */,
 				6F0EB56923D067F3007EDA84 /* CategoryHelper.swift in Sources */,
-				B62FB89E2423A8C30070A79D /* (null) in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -376,7 +369,6 @@
 				123D90A822A160D0004B8392 /* KSHttp.swift in Sources */,
 				127B22DB1D9BE59E00D9C94B /* KSAPIOperation.swift in Sources */,
 				127B22DE1D9BE59E00D9C94B /* Kumulos+API.swift in Sources */,
-				B62FB8A02423ACE60070A79D /* (null) in Sources */,
 				B62FB8982423997E0070A79D /* AppGroupsHelper.swift in Sources */,
 				127B22DD1D9BE59E00D9C94B /* Kumulos.swift in Sources */,
 				B625D076233A7A18003AA551 /* InAppHelper.swift in Sources */,
