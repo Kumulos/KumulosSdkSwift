@@ -8,8 +8,14 @@
 
 import Foundation
 
+internal let KS_MESSAGE_TYPE_PUSH = 1
+
+internal enum KumulosSharedEvent : String {
+    case MESSAGE_DELIVERED = "k.message.delivered"
+}
 
 class KumulosHelper {
+    
     private static let installIdLock = DispatchSemaphore(value: 1)
     static let userIdLock = DispatchSemaphore(value: 1)
     

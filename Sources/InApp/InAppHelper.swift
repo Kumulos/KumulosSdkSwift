@@ -526,7 +526,7 @@ internal class InAppHelper {
     private func trackMessageDelivery(messages: [[AnyHashable : Any]]) -> Void {
         for message in messages {
             let props: [String:Any] = ["type" : MESSAGE_TYPE_IN_APP, "id":message["id"] as! Int]
-            Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_DELIVERED, properties: props)
+            Kumulos.trackEvent(eventType: KumulosSharedEvent.MESSAGE_DELIVERED.rawValue, properties: props)
         }
     }
     

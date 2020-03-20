@@ -7,8 +7,6 @@ import Foundation
 import UserNotifications
 import ObjectiveC.runtime
 
-internal let KS_MESSAGE_TYPE_PUSH = 1
-
 public class KSPushNotification: NSObject {
     internal static let DeepLinkTypeInApp : Int = 1;
 

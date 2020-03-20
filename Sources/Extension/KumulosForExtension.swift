@@ -18,7 +18,7 @@ class KumulosForExtension  {
         analyticsHelper.initialize(apiKey: apiKey, secretKey: secretKey, sessionIdleTimeout: nil)
     }
     
-    internal static func initializeFromExtension() {
+    internal static func initialize() {
         if (instance !== nil) {
             assertionFailure("The KumulosSDK has already been initialized in extension")
         }

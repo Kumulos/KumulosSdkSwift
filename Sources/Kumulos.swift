@@ -28,7 +28,6 @@ internal enum KumulosEvent : String {
     case IN_APP_CONSENT_CHANGED = "k.inApp.statusUpdated"
     case MESSAGE_OPENED = "k.message.opened"
     case MESSAGE_DISMISSED = "k.message.dismissed"
-    case MESSAGE_DELIVERED = "k.message.delivered"
     case MESSAGE_DELETED_FROM_INBOX = "k.message.inbox.deleted"
 }
 

@@ -42,9 +42,6 @@ public class KumulosNotificationService {
         
         trackDeliveredEvent(notificationId: id)
         
-        
-      
-        
         bestAttemptContent.title = value1
         
         let buttons = data["k.buttons"] as? NSArray
@@ -78,8 +75,10 @@ public class KumulosNotificationService {
     }
     
     class func trackDeliveredEvent(notificationId: Int){
-//        let props: [String:Any] = ["type" : KS_MESSAGE_TYPE_PUSH, "id":notificationId]
-//        Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_DELIVERED, properties: props)
+        KumulosForExtension.initialize()
+        
+        let props: [String:Any] = ["type" : KS_MESSAGE_TYPE_PUSH, "id":notificationId]
+        KumulosForExtension.trackEventImmediately(eventType: KumulosSharedEvent.MESSAGE_DELIVERED.rawValue, properties: props)
     }
 
     class func addButtons(messageId: Int, bestAttemptContent: UNMutableNotificationContent, buttons: NSArray) {
