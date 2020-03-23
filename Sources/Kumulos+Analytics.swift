@@ -8,17 +8,17 @@
 import Foundation
 
 public extension Kumulos {
-
-    private static let userIdLock = DispatchSemaphore(value: 1)
-    
-    
     internal static func trackEvent(eventType: KumulosEvent, properties: [String:Any]?, immediateFlush: Bool = false) {
         getInstance().analyticsHelper.trackEvent(eventType: eventType.rawValue, properties: properties, immediateFlush: immediateFlush)
     }
     
+    internal static func trackEvent(eventType: String, atTime: Date, properties: [String:Any]?, asynchronously : Bool = true, immediateFlush: Bool = false) {
+        getInstance().analyticsHelper.trackEvent(eventType: eventType, atTime: atTime, properties: properties, asynchronously: asynchronously, immediateFlush: immediateFlush)
+    }
+    
     /**
      Logs an analytics event to the local database
-     
+
      Parameters:
      - eventType: Unique identifier for the type of event
      - properties: Optional meta-data about the event
@@ -26,10 +26,10 @@ public extension Kumulos {
     static func trackEvent(eventType: String, properties: [String:Any]?) {
         getInstance().analyticsHelper.trackEvent(eventType: eventType, properties: properties, immediateFlush: false)
     }
-    
+
     /**
      Logs an analytics event to the local database then flushes all locally stored events to the server
-     
+
      Parameters:
      - eventType: Unique identifier for the type of event
      - properties: Optional meta-data about the event
@@ -37,20 +37,20 @@ public extension Kumulos {
     static func trackEventImmediately(eventType: String, properties: [String:Any]?) {
         getInstance().analyticsHelper.trackEvent(eventType: eventType, properties: properties, immediateFlush: true)
     }
-    
+
     /**
      Associates a user identifier with the current Kumulos installation record
-     
+
      Parameters:
      - userIdentifier: Unique identifier for the current user
      */
     static func associateUserWithInstall(userIdentifier: String) {
         associateUserWithInstallImpl(userIdentifier: userIdentifier, attributes: nil)
     }
-    
+
     /**
      Associates a user identifier with the current Kumulos installation record, additionally setting the attributes for the user
-     
+
      Parameters:
      - userIdentifier: Unique identifier for the current user
      - attributes: JSON encodable dictionary of attributes to store for the user
@@ -58,21 +58,14 @@ public extension Kumulos {
     static func associateUserWithInstall(userIdentifier: String, attributes: [String:AnyObject]) {
         associateUserWithInstallImpl(userIdentifier: userIdentifier, attributes: attributes)
     }
-
+    
     /**
      Returns the identifier for the user currently associated with the Kumulos installation record
-
      If no user is associated, it returns the Kumulos installation ID
     */
     static var currentUserIdentifier : String {
         get {
-            userIdLock.wait()
-            defer { userIdLock.signal() }
-            if let userId = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.USER_ID.rawValue) as! String? {
-                return userId;
-            }
-
-            return Kumulos.installId
+            return KumulosHelper.currentUserIdentifier
         }
     }
 
@@ -82,15 +75,15 @@ public extension Kumulos {
      See associateUserWithInstall and currentUserIdentifier for further information.
      */
     static func clearUserAssociation() {
-        userIdLock.wait()
+        KumulosHelper.userIdLock.wait()
         let currentUserId = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.USER_ID.rawValue) as! String?
-        userIdLock.signal()
+        KumulosHelper.userIdLock.signal()
 
         Kumulos.trackEvent(eventType: KumulosEvent.STATS_USER_ASSOCIATION_CLEARED, properties: ["oldUserIdentifier": currentUserId ?? NSNull()])
 
-        userIdLock.wait()
+        KumulosHelper.userIdLock.wait()
         KeyValPersistenceHelper.removeObject(forKey: KumulosUserDefaultsKey.USER_ID.rawValue)
-        userIdLock.signal()
+        KumulosHelper.userIdLock.signal()
 
         if (currentUserId != nil && currentUserId != Kumulos.installId) {
             getInstance().inAppHelper.handleAssociatedUserChange();
@@ -111,10 +104,10 @@ public extension Kumulos {
             params = ["id": userIdentifier]
         }
 
-        userIdLock.wait()
+        KumulosHelper.userIdLock.wait()
         let currentUserId = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.USER_ID.rawValue) as! String?
         KeyValPersistenceHelper.set(userIdentifier, forKey: KumulosUserDefaultsKey.USER_ID.rawValue)
-        userIdLock.signal()
+        KumulosHelper.userIdLock.signal()
 
         Kumulos.trackEvent(eventType: KumulosEvent.STATS_ASSOCIATE_USER, properties: params, immediateFlush: true)
 
@@ -122,5 +115,5 @@ public extension Kumulos {
             getInstance().inAppHelper.handleAssociatedUserChange();
         }
     }
-    
+
 }

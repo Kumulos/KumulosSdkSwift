@@ -28,7 +28,6 @@ internal enum KumulosEvent : String {
     case IN_APP_CONSENT_CHANGED = "k.inApp.statusUpdated"
     case MESSAGE_OPENED = "k.message.opened"
     case MESSAGE_DISMISSED = "k.message.dismissed"
-    case MESSAGE_DELIVERED = "k.message.delivered"
     case MESSAGE_DELETED_FROM_INBOX = "k.message.inbox.deleted"
 }
 
@@ -46,29 +45,24 @@ public enum InAppConsentStrategy : String {
 
 // MARK: class
 open class Kumulos {
-
-    private static let installIdLock = DispatchSemaphore(value: 1)
-    
     internal let baseApiUrl = "https://api.kumulos.com"
     internal let basePushUrl = "https://push.kumulos.com"
     internal let baseCrashUrl = "https://crash.kumulos.com/v1"
-    internal let baseEventsUrl = "https://events.kumulos.com"
 
     internal let pushHttpClient:KSHttpClient
     internal let rpcHttpClient:KSHttpClient
-    internal let eventsHttpClient:KSHttpClient
 
     internal let pushNotificationDeviceType = 1
     internal let pushNotificationProductionTokenType:Int = 1
-    
+
     internal let sdkVersion : String = "8.3.2"
 
     var networkRequestsInProgress = 0
 
     fileprivate static var instance:Kumulos?
-    
+
     internal var notificationCenter:Any?
-    
+
     internal static var sharedInstance:Kumulos {
         get {
             if(false == isInitialized()) {
@@ -78,7 +72,7 @@ open class Kumulos {
             return instance!
         }
     }
-    
+
     public static func getInstance() -> Kumulos
     {
         return sharedInstance;
@@ -88,16 +82,17 @@ open class Kumulos {
     fileprivate(set) var apiKey: String
     fileprivate(set) var secretKey: String
     fileprivate(set) var inAppConsentStrategy:InAppConsentStrategy = InAppConsentStrategy.NotEnabled
-    
+
     internal static var inAppConsentStrategy : InAppConsentStrategy {
         get {
             return sharedInstance.inAppConsentStrategy
         }
     }
-    
+
     fileprivate(set) var inAppHelper: InAppHelper
-        
+
     fileprivate(set) var analyticsHelper: AnalyticsHelper
+    fileprivate(set) var sessionHelper: SessionHelper
 
     fileprivate var pushHelper: PushHelper
 
@@ -138,19 +133,7 @@ open class Kumulos {
     */
     public static var installId :String {
         get {
-            installIdLock.wait()
-            defer {
-                installIdLock.signal()
-            }
-            
-            if let existingID = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.INSTALL_UUID.rawValue) {
-                return existingID as! String
-            }
-
-            let newID = UUID().uuidString
-            KeyValPersistenceHelper.set(newID, forKey: KumulosUserDefaultsKey.INSTALL_UUID.rawValue)
-            
-            return newID
+            return KumulosHelper.installId
         }
     }
 
@@ -170,17 +153,17 @@ open class Kumulos {
         }
 
         instance = Kumulos(config: config)
-        
+
         KeyValPersistenceHelper.maybeMigrateUserDefaultsToAppGroups()
         KeyValPersistenceHelper.set(config.apiKey, forKey: KumulosUserDefaultsKey.API_KEY.rawValue)
-        KeyValPersistenceHelper.set(config.secretKey, forKey: KumulosUserDefaultsKey.API_KEY.rawValue)
-        
+        KeyValPersistenceHelper.set(config.secretKey, forKey: KumulosUserDefaultsKey.SECRET_KEY.rawValue)
+
         instance!.initializeHelpers()
-        
+
         DispatchQueue.global().async {
             instance!.sendDeviceInformation()
         }
-        
+
         if (config.enableCrash) {
             instance!.trackAndReportCrashes()
         }
@@ -198,16 +181,15 @@ open class Kumulos {
         pushHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
         rpcHttpClient = KSHttpClient(baseUrl: URL(string: baseApiUrl)!, requestFormat: .json, responseFormat: .plist)
         rpcHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
-        eventsHttpClient = KSHttpClient(baseUrl: URL(string: baseEventsUrl)!, requestFormat: .json, responseFormat: .json)
-        eventsHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
-        
-        analyticsHelper = AnalyticsHelper()
+
+        analyticsHelper = AnalyticsHelper(apiKey: apiKey, secretKey: secretKey)
+        sessionHelper = SessionHelper(sessionIdleTimeout: config.sessionIdleTimeout)
         inAppHelper = InAppHelper()
         pushHelper = PushHelper()
     }
-    
+
     private func initializeHelpers() {
-        analyticsHelper.initialize(kumulos: self)
+        sessionHelper.initialize()
         inAppHelper.initialize()
         _ = pushHelper.pushInit
     }
@@ -216,7 +198,6 @@ open class Kumulos {
         operationQueue.cancelAllOperations()
         rpcHttpClient.invalidateSessionCancellingTasks(true)
         pushHttpClient.invalidateSessionCancellingTasks(true)
-        eventsHttpClient.invalidateSessionCancellingTasks(false)
     }
 
 }
