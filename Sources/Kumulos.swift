@@ -189,6 +189,7 @@ open class Kumulos {
     }
 
     private func initializeHelpers() {
+        sessionHelper.initialize()
         inAppHelper.initialize()
         _ = pushHelper.pushInit
     }

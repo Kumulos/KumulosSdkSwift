@@ -52,7 +52,9 @@ internal class SessionHelper {
         bgTask = UIBackgroundTaskIdentifier.invalid
         becameInactiveAt = nil
         self.sessionIdleTimeout = sessionIdleTimeout
-        
+    }
+    
+    func initialize() {
         registerListeners()
     }
     
