@@ -11,7 +11,8 @@ import UserNotifications
 
 public class KumulosNotificationService {
     internal static let KS_MEDIA_RESIZER_BASE_URL = "https://i.app.delivery"
-
+    fileprivate static var analyticsHelper: AnalyticsHelper?
+    
     public class func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         let bestAttemptContent =  (request.content.mutableCopy() as! UNMutableNotificationContent)
 
@@ -56,16 +57,6 @@ public class KumulosNotificationService {
            })
     }
     
-    class func trackDeliveredEvent(notificationId: Int) {
-        let res = KumulosForExtension.initialize()
-        if (!res){
-            return
-        }
-        
-        let props: [String:Any] = ["type" : KS_MESSAGE_TYPE_PUSH, "id":notificationId]
-        KumulosForExtension.trackEventImmediately(eventType: KumulosSharedEvent.MESSAGE_DELIVERED.rawValue, properties: props)
-    }
-
     class func addButtons(messageId: Int, bestAttemptContent: UNMutableNotificationContent, buttons: NSArray) {
         if (buttons.count == 0) {
             return;
@@ -159,4 +150,26 @@ public class KumulosNotificationService {
             completionHandler(attachment)
         })).resume()
     }
+
+    fileprivate static func trackDeliveredEvent(notificationId: Int) {
+        initializeAnalyticsHelper()
+        guard let analyticsHelper = self.analyticsHelper else {
+            return
+        }
+        
+        let props: [String:Any] = ["type" : KS_MESSAGE_TYPE_PUSH, "id":notificationId]
+        analyticsHelper.trackEvent(eventType: KumulosSharedEvent.MESSAGE_DELIVERED.rawValue, properties: props, immediateFlush: true)
+    }
+    
+    fileprivate static func initializeAnalyticsHelper() {
+        let apiKey = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.API_KEY.rawValue) as! String?
+        let secretKey = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.SECRET_KEY.rawValue) as! String?
+        if (apiKey == nil || secretKey == nil){
+            print("Extension: authorization credentials not present")
+            return;
+        }
+        
+        analyticsHelper = AnalyticsHelper(apiKey: apiKey!, secretKey: secretKey!)
+    }
+
 }

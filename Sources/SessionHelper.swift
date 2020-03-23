@@ -54,7 +54,7 @@ internal class SessionHelper {
         self.sessionIdleTimeout = sessionIdleTimeout
     }
     
-    public func initialize() {
+    func initialize() {
         registerListeners()
     }
     

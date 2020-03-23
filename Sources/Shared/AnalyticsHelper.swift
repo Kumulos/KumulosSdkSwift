@@ -27,14 +27,11 @@ internal class AnalyticsHelper {
 
     // MARK: Initialization
 
-    init() {
+    init(apiKey: String, secretKey: String) {
         analyticsContext = nil
         migrationAnalyticsContext = nil
 
         eventsHttpClient = KSHttpClient(baseUrl: URL(string: baseEventsUrl)!, requestFormat: .json, responseFormat: .json)
-    }
-
-    public func initialize(apiKey: String, secretKey: String) {
         eventsHttpClient.setBasicAuth(user: apiKey, password: secretKey)
         
         initContext()
