@@ -182,15 +182,13 @@ open class Kumulos {
         rpcHttpClient = KSHttpClient(baseUrl: URL(string: baseApiUrl)!, requestFormat: .json, responseFormat: .plist)
         rpcHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
 
-        analyticsHelper = AnalyticsHelper()
+        analyticsHelper = AnalyticsHelper(apiKey: apiKey, secretKey: secretKey)
         sessionHelper = SessionHelper(sessionIdleTimeout: config.sessionIdleTimeout)
         inAppHelper = InAppHelper()
         pushHelper = PushHelper()
     }
 
     private func initializeHelpers() {
-        analyticsHelper.initialize(apiKey: self.config.apiKey, secretKey: self.config.secretKey)
-        sessionHelper.initialize()
         inAppHelper.initialize()
         _ = pushHelper.pushInit
     }
