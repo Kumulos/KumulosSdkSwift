@@ -301,13 +301,19 @@ class PushHelper {
             } else {
                 fetchBarrier.signal()
             }
-
+            
             let aps = userInfo["aps"] as! [AnyHashable:Any]
             guard let contentAvailable = aps["content-available"] as? Int, contentAvailable == 1 else {
+                if #available(iOS 10, *) {} else {
+                    self.trackPushDelivery(userInfo: userInfo)
+                }
+                
                 completionHandler(fetchResult)
                 return
             }
-
+            
+            self.trackPushDelivery(userInfo: userInfo)
+            
             Kumulos.sharedInstance.inAppHelper.sync { (result:Int) in
                 _ = fetchBarrier.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(20))
 
@@ -330,4 +336,10 @@ class PushHelper {
             UNUserNotificationCenter.current().delegate = delegate
         }
     }()
+    
+    fileprivate func trackPushDelivery(userInfo: [AnyHashable : Any]){
+        let notification = KSPushNotification(userInfo: userInfo)
+        let props: [String:Any] = ["type" : KS_MESSAGE_TYPE_PUSH, "id": notification.id]
+        Kumulos.trackEvent(eventType: KumulosSharedEvent.MESSAGE_DELIVERED.rawValue, properties:props)
+    }
 }

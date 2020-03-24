@@ -55,7 +55,7 @@ open class Kumulos {
     internal let pushNotificationDeviceType = 1
     internal let pushNotificationProductionTokenType:Int = 1
 
-    internal let sdkVersion : String = "8.3.2"
+    internal let sdkVersion : String = "8.4.0"
 
     var networkRequestsInProgress = 0
 
@@ -152,11 +152,11 @@ open class Kumulos {
             assertionFailure("The KumulosSDK has already been initialized")
         }
 
-        instance = Kumulos(config: config)
-
         KeyValPersistenceHelper.maybeMigrateUserDefaultsToAppGroups()
         KeyValPersistenceHelper.set(config.apiKey, forKey: KumulosUserDefaultsKey.API_KEY.rawValue)
         KeyValPersistenceHelper.set(config.secretKey, forKey: KumulosUserDefaultsKey.SECRET_KEY.rawValue)
+        
+        instance = Kumulos(config: config)
 
         instance!.initializeHelpers()
 

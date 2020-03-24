@@ -45,7 +45,6 @@
 		B62FB8A924244EF90070A79D /* KumulosHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62FB8A5242448520070A79D /* KumulosHelper.swift */; };
 		B62FB8AA24244EFC0070A79D /* KelValPersistenceHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B66094ED241BEADF005C3B34 /* KelValPersistenceHelper.swift */; };
 		B62FB8AB24244EFE0070A79D /* AppGroupsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62FB8972423997E0070A79D /* AppGroupsHelper.swift */; };
-		B62FB8AE2424584F0070A79D /* KumulosForExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62FB8AC2424583F0070A79D /* KumulosForExtension.swift */; };
 		B62FB8AF242461C70070A79D /* AnalyticsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1293720A2006378D00EBC8F4 /* AnalyticsHelper.swift */; };
 		B62FB8B02424622F0070A79D /* KSHttp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 123D90A722A160CF004B8392 /* KSHttp.swift */; };
 		B66094EE241BEADF005C3B34 /* KelValPersistenceHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B66094ED241BEADF005C3B34 /* KelValPersistenceHelper.swift */; };
@@ -94,7 +93,6 @@
 		B62FB894242384020070A79D /* KumulosUserDefaultsKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KumulosUserDefaultsKey.swift; sourceTree = "<group>"; };
 		B62FB8972423997E0070A79D /* AppGroupsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupsHelper.swift; sourceTree = "<group>"; };
 		B62FB8A5242448520070A79D /* KumulosHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = KumulosHelper.swift; path = Sources/Shared/KumulosHelper.swift; sourceTree = SOURCE_ROOT; };
-		B62FB8AC2424583F0070A79D /* KumulosForExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KumulosForExtension.swift; sourceTree = "<group>"; };
 		B66094ED241BEADF005C3B34 /* KelValPersistenceHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KelValPersistenceHelper.swift; sourceTree = "<group>"; };
 		B6E48F5E2425057E00E8B3B9 /* SessionHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SessionHelper.swift; path = Sources/SessionHelper.swift; sourceTree = "<group>"; };
 		DB481C1A1D3BC9D30021C627 /* KumulosSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = KumulosSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -172,7 +170,6 @@
 		12985A64238D6FB600671FBF /* Extension */ = {
 			isa = PBXGroup;
 			children = (
-				B62FB8AC2424583F0070A79D /* KumulosForExtension.swift */,
 				12985A65238D6FB600671FBF /* KumulosSDKExtension.h */,
 				12985A66238D6FB600671FBF /* Info.plist */,
 				6F0EB56723D06509007EDA84 /* CategoryHelper.swift */,
@@ -346,7 +343,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B62FB8AE2424584F0070A79D /* KumulosForExtension.swift in Sources */,
 				12985A6A238D701500671FBF /* KumulosNotificationService.swift in Sources */,
 				B62FB8A824244EF50070A79D /* KumulosUserDefaultsKey.swift in Sources */,
 				B62FB8A924244EF90070A79D /* KumulosHelper.swift in Sources */,
@@ -414,7 +410,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MARKETING_VERSION = 8.3.2;
+				MARKETING_VERSION = 8.4.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				OTHER_SWIFT_FLAGS = "";
@@ -448,7 +444,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MARKETING_VERSION = 8.3.2;
+				MARKETING_VERSION = 8.4.0;
 				MTL_FAST_MATH = YES;
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.kumulos.swift.KumulosSDKExtension;
@@ -591,7 +587,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MARKETING_VERSION = 8.3.2;
+				MARKETING_VERSION = 8.4.0;
 				OTHER_LDFLAGS = "-ObjC";
 				OTHER_SWIFT_FLAGS = "-DDEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.kumulos.swift;
@@ -619,7 +615,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MARKETING_VERSION = 8.3.2;
+				MARKETING_VERSION = 8.4.0;
 				OTHER_LDFLAGS = "-ObjC";
 				OTHER_SWIFT_FLAGS = "-DRELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.kumulos.swift;
