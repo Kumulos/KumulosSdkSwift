@@ -200,10 +200,10 @@ internal class AnalyticsHelper {
             do{
                 try persStoreCoord.remove(store)
                 try FileManager.default.removeItem(at: storeUrl)
-                migrationAnalyticsContext = nil
             }
             catch{}
         }
+        migrationAnalyticsContext = nil
     }
 
     private func syncEventsBatch(_ context: NSManagedObjectContext?, events: [KSEventModel]) {
