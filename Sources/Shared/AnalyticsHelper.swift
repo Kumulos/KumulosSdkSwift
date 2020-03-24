@@ -200,6 +200,7 @@ internal class AnalyticsHelper {
             do{
                 try persStoreCoord.remove(store)
                 try FileManager.default.removeItem(at: storeUrl)
+                migrationAnalyticsContext = nil
             }
             catch{}
         }
