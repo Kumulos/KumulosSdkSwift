@@ -21,7 +21,19 @@ internal class AppGroupsHelper {
     }
     
     internal static func getKumulosGroupName() -> String {
-        return "group.com.kumulos"//TODO: normal name
+        var targetBundle = Bundle.main
+        if targetBundle.bundleURL.pathExtension == "appex" {
+            let url = targetBundle.bundleURL.deletingLastPathComponent().deletingLastPathComponent()
+            if let mainBundle = Bundle(url: url) {
+                targetBundle = mainBundle
+            }
+            else{
+                print("AppGroupsHelper: Error, could not obtain main bundle from extension! ")
+            }
+        }
+       
+       return "group." + targetBundle.bundleIdentifier! + ".kumulos"
     }
 }
+
 
