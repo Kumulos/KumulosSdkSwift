@@ -38,7 +38,7 @@ internal class AnalyticsHelper {
 
         DispatchQueue.global().async {
             if (self.migrationAnalyticsContext != nil){
-               self.syncEvents(context: self.migrationAnalyticsContext)
+                self.syncEvents(context: self.migrationAnalyticsContext)
             }
             self.syncEvents(context: self.analyticsContext)
         }
@@ -174,6 +174,34 @@ internal class AnalyticsHelper {
                 syncEventsBatch(context, events: results)
                 return
             }
+            else if (context === migrationAnalyticsContext){
+                removeAppDatabase()
+            }
+        }
+    }
+    
+    private func removeAppDatabase() {
+        if (migrationAnalyticsContext == nil){
+            return
+        }
+     
+        guard let persStoreCoord = migrationAnalyticsContext!.persistentStoreCoordinator else {
+            return
+        }
+        
+        guard let store = persStoreCoord.persistentStores.last else {
+            return
+        }
+        
+        let storeUrl = persStoreCoord.url(for: store)
+        
+        migrationAnalyticsContext!.performAndWait(){
+            migrationAnalyticsContext!.reset()
+            do{
+                try persStoreCoord.remove(store)
+                try FileManager.default.removeItem(at: storeUrl)
+            }
+            catch{}
         }
     }
 
