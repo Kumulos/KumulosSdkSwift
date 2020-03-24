@@ -28,7 +28,7 @@ internal class AppGroupsHelper {
                 targetBundle = mainBundle
             }
             else{
-                print("AppGroupsHelper: Error, could not obtain main bundle from extension! ")
+                print("AppGroupsHelper: Error, could not obtain main bundle from extension!")
             }
         }
        
