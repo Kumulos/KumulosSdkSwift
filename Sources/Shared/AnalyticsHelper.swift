@@ -195,7 +195,7 @@ internal class AnalyticsHelper {
         
         let storeUrl = persStoreCoord.url(for: store)
         
-        migrationAnalyticsContext!.performAndWait(){
+        migrationAnalyticsContext!.performAndWait {
             migrationAnalyticsContext!.reset()
             do{
                 try persStoreCoord.remove(store)
