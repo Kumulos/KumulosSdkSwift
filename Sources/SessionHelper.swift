@@ -112,13 +112,15 @@ internal class SessionHelper {
         startNewSession = true
         sessionIdleTimer = nil
 
-        Kumulos.trackEvent(eventType: KumulosEvent.STATS_BACKGROUND.rawValue, atTime: becameInactiveAt!, properties: nil, asynchronously: false, immediateFlush: true)
-        becameInactiveAt = nil
-        
-        if bgTask != UIBackgroundTaskIdentifier.invalid {
-            UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(bgTask.rawValue))
-            bgTask = UIBackgroundTaskIdentifier.invalid
-        }
+        Kumulos.trackEvent(eventType: KumulosEvent.STATS_BACKGROUND.rawValue, atTime: becameInactiveAt!, properties: nil, immediateFlush: true, onSyncComplete: {err in
+            self.becameInactiveAt = nil
+
+            if self.bgTask != UIBackgroundTaskIdentifier.invalid {
+                let taskId = convertToUIBackgroundTaskIdentifier(self.bgTask.rawValue)
+                self.bgTask = UIBackgroundTaskIdentifier.invalid
+                UIApplication.shared.endBackgroundTask(taskId)
+            }
+        })
     }
     
 }

@@ -18,6 +18,8 @@ class KSEventModel : NSManagedObject {
     @NSManaged var properties : Data?
 }
 
+typealias SyncCompletedBlock = (Error?) -> Void
+
 internal class AnalyticsHelper {
  
     private var analyticsContext : NSManagedObjectContext?
@@ -108,11 +110,11 @@ internal class AnalyticsHelper {
     }
 
     // MARK: Event Tracking
-    func trackEvent(eventType: String, properties: [String:Any]?, immediateFlush: Bool = false) {
+    func trackEvent(eventType: String, properties: [String:Any]?, immediateFlush: Bool) {
         trackEvent(eventType: eventType, atTime: Date(), properties: properties, immediateFlush: immediateFlush)
     }
 
-    func trackEvent(eventType: String, atTime: Date, properties: [String:Any]?, asynchronously : Bool = true, immediateFlush: Bool = false) {
+    func trackEvent(eventType: String, atTime: Date, properties: [String:Any]?, immediateFlush: Bool, onSyncComplete: SyncCompletedBlock? = nil) {
         if eventType == "" || (properties != nil && !JSONSerialization.isValidJSONObject(properties as Any)) {
             print("Ignoring invalid event with empty type or non-serializable properties")
             return
@@ -148,7 +150,7 @@ internal class AnalyticsHelper {
 
                 if (immediateFlush) {
                     DispatchQueue.global().async {
-                        self.syncEvents(context: self.analyticsContext)
+                        self.syncEvents(context: self.analyticsContext, onSyncComplete)
                     }
                 }
             }
@@ -158,24 +160,23 @@ internal class AnalyticsHelper {
             }
         }
 
-        if asynchronously {
-            analyticsContext?.perform(work)
-        }
-        else {
-            analyticsContext?.performAndWait(work)
-        }
+        analyticsContext?.perform(work)
     }
 
-    private func syncEvents(context: NSManagedObjectContext?) {
+    private func syncEvents(context: NSManagedObjectContext?, _ onSyncComplete: SyncCompletedBlock? = nil) {
         context?.performAndWait {
             let results = fetchEventsBatch(context)
 
-            if results.count > 0 {
-                syncEventsBatch(context, events: results)
-                return
+            if (results.count == 0) {
+                onSyncComplete?(nil)
+
+                if (context === migrationAnalyticsContext){
+                    removeAppDatabase()
+                }
             }
-            else if (context === migrationAnalyticsContext){
-                removeAppDatabase()
+            else if results.count > 0 {
+                syncEventsBatch(context, events: results, onSyncComplete)
+                return
             }
         }
     }
@@ -206,7 +207,7 @@ internal class AnalyticsHelper {
         migrationAnalyticsContext = nil
     }
 
-    private func syncEventsBatch(_ context: NSManagedObjectContext?, events: [KSEventModel]) {
+    private func syncEventsBatch(_ context: NSManagedObjectContext?, events: [KSEventModel], _ onSyncComplete:SyncCompletedBlock? = nil) {
         var data = [] as [[String : Any?]]
         var eventIds = [] as [NSManagedObjectID]
 
@@ -231,11 +232,13 @@ internal class AnalyticsHelper {
         self.eventsHttpClient.sendRequest(.POST, toPath: path, data: data, onSuccess: { (response, data) in
             if let err = self.pruneEventsBatch(context, eventIds) {
                 print("Failed to prune events batch: " + err.localizedDescription)
+                onSyncComplete?(err)
                 return
             }
-            self.syncEvents(context: context)
+            self.syncEvents(context: context, onSyncComplete)
         }) { (response, error) in
             print("Failed to send events")
+            onSyncComplete?(error)
         }
     }
 
