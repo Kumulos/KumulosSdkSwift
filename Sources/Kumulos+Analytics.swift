@@ -12,8 +12,8 @@ public extension Kumulos {
         getInstance().analyticsHelper.trackEvent(eventType: eventType.rawValue, properties: properties, immediateFlush: immediateFlush)
     }
     
-    internal static func trackEvent(eventType: String, atTime: Date, properties: [String:Any]?, asynchronously : Bool = true, immediateFlush: Bool = false) {
-        getInstance().analyticsHelper.trackEvent(eventType: eventType, atTime: atTime, properties: properties, asynchronously: asynchronously, immediateFlush: immediateFlush)
+    internal static func trackEvent(eventType: String, atTime: Date, properties: [String:Any]?, immediateFlush: Bool = false, onSyncComplete:SyncCompletedBlock? = nil) {
+        getInstance().analyticsHelper.trackEvent(eventType: eventType, atTime: atTime, properties: properties, immediateFlush: immediateFlush, onSyncComplete: onSyncComplete)
     }
     
     /**
