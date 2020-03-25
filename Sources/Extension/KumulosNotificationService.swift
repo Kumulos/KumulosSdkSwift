@@ -25,7 +25,7 @@ public class KumulosNotificationService {
         let msgData = msg["data"] as! [AnyHashable:Any]
         let id = msgData["id"] as! Int
         
-        trackDeliveredEvent(notificationId: id)
+        trackDeliveredEvent(userInfo: userInfo, notificationId: id)
         
         let buttons = data["k.buttons"] as? NSArray
         
@@ -151,7 +151,12 @@ public class KumulosNotificationService {
         })).resume()
     }
 
-    fileprivate static func trackDeliveredEvent(notificationId: Int) {
+    fileprivate static func trackDeliveredEvent(userInfo: [AnyHashable:Any], notificationId: Int) {
+        let aps = userInfo["aps"] as! [AnyHashable:Any]
+        if let contentAvailable = aps["content-available"] as? Int, contentAvailable == 1 {
+            return
+        }
+
         initializeAnalyticsHelper()
         guard let analyticsHelper = self.analyticsHelper else {
             return
