@@ -8,10 +8,10 @@
 
 #import <Foundation/Foundation.h>
 
-typedef void (^ BadgeChangedCallback)(int newBadgeCount);
+typedef void (^ KSBadgeChangedCallback)(int newBadgeCount);
 
 @interface KSBadgeObserver : NSObject
 
-- (id) init: (BadgeChangedCallback)callback;
+- (id) init: (KSBadgeChangedCallback)callback;
 
 @end

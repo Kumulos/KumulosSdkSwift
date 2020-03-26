@@ -3,10 +3,10 @@
 
 @implementation KSBadgeObserver : NSObject
 
-BadgeChangedCallback _callback;
+KSBadgeChangedCallback _callback;
 
 
-- (id) init: (BadgeChangedCallback)callback {
+- (id) init: (KSBadgeChangedCallback)callback {
     if (self = [super init]) {
         _callback = callback;
       
