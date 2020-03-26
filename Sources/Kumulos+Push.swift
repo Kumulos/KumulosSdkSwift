@@ -340,6 +340,6 @@ class PushHelper {
     fileprivate func trackPushDelivery(userInfo: [AnyHashable : Any]){
         let notification = KSPushNotification(userInfo: userInfo)
         let props: [String:Any] = ["type" : KS_MESSAGE_TYPE_PUSH, "id": notification.id]
-        Kumulos.trackEvent(eventType: KumulosSharedEvent.MESSAGE_DELIVERED.rawValue, properties:props)
+        Kumulos.trackEvent(eventType: KumulosSharedEvent.MESSAGE_DELIVERED, properties:props, immediateFlush: true)
     }
 }
