@@ -7,10 +7,10 @@
 //  Copyright (c) 2013 The Blindsight Corporation. All rights reserved.
 //  Released under the BSD 2-Clause License (see LICENSE)
 
-#import "BadgeObserver.h"
+#import "KSBadgeObserver.h"
 #import <UIKit/UIKit.h>
 
-@implementation BadgeObserver : NSObject
+@implementation KSBadgeObserver : NSObject
 
 BadgeChangedCallback _callback;
 

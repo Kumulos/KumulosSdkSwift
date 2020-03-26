@@ -10,7 +10,7 @@
 
 typedef void (^ BadgeChangedCallback)(int newBadgeCount);
 
-@interface BadgeObserver : NSObject
+@interface KSBadgeObserver : NSObject
 
 - (id) init: (BadgeChangedCallback)callback;
 
