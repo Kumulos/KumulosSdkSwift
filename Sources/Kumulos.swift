@@ -93,6 +93,7 @@ open class Kumulos {
 
     fileprivate(set) var analyticsHelper: AnalyticsHelper
     fileprivate(set) var sessionHelper: SessionHelper
+    fileprivate(set) var badgeObserver: BadgeObserver
 
     fileprivate var pushHelper: PushHelper
 
@@ -186,6 +187,9 @@ open class Kumulos {
         sessionHelper = SessionHelper(sessionIdleTimeout: config.sessionIdleTimeout)
         inAppHelper = InAppHelper()
         pushHelper = PushHelper()
+        badgeObserver = BadgeObserver({ (newBadgeCount) in
+           KeyValPersistenceHelper.set(newBadgeCount, forKey: KumulosUserDefaultsKey.BADGE_COUNT.rawValue)
+        })
     }
 
     private func initializeHelpers() {

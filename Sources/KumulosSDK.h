@@ -6,6 +6,7 @@
 #import <UIKit/UIKit.h>
 
 #import "MobileProvision.h"
+#import "BadgeObserver.h"
 
 //! Project version number for KumulosSDK.
 FOUNDATION_EXPORT double KumulosSDKVersionNumber;
