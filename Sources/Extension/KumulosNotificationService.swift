@@ -69,7 +69,8 @@ public class KumulosNotificationService {
         if (badge == nil){
             return
         }
-        
+
+        // Note in case of no cache, server sends the increment value in the badge field too, so works as badge = 0 + badge_inc
         var newBadge: NSNumber? = badge
         if let incrementBy = incrementBy, let currentVal = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.BADGE_COUNT.rawValue) as? NSNumber {
             newBadge = NSNumber(value: currentVal.intValue + incrementBy.intValue)
