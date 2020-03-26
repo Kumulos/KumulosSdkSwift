@@ -25,6 +25,8 @@ public class KumulosNotificationService {
         let msgData = msg["data"] as! [AnyHashable:Any]
         let id = msgData["id"] as! Int
         
+        maybeSetBadge(bestAttemptContent: bestAttemptContent, userInfo: userInfo)
+        
         trackDeliveredEvent(userInfo: userInfo, notificationId: id)
         
         let buttons = data["k.buttons"] as? NSArray
@@ -55,6 +57,26 @@ public class KumulosNotificationService {
                }
                contentHandler(bestAttemptContent)
            })
+    }
+    
+    fileprivate class func maybeSetBadge(bestAttemptContent: UNMutableNotificationContent, userInfo: [AnyHashable:Any]){
+        let custom = userInfo["custom"] as! [AnyHashable:Any]
+        let aps = userInfo["aps"] as! [AnyHashable:Any]
+        
+        let incrementBy: NSNumber? = custom["badge_inc"] as? NSNumber
+        let badge: NSNumber? = aps["badge"] as? NSNumber
+        
+        if (badge == nil){
+            return
+        }
+        
+        var newBadge: NSNumber? = badge
+        if let incrementBy = incrementBy, let currentVal = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.BADGE_COUNT.rawValue) as? NSNumber {
+            newBadge = NSNumber(value: currentVal.intValue + incrementBy.intValue)
+        }
+        
+        bestAttemptContent.badge = newBadge
+        KeyValPersistenceHelper.set(newBadge, forKey: KumulosUserDefaultsKey.BADGE_COUNT.rawValue)
     }
     
     class func addButtons(messageId: Int, bestAttemptContent: UNMutableNotificationContent, buttons: NSArray) {
