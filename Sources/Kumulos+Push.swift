@@ -82,7 +82,20 @@ public class KSPushNotification: NSObject {
     }
 }
 
+@available(iOS 10.0, *)
+public typealias KSUNAuthorizationCheckedHandler = (UNAuthorizationStatus, Error?) -> Void
+
 public extension Kumulos {
+
+    /**
+        Helper method for requesting the device token with alert, badge and sound permissions.
+
+        On success will raise the didRegisterForRemoteNotificationsWithDeviceToken UIApplication event
+    */
+    @available(iOS 10.0, *)
+    static func pushRequestDeviceToken(_ onAuthorizationStatus: KSUNAuthorizationCheckedHandler? = nil) {
+        requestToken(onAuthorizationStatus)
+    }
 
     /**
         Helper method for requesting the device token with alert, badge and sound permissions.
@@ -100,7 +113,7 @@ public extension Kumulos {
     }
 
     @available(iOS 10.0, *)
-    fileprivate static func requestToken() {
+    fileprivate static func requestToken(_ onAuthorizationStatus: KSUNAuthorizationCheckedHandler? = nil) {
         let center = UNUserNotificationCenter.current()
 
         let requestToken : () -> Void = {
@@ -111,14 +124,23 @@ public extension Kumulos {
 
         let askPermission : () -> Void = {
             if UIApplication.shared.applicationState != .active {
+                onAuthorizationStatus?(.notDetermined,
+                                       NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Application not active, aborting push permission request"]) as Error)
                 return
             }
 
             center.requestAuthorization(options: [.alert, .badge, .sound]) { (granted, error) in
-                if (!granted || error != nil) {
+                if let err = error {
+                    onAuthorizationStatus?(.notDetermined, err)
                     return
                 }
 
+                if (!granted) {
+                    onAuthorizationStatus?(.denied, nil)
+                    return
+                }
+
+                onAuthorizationStatus?(.authorized, nil)
                 requestToken()
             }
         }
@@ -126,8 +148,10 @@ public extension Kumulos {
         center.getNotificationSettings { (settings) in
             switch settings.authorizationStatus {
             case .denied:
+                onAuthorizationStatus?(settings.authorizationStatus, nil)
                 return
             case .authorized:
+                onAuthorizationStatus?(settings.authorizationStatus, nil)
                 requestToken()
                 break
             default:
