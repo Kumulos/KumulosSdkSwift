@@ -54,5 +54,24 @@ internal class KumulosHelper {
         }
     }
     
+    static func getBadgeFromUserInfo(userInfo: [AnyHashable:Any]) -> NSNumber? {
+        let custom = userInfo["custom"] as! [AnyHashable:Any]
+        let aps = userInfo["aps"] as! [AnyHashable:Any]
+        
+        let incrementBy: NSNumber? = custom["badge_inc"] as? NSNumber
+        let badge: NSNumber? = aps["badge"] as? NSNumber
+        
+        if (badge == nil){
+            return nil
+        }
+        
+        var newBadge: NSNumber? = badge
+        if let incrementBy = incrementBy, let currentVal = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.BADGE_COUNT.rawValue) as? NSNumber {
+            newBadge = NSNumber(value: currentVal.intValue + incrementBy.intValue)
+        }
+        
+        return newBadge
+    }
+    
     
 }
