@@ -60,20 +60,14 @@ public class KumulosNotificationService {
     }
     
     fileprivate class func maybeSetBadge(bestAttemptContent: UNMutableNotificationContent, userInfo: [AnyHashable:Any]){
-        let custom = userInfo["custom"] as! [AnyHashable:Any]
         let aps = userInfo["aps"] as! [AnyHashable:Any]
-        
-        let incrementBy: NSNumber? = custom["badge_inc"] as? NSNumber
-        let badge: NSNumber? = aps["badge"] as? NSNumber
-        
-        if (badge == nil){
+        if let contentAvailable = aps["content-available"] as? Int, contentAvailable == 1 {
             return
         }
-
-        // Note in case of no cache, server sends the increment value in the badge field too, so works as badge = 0 + badge_inc
-        var newBadge: NSNumber? = badge
-        if let incrementBy = incrementBy, let currentVal = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.BADGE_COUNT.rawValue) as? NSNumber {
-            newBadge = NSNumber(value: currentVal.intValue + incrementBy.intValue)
+        
+        let newBadge: NSNumber? = KumulosHelper.getBadgeFromUserInfo(userInfo: userInfo)
+        if (newBadge == nil){
+            return;
         }
         
         bestAttemptContent.badge = newBadge

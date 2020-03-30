@@ -305,13 +305,15 @@ class PushHelper {
             let aps = userInfo["aps"] as! [AnyHashable:Any]
             guard let contentAvailable = aps["content-available"] as? Int, contentAvailable == 1 else {
                 if #available(iOS 10, *) {} else {
+                    self.setBadge(userInfo: userInfo)
                     self.trackPushDelivery(userInfo: userInfo)
                 }
                 
                 completionHandler(fetchResult)
                 return
             }
-            
+          
+            self.setBadge(userInfo: userInfo)
             self.trackPushDelivery(userInfo: userInfo)
             
             Kumulos.sharedInstance.inAppHelper.sync { (result:Int) in
@@ -336,6 +338,13 @@ class PushHelper {
             UNUserNotificationCenter.current().delegate = delegate
         }
     }()
+    
+    fileprivate func setBadge(userInfo: [AnyHashable:Any]){
+        let badge: NSNumber? = KumulosHelper.getBadgeFromUserInfo(userInfo: userInfo)
+        if let newBadge = badge {
+            UIApplication.shared.applicationIconBadgeNumber = newBadge.intValue
+        }
+    }
     
     fileprivate func trackPushDelivery(userInfo: [AnyHashable : Any]){
         let notification = KSPushNotification(userInfo: userInfo)
