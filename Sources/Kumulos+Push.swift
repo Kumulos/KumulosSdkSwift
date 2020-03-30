@@ -90,25 +90,30 @@ public extension Kumulos {
         On success will raise the didRegisterForRemoteNotificationsWithDeviceToken UIApplication event
     */
     static func pushRequestDeviceToken() {
-       if #available(iOS 10.0, *) {
-            let center = UNUserNotificationCenter.current()
-            center.requestAuthorization(options: [.alert, .badge, .sound]) { (granted, error) in
-                if (!granted || error != nil) {
-                    return
-                }
-
-                DispatchQueue.main.async {
-                    UIApplication.shared.registerForRemoteNotifications()
-                }
-            }
+        if #available(iOS 10.0, *) {
+            requestToken()
         } else {
             DispatchQueue.main.async {
                 requestTokenLegacy()
             }
         }
     }
+
+    @available(iOS 10.0, *)
+    fileprivate static func requestToken() {
+        let center = UNUserNotificationCenter.current()
+        center.requestAuthorization(options: [.alert, .badge, .sound]) { (granted, error) in
+            if (!granted || error != nil) {
+                return
+            }
+
+            DispatchQueue.main.async {
+                UIApplication.shared.registerForRemoteNotifications()
+            }
+        }
+    }
         
-    private static func requestTokenLegacy() {
+    fileprivate static func requestTokenLegacy() {
          // Determine the type of notifications we want to ask permission for, for example we may want to alert the user, update the badge number and play a sound
          let notificationTypes: UIUserNotificationType = [UIUserNotificationType.alert, UIUserNotificationType.badge, UIUserNotificationType.sound]
 
