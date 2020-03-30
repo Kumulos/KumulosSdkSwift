@@ -102,13 +102,41 @@ public extension Kumulos {
     @available(iOS 10.0, *)
     fileprivate static func requestToken() {
         let center = UNUserNotificationCenter.current()
-        center.requestAuthorization(options: [.alert, .badge, .sound]) { (granted, error) in
-            if (!granted || error != nil) {
+
+        let requestToken : () -> Void = {
+            DispatchQueue.main.async {
+                UIApplication.shared.registerForRemoteNotifications()
+            }
+        }
+
+        let askPermission : () -> Void = {
+            if UIApplication.shared.applicationState != .active {
                 return
             }
 
-            DispatchQueue.main.async {
-                UIApplication.shared.registerForRemoteNotifications()
+            center.requestAuthorization(options: [.alert, .badge, .sound]) { (granted, error) in
+                if (!granted || error != nil) {
+                    return
+                }
+
+                requestToken()
+            }
+        }
+
+        center.getNotificationSettings { (settings) in
+            switch settings.authorizationStatus {
+            case .denied:
+                return
+            case .authorized:
+                requestToken()
+                break
+            default:
+                // Queue on the main thread to allow application state to settle
+                // If called during applicationDidLaunch, state is still inactive
+                DispatchQueue.main.async {
+                    askPermission()
+                }
+                break
             }
         }
     }
