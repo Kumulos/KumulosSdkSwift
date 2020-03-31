@@ -123,7 +123,7 @@ public extension Kumulos {
         }
 
         let askPermission : () -> Void = {
-            if UIApplication.shared.applicationState != .active {
+            if UIApplication.shared.applicationState == .background {
                 onAuthorizationStatus?(.notDetermined,
                                        NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Application not active, aborting push permission request"]) as Error)
                 return
@@ -155,11 +155,7 @@ public extension Kumulos {
                 requestToken()
                 break
             default:
-                // Queue on the main thread to allow application state to settle
-                // If called during applicationDidLaunch, state is still inactive
-                DispatchQueue.main.async {
-                    askPermission()
-                }
+                askPermission()
                 break
             }
         }
