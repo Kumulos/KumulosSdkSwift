@@ -68,6 +68,10 @@ internal class KumulosHelper {
         var newBadge: NSNumber? = badge
         if let incrementBy = incrementBy, let currentVal = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.BADGE_COUNT.rawValue) as? NSNumber {
             newBadge = NSNumber(value: currentVal.intValue + incrementBy.intValue)
+
+            if newBadge!.intValue < 0 {
+                newBadge = 0
+            }
         }
         
         return newBadge
