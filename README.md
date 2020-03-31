@@ -58,7 +58,7 @@ This project is licensed under the MIT license with portions licensed under the 
 
 ## Requirements
 
-- iOS10+
+- iOS9+
 - Swift5.0
 
 ## Swift Version Support
@@ -67,4 +67,4 @@ This project is licensed under the MIT license with portions licensed under the 
 | ------------- | ----------- |
 | 3.0           | 2.x         |
 | 4.2           | 4.x         |
-| 5.0           | 5.x, 6.x    |
+| 5.0           | 5.x, 6.x, 7.x, 8.x    |

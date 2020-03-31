@@ -80,6 +80,9 @@ public class KSPushNotification: NSObject {
     }
 }
 
+@available(iOS 10.0, *)
+public typealias KSUNAuthorizationCheckedHandler = (UNAuthorizationStatus, Error?) -> Void
+
 public extension Kumulos {
 
     /**
@@ -87,26 +90,78 @@ public extension Kumulos {
 
         On success will raise the didRegisterForRemoteNotificationsWithDeviceToken UIApplication event
     */
-    static func pushRequestDeviceToken() {
-       if #available(iOS 10.0, *) {
-            let center = UNUserNotificationCenter.current()
-            center.requestAuthorization(options: [.alert, .badge, .sound]) { (granted, error) in
-                if (!granted || error != nil) {
-                    return
-                }
+    @available(iOS 10.0, *)
+    static func pushRequestDeviceToken(_ onAuthorizationStatus: KSUNAuthorizationCheckedHandler? = nil) {
+        requestToken(onAuthorizationStatus)
+    }
 
-                DispatchQueue.main.async {
-                    UIApplication.shared.registerForRemoteNotifications()
-                }
-            }
+    /**
+        Helper method for requesting the device token with alert, badge and sound permissions.
+
+        On success will raise the didRegisterForRemoteNotificationsWithDeviceToken UIApplication event
+    */
+    static func pushRequestDeviceToken() {
+        if #available(iOS 10.0, *) {
+            requestToken()
         } else {
             DispatchQueue.main.async {
                 requestTokenLegacy()
             }
         }
     }
+
+    @available(iOS 10.0, *)
+    fileprivate static func requestToken(_ onAuthorizationStatus: KSUNAuthorizationCheckedHandler? = nil) {
+        let center = UNUserNotificationCenter.current()
+
+        let requestToken : () -> Void = {
+            DispatchQueue.main.async {
+                UIApplication.shared.registerForRemoteNotifications()
+            }
+        }
+
+        let askPermission : () -> Void = {
+            DispatchQueue.main.async {
+                if UIApplication.shared.applicationState == .background {
+                    onAuthorizationStatus?(.notDetermined,
+                                           NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Application not active, aborting push permission request"]) as Error)
+                    return
+                }
+
+                center.requestAuthorization(options: [.alert, .badge, .sound]) { (granted, error) in
+                    if let err = error {
+                        onAuthorizationStatus?(.notDetermined, err)
+                        return
+                    }
+
+                    if (!granted) {
+                        onAuthorizationStatus?(.denied, nil)
+                        return
+                    }
+
+                    onAuthorizationStatus?(.authorized, nil)
+                    requestToken()
+                }
+            }
+        }
+
+        center.getNotificationSettings { (settings) in
+            switch settings.authorizationStatus {
+            case .denied:
+                onAuthorizationStatus?(settings.authorizationStatus, nil)
+                return
+            case .authorized:
+                onAuthorizationStatus?(settings.authorizationStatus, nil)
+                requestToken()
+                break
+            default:
+                askPermission()
+                break
+            }
+        }
+    }
         
-    private static func requestTokenLegacy() {
+    fileprivate static func requestTokenLegacy() {
          // Determine the type of notifications we want to ask permission for, for example we may want to alert the user, update the badge number and play a sound
          let notificationTypes: UIUserNotificationType = [UIUserNotificationType.alert, UIUserNotificationType.badge, UIUserNotificationType.sound]
 

@@ -156,7 +156,7 @@ open class Kumulos {
         KeyValPersistenceHelper.maybeMigrateUserDefaultsToAppGroups()
         KeyValPersistenceHelper.set(config.apiKey, forKey: KumulosUserDefaultsKey.API_KEY.rawValue)
         KeyValPersistenceHelper.set(config.secretKey, forKey: KumulosUserDefaultsKey.SECRET_KEY.rawValue)
-        
+
         instance = Kumulos(config: config)
 
         instance!.initializeHelpers()
