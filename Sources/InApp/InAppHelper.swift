@@ -148,7 +148,7 @@ internal class InAppHelper {
     }
     
     func userConsented() -> Bool {
-        return UserDefaults.standard.object(forKey: KumulosUserDefaultsKey.IN_APP_CONSENTED.rawValue) as? Bool ?? false;
+        return UserDefaults.standard.bool(forKey: KumulosUserDefaultsKey.IN_APP_CONSENTED.rawValue)
     }
     
     func updateUserConsent(consentGiven: Bool) {
