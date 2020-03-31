@@ -123,25 +123,27 @@ public extension Kumulos {
         }
 
         let askPermission : () -> Void = {
-            if UIApplication.shared.applicationState == .background {
-                onAuthorizationStatus?(.notDetermined,
-                                       NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Application not active, aborting push permission request"]) as Error)
-                return
-            }
-
-            center.requestAuthorization(options: [.alert, .badge, .sound]) { (granted, error) in
-                if let err = error {
-                    onAuthorizationStatus?(.notDetermined, err)
+            DispatchQueue.main.async {
+                if UIApplication.shared.applicationState == .background {
+                    onAuthorizationStatus?(.notDetermined,
+                                           NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Application not active, aborting push permission request"]) as Error)
                     return
                 }
 
-                if (!granted) {
-                    onAuthorizationStatus?(.denied, nil)
-                    return
-                }
+                center.requestAuthorization(options: [.alert, .badge, .sound]) { (granted, error) in
+                    if let err = error {
+                        onAuthorizationStatus?(.notDetermined, err)
+                        return
+                    }
 
-                onAuthorizationStatus?(.authorized, nil)
-                requestToken()
+                    if (!granted) {
+                        onAuthorizationStatus?(.denied, nil)
+                        return
+                    }
+
+                    onAuthorizationStatus?(.authorized, nil)
+                    requestToken()
+                }
             }
         }
 
