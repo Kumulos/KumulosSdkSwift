@@ -43,11 +43,11 @@
 		B62FB8A6242448520070A79D /* KumulosHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62FB8A5242448520070A79D /* KumulosHelper.swift */; };
 		B62FB8A824244EF50070A79D /* KumulosUserDefaultsKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62FB894242384020070A79D /* KumulosUserDefaultsKey.swift */; };
 		B62FB8A924244EF90070A79D /* KumulosHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62FB8A5242448520070A79D /* KumulosHelper.swift */; };
-		B62FB8AA24244EFC0070A79D /* KelValPersistenceHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B66094ED241BEADF005C3B34 /* KelValPersistenceHelper.swift */; };
+		B62FB8AA24244EFC0070A79D /* KeyValPersistenceHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B66094ED241BEADF005C3B34 /* KeyValPersistenceHelper.swift */; };
 		B62FB8AB24244EFE0070A79D /* AppGroupsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62FB8972423997E0070A79D /* AppGroupsHelper.swift */; };
 		B62FB8AF242461C70070A79D /* AnalyticsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1293720A2006378D00EBC8F4 /* AnalyticsHelper.swift */; };
 		B62FB8B02424622F0070A79D /* KSHttp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 123D90A722A160CF004B8392 /* KSHttp.swift */; };
-		B66094EE241BEADF005C3B34 /* KelValPersistenceHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B66094ED241BEADF005C3B34 /* KelValPersistenceHelper.swift */; };
+		B66094EE241BEADF005C3B34 /* KeyValPersistenceHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B66094ED241BEADF005C3B34 /* KeyValPersistenceHelper.swift */; };
 		B6E48F5F2425057E00E8B3B9 /* SessionHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E48F5E2425057E00E8B3B9 /* SessionHelper.swift */; };
 		B6E48F64242BA8D700E8B3B9 /* KSBadgeObserver.m in Sources */ = {isa = PBXBuildFile; fileRef = B6E48F63242BA8D700E8B3B9 /* KSBadgeObserver.m */; };
 		B6E48F66242BA8F600E8B3B9 /* KSBadgeObserver.h in Headers */ = {isa = PBXBuildFile; fileRef = B6E48F65242BA8F600E8B3B9 /* KSBadgeObserver.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -95,7 +95,7 @@
 		B62FB894242384020070A79D /* KumulosUserDefaultsKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KumulosUserDefaultsKey.swift; sourceTree = "<group>"; };
 		B62FB8972423997E0070A79D /* AppGroupsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupsHelper.swift; sourceTree = "<group>"; };
 		B62FB8A5242448520070A79D /* KumulosHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = KumulosHelper.swift; path = Sources/Shared/KumulosHelper.swift; sourceTree = SOURCE_ROOT; };
-		B66094ED241BEADF005C3B34 /* KelValPersistenceHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KelValPersistenceHelper.swift; sourceTree = "<group>"; };
+		B66094ED241BEADF005C3B34 /* KeyValPersistenceHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyValPersistenceHelper.swift; sourceTree = "<group>"; };
 		B6E48F5E2425057E00E8B3B9 /* SessionHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SessionHelper.swift; path = Sources/SessionHelper.swift; sourceTree = "<group>"; };
 		B6E48F63242BA8D700E8B3B9 /* KSBadgeObserver.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = KSBadgeObserver.m; path = Sources/KSBadgeObserver.m; sourceTree = "<group>"; };
 		B6E48F65242BA8F600E8B3B9 /* KSBadgeObserver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = KSBadgeObserver.h; path = Sources/KSBadgeObserver.h; sourceTree = "<group>"; };
@@ -202,7 +202,7 @@
 				123D90A722A160CF004B8392 /* KSHttp.swift */,
 				1293720A2006378D00EBC8F4 /* AnalyticsHelper.swift */,
 				B62FB8A5242448520070A79D /* KumulosHelper.swift */,
-				B66094ED241BEADF005C3B34 /* KelValPersistenceHelper.swift */,
+				B66094ED241BEADF005C3B34 /* KeyValPersistenceHelper.swift */,
 				B62FB894242384020070A79D /* KumulosUserDefaultsKey.swift */,
 				B62FB8972423997E0070A79D /* AppGroupsHelper.swift */,
 			);
@@ -354,7 +354,7 @@
 				B62FB8A824244EF50070A79D /* KumulosUserDefaultsKey.swift in Sources */,
 				B62FB8A924244EF90070A79D /* KumulosHelper.swift in Sources */,
 				B62FB8B02424622F0070A79D /* KSHttp.swift in Sources */,
-				B62FB8AA24244EFC0070A79D /* KelValPersistenceHelper.swift in Sources */,
+				B62FB8AA24244EFC0070A79D /* KeyValPersistenceHelper.swift in Sources */,
 				B62FB8AF242461C70070A79D /* AnalyticsHelper.swift in Sources */,
 				B62FB8AB24244EFE0070A79D /* AppGroupsHelper.swift in Sources */,
 				6F0EB56923D067F3007EDA84 /* CategoryHelper.swift in Sources */,
@@ -390,7 +390,7 @@
 				128EF6F0233B6FF6006C7A71 /* KSUserNotificationCenterDelegate.swift in Sources */,
 				6FDBD0EA233CF8C2000398EE /* KumulosInApp.swift in Sources */,
 				B62FB895242384020070A79D /* KumulosUserDefaultsKey.swift in Sources */,
-				B66094EE241BEADF005C3B34 /* KelValPersistenceHelper.swift in Sources */,
+				B66094EE241BEADF005C3B34 /* KeyValPersistenceHelper.swift in Sources */,
 				1293720B2006378D00EBC8F4 /* AnalyticsHelper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
