@@ -15,8 +15,11 @@ public class KumulosNotificationService {
     
     public class func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         let bestAttemptContent =  (request.content.mutableCopy() as! UNMutableNotificationContent)
-
         let userInfo = request.content.userInfo
+        
+        if (!validateUserInfo(userInfo: userInfo)){
+            return
+        }
         
         let custom = userInfo["custom"] as! [AnyHashable:Any]
         let data = custom["a"] as! [AnyHashable:Any]
@@ -59,6 +62,26 @@ public class KumulosNotificationService {
            })
     }
     
+    fileprivate class func validateUserInfo(userInfo:[AnyHashable:Any]) -> Bool {
+        var dict: [AnyHashable:Any] = userInfo
+        let keysInOrder = ["custom", "a", "k.message", "data"]
+        
+        for key in keysInOrder
+        {
+            if (dict[key] == nil) {
+                return false
+            }
+            
+            dict = dict[key] as! [AnyHashable:Any]
+        }
+        
+        if (dict["id"] == nil){
+            return false
+        }
+
+        return true
+    }
+    
     fileprivate class func maybeSetBadge(bestAttemptContent: UNMutableNotificationContent, userInfo: [AnyHashable:Any]){
         let aps = userInfo["aps"] as! [AnyHashable:Any]
         if let contentAvailable = aps["content-available"] as? Int, contentAvailable == 1 {
@@ -74,7 +97,7 @@ public class KumulosNotificationService {
         KeyValPersistenceHelper.set(newBadge, forKey: KumulosUserDefaultsKey.BADGE_COUNT.rawValue)
     }
     
-    class func addButtons(messageId: Int, bestAttemptContent: UNMutableNotificationContent, buttons: NSArray) {
+    fileprivate class func addButtons(messageId: Int, bestAttemptContent: UNMutableNotificationContent, buttons: NSArray) {
         if (buttons.count == 0) {
             return;
         }
@@ -100,7 +123,7 @@ public class KumulosNotificationService {
         bestAttemptContent.categoryIdentifier = categoryIdentifier
     }
     
-    class func getPictureExtension(_ pictureUrl: String?) -> String? {
+    fileprivate class func getPictureExtension(_ pictureUrl: String?) -> String? {
         if (pictureUrl == nil){
             return nil;
         }
@@ -112,7 +135,7 @@ public class KumulosNotificationService {
         return "." + (pictureExtension)
     }
 
-    class func getCompletePictureUrl(_ pictureUrl: String) -> URL? {
+    fileprivate class func getCompletePictureUrl(_ pictureUrl: String) -> URL? {
         if (((pictureUrl as NSString).substring(with: NSRange(location: 0, length: 8))) == "https://") || (((pictureUrl as NSString).substring(with: NSRange(location: 0, length: 7))) == "http://") {
             return URL(string: pictureUrl)
         }
@@ -124,7 +147,7 @@ public class KumulosNotificationService {
         return URL(string: completeString)
     }
 
-    class func loadAttachment(_ url: URL, withExtension pictureExtension: String?, completionHandler: @escaping (UNNotificationAttachment?) -> Void) {
+    fileprivate class func loadAttachment(_ url: URL, withExtension pictureExtension: String?, completionHandler: @escaping (UNNotificationAttachment?) -> Void) {
         let session = URLSession(configuration: URLSessionConfiguration.default)
 
         (session.downloadTask(with: url, completionHandler: { temporaryFileLocation, response, error in
