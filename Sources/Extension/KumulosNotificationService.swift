@@ -28,10 +28,11 @@ public class KumulosNotificationService {
         let msgData = msg["data"] as! [AnyHashable:Any]
         let id = msgData["id"] as! Int
         
-        maybeSetBadge(bestAttemptContent: bestAttemptContent, userInfo: userInfo)
-        
-        trackDeliveredEvent(userInfo: userInfo, notificationId: id)
-        
+        if (AppGroupsHelper.isKumulosAppGroupDefined()){
+            maybeSetBadge(bestAttemptContent: bestAttemptContent, userInfo: userInfo)
+            trackDeliveredEvent(userInfo: userInfo, notificationId: id)
+        }
+       
         let buttons = data["k.buttons"] as? NSArray
         
         if (buttons != nil && bestAttemptContent.categoryIdentifier == "") {
