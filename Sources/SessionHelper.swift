@@ -27,7 +27,6 @@ class SessionIdleTimer {
             }
             
             self.invalidationLock.signal()
-            
             helper.sessionDidEnd()
         }
     }
@@ -83,7 +82,7 @@ internal class SessionHelper {
         }
 
         if bgTask != UIBackgroundTaskIdentifier.invalid {
-            UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(bgTask.rawValue))
+            UIApplication.shared.endBackgroundTask(bgTask)
             bgTask = UIBackgroundTaskIdentifier.invalid
         }
     }
@@ -95,8 +94,8 @@ internal class SessionHelper {
     }
 
     @objc private func appBecameBackground() {
-        bgTask = UIApplication.shared.beginBackgroundTask(withName: "sync", expirationHandler: {
-            UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(self.bgTask.rawValue))
+        bgTask = UIApplication.shared.beginBackgroundTask(withName: "ksession", expirationHandler: {
+            UIApplication.shared.endBackgroundTask(self.bgTask)
             self.bgTask = UIBackgroundTaskIdentifier.invalid
         })
     }
@@ -116,17 +115,10 @@ internal class SessionHelper {
             self.becameInactiveAt = nil
 
             if self.bgTask != UIBackgroundTaskIdentifier.invalid {
-                let taskId = convertToUIBackgroundTaskIdentifier(self.bgTask.rawValue)
+                UIApplication.shared.endBackgroundTask(self.bgTask)
                 self.bgTask = UIBackgroundTaskIdentifier.invalid
-                UIApplication.shared.endBackgroundTask(taskId)
             }
         })
     }
     
 }
-
-// Helper function inserted by Swift 4.2 migrator.
-fileprivate func convertToUIBackgroundTaskIdentifier(_ input: Int) -> UIBackgroundTaskIdentifier {
-    return UIBackgroundTaskIdentifier(rawValue: input)
-}
-
