@@ -44,6 +44,7 @@ internal class SessionHelper {
     private var sessionIdleTimer : SessionIdleTimer?
     private var bgTask : UIBackgroundTaskIdentifier
     private var sessionIdleTimeout : UInt
+    private let syncBarrier = DispatchSemaphore(value: 0)
     
     init(sessionIdleTimeout: UInt) {
         startNewSession = true
@@ -118,7 +119,11 @@ internal class SessionHelper {
                 UIApplication.shared.endBackgroundTask(self.bgTask)
                 self.bgTask = UIBackgroundTaskIdentifier.invalid
             }
+
+            self.syncBarrier.signal()
         })
+
+        _ = syncBarrier.wait(timeout: .now() + .seconds(10))
     }
     
 }
