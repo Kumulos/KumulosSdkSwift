@@ -99,12 +99,20 @@ internal class SessionHelper {
             UIApplication.shared.endBackgroundTask(self.bgTask)
             self.bgTask = UIBackgroundTaskIdentifier.invalid
         })
+
+        if becameInactiveAt == nil {
+            becameInactiveAt = Date()
+        }
     }
 
     @objc private func appWillTerminate() {
         if sessionIdleTimer != nil {
             sessionIdleTimer?.invalidate()
             sessionDidEnd()
+        }
+
+        if becameInactiveAt == nil {
+            becameInactiveAt = Date()
         }
     }
 
