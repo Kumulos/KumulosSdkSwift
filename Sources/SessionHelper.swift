@@ -117,10 +117,14 @@ internal class SessionHelper {
     }
 
     fileprivate func sessionDidEnd() {
+        guard let sessionEndTime = becameInactiveAt else {
+            return
+        }
+
         startNewSession = true
         sessionIdleTimer = nil
 
-        Kumulos.trackEvent(eventType: KumulosEvent.STATS_BACKGROUND.rawValue, atTime: becameInactiveAt!, properties: nil, immediateFlush: true, onSyncComplete: {err in
+        Kumulos.trackEvent(eventType: KumulosEvent.STATS_BACKGROUND.rawValue, atTime: sessionEndTime, properties: nil, immediateFlush: true, onSyncComplete: {err in
             self.becameInactiveAt = nil
 
             if self.bgTask != UIBackgroundTaskIdentifier.invalid {
