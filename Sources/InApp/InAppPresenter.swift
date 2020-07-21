@@ -311,8 +311,8 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
            return;
        }
         
-        var body = message.body as! NSDictionary
-        var type = body["type"] as! String
+        let body = message.body as! NSDictionary
+        let type = body["type"] as! String
         
         if (type == "READY") {
               messageQueueLock.wait()
