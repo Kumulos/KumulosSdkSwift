@@ -261,11 +261,11 @@ internal class InAppHelper {
                 formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
                 formatter.timeZone = NSTimeZone(forSecondsFromGMT: 0) as TimeZone
                 if let lastSyncTime = lastSyncTime {
-                    after = "?after=\(self.urlEncode(url: formatter.string(from: lastSyncTime as Date))!)" ;
+                    after = "?after=\(KSHttpUtil.urlEncode(formatter.string(from: lastSyncTime as Date))!)" ;
                 }
             }
 
-            let encodedIdentifier = self.urlEncode(url: KumulosHelper.currentUserIdentifier)
+            let encodedIdentifier = KSHttpUtil.urlEncode(KumulosHelper.currentUserIdentifier)
             let path = "/v1/users/\(encodedIdentifier!)/messages\(after)"
         
             Kumulos.sharedInstance.pushHttpClient.sendRequest(.GET, toPath: path, data: nil, onSuccess: { response, decodedBody in
@@ -307,16 +307,6 @@ internal class InAppHelper {
             })
         })
         _ = syncBarrier.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(20))
-    }
-    
-    private func urlEncode(url: String) -> String? {
-        let unreserved = "-._~"
-        var allowed = CharacterSet.alphanumerics
-        allowed.insert(charactersIn: unreserved)
-
-        let encoded = url.addingPercentEncoding(withAllowedCharacters: allowed)
-        
-        return encoded
     }
     
     private func persistInAppMessages(messages: [[AnyHashable : Any]]) {

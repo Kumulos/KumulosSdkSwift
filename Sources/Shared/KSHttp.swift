@@ -18,6 +18,7 @@ typealias KSHttpFailureBlock = (_ response:HTTPURLResponse?, _ error:Error?) -> 
 enum KSHttpDataFormat {
     case json
     case plist
+    case rawData
 }
 
 enum KSHttpMethod : String {
@@ -36,7 +37,7 @@ internal class KSHttpClient {
 
     // MARK: Initializers & Configs
 
-    init(baseUrl: URL, requestFormat: KSHttpDataFormat, responseFormat: KSHttpDataFormat) {
+    init(baseUrl: URL, requestFormat: KSHttpDataFormat, responseFormat: KSHttpDataFormat, additionalHeaders:[AnyHashable:Any]? = nil) {
         self.baseUrl = baseUrl
         self.requestFormat = requestFormat
         self.responseFormat = responseFormat
@@ -45,6 +46,10 @@ internal class KSHttpClient {
 
         if requestFormat == .json {
             config.httpAdditionalHeaders = ["Accept": "application/json"]
+        }
+
+        if additionalHeaders != nil {
+            config.httpAdditionalHeaders = additionalHeaders
         }
 
         self.urlSession = URLSession(configuration: config)
@@ -96,6 +101,8 @@ internal class KSHttpClient {
             break
         case .plist:
             break
+        case .rawData:
+            break
         }
 
         if let bodyVal = body {
@@ -115,6 +122,12 @@ internal class KSHttpClient {
             }
 
             return try? JSONSerialization.data(withJSONObject: body, options: .init(rawValue: 0))
+        case .rawData:
+            guard let data = body as? Data else {
+                print("Body not Data")
+                return nil
+            }
+            return data
         default:
             print("No body encoder defined for format")
             return nil
@@ -134,6 +147,9 @@ internal class KSHttpClient {
             break
         case .plist:
             decodedData = try? PropertyListSerialization.propertyList(from: data, options: .mutableContainers, format: nil)
+            break
+        case .rawData:
+            decodedData = data
             break
         }
 
@@ -171,4 +187,16 @@ internal class KSHttpClient {
         return task
     }
 
+}
+
+internal struct KSHttpUtil {
+    static func urlEncode(_ url: String) -> String? {
+        let unreserved = "-._~"
+        var allowed = CharacterSet.alphanumerics
+        allowed.insert(charactersIn: unreserved)
+
+        let encoded = url.addingPercentEncoding(withAllowedCharacters: allowed)
+
+        return encoded
+    }
 }

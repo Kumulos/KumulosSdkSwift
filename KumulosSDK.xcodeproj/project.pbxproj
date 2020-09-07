@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		123D90A822A160D0004B8392 /* KSHttp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 123D90A722A160CF004B8392 /* KSHttp.swift */; };
+		126F12632507EAB2007DBBE1 /* KumulosCheckins.swift in Sources */ = {isa = PBXBuildFile; fileRef = 126F12622507EAB2007DBBE1 /* KumulosCheckins.swift */; };
 		127B22D91D9BE59E00D9C94B /* CwlSysctl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 127B22CE1D9BE59E00D9C94B /* CwlSysctl.swift */; };
 		127B22DB1D9BE59E00D9C94B /* KSAPIOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 127B22D01D9BE59E00D9C94B /* KSAPIOperation.swift */; };
 		127B22DC1D9BE59E00D9C94B /* KSResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 127B22D11D9BE59E00D9C94B /* KSResponse.swift */; };
@@ -55,6 +56,7 @@
 
 /* Begin PBXFileReference section */
 		123D90A722A160CF004B8392 /* KSHttp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KSHttp.swift; sourceTree = "<group>"; };
+		126F12622507EAB2007DBBE1 /* KumulosCheckins.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = KumulosCheckins.swift; path = Sources/KumulosCheckins.swift; sourceTree = "<group>"; };
 		127B22CE1D9BE59E00D9C94B /* CwlSysctl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CwlSysctl.swift; path = Sources/CwlSysctl.swift; sourceTree = "<group>"; };
 		127B22CF1D9BE59E00D9C94B /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Sources/Info.plist; sourceTree = "<group>"; };
 		127B22D01D9BE59E00D9C94B /* KSAPIOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = KSAPIOperation.swift; path = Sources/KSAPIOperation.swift; sourceTree = "<group>"; };
@@ -160,6 +162,7 @@
 				127B22D41D9BE59E00D9C94B /* Kumulos+Push.swift */,
 				127B22D51D9BE59E00D9C94B /* Kumulos+Stats.swift */,
 				A16790811E49D8BD00C276AF /* KumulosPushChannels.swift */,
+				126F12622507EAB2007DBBE1 /* KumulosCheckins.swift */,
 				127B22D61D9BE59E00D9C94B /* KumulosSDK.h */,
 				127B22D71D9BE59E00D9C94B /* MobileProvision.h */,
 				127B22D81D9BE59E00D9C94B /* MobileProvision.m */,
@@ -389,6 +392,7 @@
 				B6E48F64242BA8D700E8B3B9 /* KSBadgeObserver.m in Sources */,
 				128EF6F0233B6FF6006C7A71 /* KSUserNotificationCenterDelegate.swift in Sources */,
 				6FDBD0EA233CF8C2000398EE /* KumulosInApp.swift in Sources */,
+				126F12632507EAB2007DBBE1 /* KumulosCheckins.swift in Sources */,
 				B62FB895242384020070A79D /* KumulosUserDefaultsKey.swift in Sources */,
 				B66094EE241BEADF005C3B34 /* KeyValPersistenceHelper.swift in Sources */,
 				1293720B2006378D00EBC8F4 /* AnalyticsHelper.swift in Sources */,
