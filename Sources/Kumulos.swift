@@ -48,7 +48,6 @@ open class Kumulos {
     internal let baseApiUrl = "https://api.kumulos.com"
     internal let basePushUrl = "https://push.kumulos.com"
     internal let baseCrashUrl = "https://crash.kumulos.com/v1"
-    internal let baseCrmUrl = "https://crm.kumulos.com"
 
     internal let pushHttpClient:KSHttpClient
     internal let rpcHttpClient:KSHttpClient
