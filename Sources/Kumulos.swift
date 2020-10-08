@@ -97,6 +97,8 @@ open class Kumulos {
 
     fileprivate var pushHelper: PushHelper
 
+    fileprivate(set) var deepLinkHelper : DeepLinkHelper?
+
     public static var apiKey:String {
         get {
             return sharedInstance.apiKey
@@ -190,12 +192,17 @@ open class Kumulos {
         badgeObserver = KSBadgeObserver({ (newBadgeCount) in
            KeyValPersistenceHelper.set(newBadgeCount, forKey: KumulosUserDefaultsKey.BADGE_COUNT.rawValue)
         })
+
+        if config.deepLinkHandler != nil {
+            deepLinkHelper = DeepLinkHelper(config)
+        }
     }
 
     private func initializeHelpers() {
         sessionHelper.initialize()
         inAppHelper.initialize()
         _ = pushHelper.pushInit
+        deepLinkHelper?.checkForDeferredLink()
     }
 
     deinit {

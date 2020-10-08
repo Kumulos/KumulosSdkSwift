@@ -24,7 +24,7 @@ internal class KeyValPersistenceHelper {
     {
         getUserDefaults().removeObject(forKey: forKey)
     }
-    
+
     internal static func maybeMigrateUserDefaultsToAppGroups() {
         let standardDefaults = UserDefaults.standard
         let haveMigratedKey : String = KumulosUserDefaultsKey.MIGRATED_TO_GROUPS.rawValue

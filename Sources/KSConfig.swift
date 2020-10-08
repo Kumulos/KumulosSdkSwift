@@ -8,67 +8,28 @@
 
 import Foundation
 
-open class KSConfig: NSObject {
-    fileprivate init(apiKey: String, secretKey: String, enableCrash: Bool, sessionIdleTimeout: UInt, inAppConsentStrategy: InAppConsentStrategy, inAppDeepLinkHandlerBlock : InAppDeepLinkHandlerBlock?, pushOpenedHandlerBlock : PushOpenedHandlerBlock?, pushReceivedInForegroundHandlerBlock : Any?) {
-        _apiKey = apiKey
-        _secretKey = secretKey
-        _enableCrash = enableCrash
-        _sessionIdleTimeout = sessionIdleTimeout
-        _inAppConsentStrategy = inAppConsentStrategy
-        _inAppDeepLinkHandlerBlock = inAppDeepLinkHandlerBlock
-        _pushOpenedHandlerBlock = pushOpenedHandlerBlock
-        _pushReceivedInForegroundHandlerBlock = pushReceivedInForegroundHandlerBlock
-    }
-    
-    private var _apiKey: String
-    private var _secretKey: String
-    private var _enableCrash: Bool
-    private var _sessionIdleTimeout: UInt
-    private var _inAppConsentStrategy : InAppConsentStrategy
-    private var _inAppDeepLinkHandlerBlock : InAppDeepLinkHandlerBlock?
-    private var _pushOpenedHandlerBlock : PushOpenedHandlerBlock?
-    private var _pushReceivedInForegroundHandlerBlock : Any?
-    
-    var apiKey: String {
-        get { return _apiKey }
-    }
-    
-    var secretKey: String {
-        get { return _secretKey }
-    }
-    
-    var enableCrash: Bool {
-        get { return _enableCrash }
-    }
-    
-    var sessionIdleTimeout: UInt {
-        get { return _sessionIdleTimeout }
-    }
-    
-    var inAppConsentStrategy: InAppConsentStrategy {
-        get {
-            return _inAppConsentStrategy
-        }
-    }
-    
-    var inAppDeepLinkHandlerBlock: InAppDeepLinkHandlerBlock? {
-        get {
-            return _inAppDeepLinkHandlerBlock
-        }
-    }
-    
-    var pushOpenedHandlerBlock: PushOpenedHandlerBlock? {
-        get {
-            return _pushOpenedHandlerBlock
-        }
-    }
-    
+public struct KSConfig {
+    let apiKey: String
+    let secretKey: String
+
+    let enableCrash: Bool
+
+    let sessionIdleTimeout: UInt
+
+    let inAppConsentStrategy : InAppConsentStrategy
+    let inAppDeepLinkHandlerBlock : InAppDeepLinkHandlerBlock?
+
+    let pushOpenedHandlerBlock : PushOpenedHandlerBlock?
+    let _pushReceivedInForegroundHandlerBlock : Any?
     @available(iOS 10.0, *)
     var pushReceivedInForegroundHandlerBlock: PushReceivedInForegroundHandlerBlock? {
         get {
             return _pushReceivedInForegroundHandlerBlock as? PushReceivedInForegroundHandlerBlock
         }
     }
+
+    let deepLinkCname : URL?
+    let deepLinkHandler : DeepLinkHandler?
 }
 
 open class KSConfigBuilder: NSObject {
@@ -80,6 +41,8 @@ open class KSConfigBuilder: NSObject {
     private var _inAppDeepLinkHandlerBlock: InAppDeepLinkHandlerBlock?
     private var _pushOpenedHandlerBlock: PushOpenedHandlerBlock?
     private var _pushReceivedInForegroundHandlerBlock: Any?
+    private var _deepLinkCname : URL?
+    private var _deepLinkHandler : DeepLinkHandler?
     
     public init(apiKey: String, secretKey: String) {
         _apiKey = apiKey
@@ -118,8 +81,26 @@ open class KSConfigBuilder: NSObject {
         _pushReceivedInForegroundHandlerBlock = pushReceivedInForegroundHandlerBlock
         return self
     }
+
+    public func enableDeepLinking(cname: String? = nil, _ handler: @escaping DeepLinkHandler) -> KSConfigBuilder {
+        _deepLinkCname = URL(string: cname ?? "")
+        _deepLinkHandler = handler
+
+        return self
+    }
     
     public func build() -> KSConfig {
-        return KSConfig(apiKey: _apiKey, secretKey: _secretKey, enableCrash: _enableCrash, sessionIdleTimeout: _sessionIdleTimeout, inAppConsentStrategy: _inAppConsentStrategy, inAppDeepLinkHandlerBlock: _inAppDeepLinkHandlerBlock, pushOpenedHandlerBlock: _pushOpenedHandlerBlock, pushReceivedInForegroundHandlerBlock: _pushReceivedInForegroundHandlerBlock)
+        return KSConfig(
+            apiKey: _apiKey,
+            secretKey: _secretKey,
+            enableCrash: _enableCrash,
+            sessionIdleTimeout: _sessionIdleTimeout,
+            inAppConsentStrategy: _inAppConsentStrategy,
+            inAppDeepLinkHandlerBlock: _inAppDeepLinkHandlerBlock,
+            pushOpenedHandlerBlock: _pushOpenedHandlerBlock,
+            _pushReceivedInForegroundHandlerBlock: _pushReceivedInForegroundHandlerBlock,
+            deepLinkCname: nil,
+            deepLinkHandler: _deepLinkHandler
+        )
     }
 }
