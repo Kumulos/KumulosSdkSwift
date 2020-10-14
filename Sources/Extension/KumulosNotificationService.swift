@@ -118,10 +118,11 @@ public class KumulosNotificationService {
         dispatchGroup.enter()
  
         loadAttachment(url!, withExtension: picExtension, completionHandler: { attachment in
-           if attachment != nil {
+            if attachment != nil {
                bestAttemptContent.attachments = [attachment!]
-                dispatchGroup.leave()
-           }
+
+            }
+            dispatchGroup.leave()
         })
     }
     
