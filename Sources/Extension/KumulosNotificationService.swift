@@ -229,6 +229,7 @@ public class KumulosNotificationService {
         })
 
         _ = syncBarrier.wait(timeout: .now() + .seconds(10))
+        dispatchGroup.leave()
     }
     
     fileprivate static func initializeAnalyticsHelper() {
