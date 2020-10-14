@@ -12,6 +12,7 @@ import UserNotifications
 public class KumulosNotificationService {
     internal static let KS_MEDIA_RESIZER_BASE_URL = "https://i.app.delivery"
     fileprivate static var analyticsHelper: AnalyticsHelper?
+    private static let syncBarrier = DispatchSemaphore(value: 0)
     
     public class func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         let bestAttemptContent = (request.content.mutableCopy() as! UNMutableNotificationContent)
@@ -20,6 +21,13 @@ public class KumulosNotificationService {
         if (!validateUserInfo(userInfo: userInfo)){
             return
         }
+        
+        let custom = userInfo["custom"] as! [AnyHashable:Any]
+        let data = custom["a"] as! [AnyHashable:Any]
+        
+        let msg = data["k.message"] as! [AnyHashable:Any]
+        let msgData = msg["data"] as! [AnyHashable:Any]
+        let id = msgData["id"] as! Int
         
         maybeAddButtons(userInfo: userInfo, bestAttemptContent:bestAttemptContent)
         
@@ -50,14 +58,14 @@ public class KumulosNotificationService {
             dict = dict[key] as! [AnyHashable:Any]
         }
         
-        if (dict["id"] == nil){
+        if (dict["id"] == nil) {
             return false
         }
 
         return true
     }
     
-    fileprivate class func addButtons(userInfo:[AnyHashable:Any], bestAttemptContent: UNMutableNotificationContent) {
+    fileprivate class func maybeAddButtons(userInfo:[AnyHashable:Any], bestAttemptContent: UNMutableNotificationContent) {
         if(bestAttemptContent.categoryIdentifier != "") {
             return
         }
@@ -71,13 +79,13 @@ public class KumulosNotificationService {
         
         let buttons = data["k.buttons"] as? NSArray
         
-        if (buttons == nil || buttons.count == 0) {
+        if (buttons == nil || buttons!.count == 0) {
             return;
         }
         
         let actionArray = NSMutableArray()
         
-        for button in buttons {
+        for button in buttons! {
             let buttonDict = button as! [AnyHashable:Any]
             
             let id = buttonDict["id"] as! String
@@ -87,7 +95,7 @@ public class KumulosNotificationService {
             actionArray.add(action);
         }
         
-        let categoryIdentifier = CategoryHelper.getCategoryIdForMessageId(messageId: messageId)
+        let categoryIdentifier = CategoryHelper.getCategoryIdForMessageId(messageId: id)
         
         let category = UNNotificationCategory(identifier: categoryIdentifier, actions: actionArray as! [UNNotificationAction], intentIdentifiers: [],  options: .customDismissAction)
         
@@ -200,7 +208,7 @@ public class KumulosNotificationService {
         KeyValPersistenceHelper.set(newBadge, forKey: KumulosUserDefaultsKey.BADGE_COUNT.rawValue)
     }
 
-    fileprivate static func trackDeliveredEvent(dispatchGroup: DispatchGroup, userInfo: [AnyHashable:Any], notificationId: Int) {
+    fileprivate class func trackDeliveredEvent(dispatchGroup: DispatchGroup, userInfo: [AnyHashable:Any], notificationId: Int) {
         let aps = userInfo["aps"] as! [AnyHashable:Any]
         if let contentAvailable = aps["content-available"] as? Int, contentAvailable == 1 {
             return
@@ -215,13 +223,12 @@ public class KumulosNotificationService {
         
         dispatchGroup.enter()
         
-        analyticsHelper.trackEvent(eventType: KumulosEvent.MESSAGE_DELIVERED.rawValue, properties: props, immediateFlush: true, onSyncComplete: {err in
+        analyticsHelper.trackEvent(eventType: KumulosSharedEvent.MESSAGE_DELIVERED.rawValue, atTime: Date(), properties: props, immediateFlush: true, onSyncComplete: {err in
             self.syncBarrier.signal()
             dispatchGroup.leave()
         })
 
         _ = syncBarrier.wait(timeout: .now() + .seconds(10))
-        
     }
     
     fileprivate static func initializeAnalyticsHelper() {
