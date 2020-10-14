@@ -74,7 +74,7 @@ class DeepLinkHelper {
 
         if shouldCheck, let url = UIPasteboard.general.url, urlShouldBeHandled(url) {
             UIPasteboard.general.urls = UIPasteboard.general.urls?.filter({$0 != url})
-            self.handleDeepLinkUrl(url)
+            self.handleDeepLinkUrl(url, wasDeferred: true)
         }
 
         KeyValPersistenceHelper.set(true, forKey: DeepLinkHelper.deferredLinkCheckedKey)
@@ -88,7 +88,7 @@ class DeepLinkHelper {
         return host.hasSuffix("lnk.click") || host == config.deepLinkCname?.host
     }
 
-    fileprivate func handleDeepLinkUrl(_ url: URL) {
+    fileprivate func handleDeepLinkUrl(_ url: URL, wasDeferred: Bool = false) {
         let slug = KSHttpUtil.urlEncode(url.path.trimmingCharacters(in: ["/"]))
 
         httpClient.sendRequest(.GET, toPath: "/v1/deeplinks/\(slug ?? "")", data: nil) { (res, data) in
@@ -101,6 +101,9 @@ class DeepLinkHelper {
                 }
 
                 self.invokeDeepLinkHandler(.linkMatched(link))
+
+                let linkProps = ["url": url.absoluteURL, "wasDeferred": wasDeferred] as [String : Any]
+                Kumulos.getInstance().analyticsHelper.trackEvent(eventType: KumulosEvent.DEEP_LINK_MATCHED.rawValue, properties: linkProps, immediateFlush: false)
                 break
             default:
                 self.invokeDeepLinkHandler(.lookupFailed(url))
