@@ -209,7 +209,7 @@ public class KumulosNotificationService {
         KeyValPersistenceHelper.set(newBadge, forKey: KumulosUserDefaultsKey.BADGE_COUNT.rawValue)
     }
 
-    fileprivate class func trackDeliveredEvent(dispatchGroup: DispatchGroup, userInfo: [AnyHashable:Any], notificationId: Int) {
+    fileprivate static func trackDeliveredEvent(dispatchGroup: DispatchGroup, userInfo: [AnyHashable:Any], notificationId: Int) {
         let aps = userInfo["aps"] as! [AnyHashable:Any]
         if let contentAvailable = aps["content-available"] as? Int, contentAvailable == 1 {
             return
