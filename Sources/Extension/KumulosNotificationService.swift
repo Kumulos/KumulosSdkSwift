@@ -226,7 +226,6 @@ public class KumulosNotificationService {
         
         analyticsHelper.trackEvent(eventType: KumulosSharedEvent.MESSAGE_DELIVERED.rawValue, atTime: Date(), properties: props, immediateFlush: true, onSyncComplete: {err in
             self.syncBarrier.signal()
-            dispatchGroup.leave()
         })
 
         _ = syncBarrier.wait(timeout: .now() + .seconds(10))
