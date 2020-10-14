@@ -9,7 +9,7 @@ import Foundation
 
 public struct DeepLinkContent {
     public let title: String?
-    public let message: String?
+    public let description: String?
 }
 
 public struct DeepLink {
@@ -25,7 +25,7 @@ public struct DeepLink {
         }
 
         self.url = url
-        self.content = DeepLinkContent(title: content["title"] as? String, message: content["message"] as? String)
+        self.content = DeepLinkContent(title: content["title"] as? String, description: content["description"] as? String)
         self.data = linkData
     }
 }
