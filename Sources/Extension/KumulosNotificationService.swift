@@ -28,16 +28,17 @@ public class KumulosNotificationService {
         let msgData = msg["data"] as! [AnyHashable:Any]
         let id = msgData["id"] as! Int
         
-        if (AppGroupsHelper.isKumulosAppGroupDefined()){
-            maybeSetBadge(bestAttemptContent: bestAttemptContent, userInfo: userInfo)
-            trackDeliveredEvent(userInfo: userInfo, notificationId: id)
-        }
-       
         let buttons = data["k.buttons"] as? NSArray
         
         if (buttons != nil && bestAttemptContent.categoryIdentifier == "") {
             addButtons(messageId: id, bestAttemptContent: bestAttemptContent, buttons: buttons!)
         }
+        
+        let dispatchQueue = DispatchQueue(label: "com.kumulos.notifications", qos: .userInitiated, attributes: .concurrent)
+        let dispatchGroup = DispatchGroup()
+        
+        
+        dispatchGroup.enter()
         
         let attachments = userInfo["attachments"] as? [AnyHashable : Any]
         let pictureUrl = attachments?["pictureUrl"] as? String
@@ -49,18 +50,29 @@ public class KumulosNotificationService {
 
         let picExtension = getPictureExtension(pictureUrl)
         let url = getCompletePictureUrl(pictureUrl!)
-
-        if (url == nil){
-            contentHandler(bestAttemptContent)
-            return
-        }
-
+ 
         loadAttachment(url!, withExtension: picExtension, completionHandler: { attachment in
-               if attachment != nil {
-                   bestAttemptContent.attachments = [attachment!]
-               }
-               contentHandler(bestAttemptContent)
-           })
+           if attachment != nil {
+               bestAttemptContent.attachments = [attachment!]
+           }
+           
+       })
+        
+        dispatchGroup.leave()
+        
+        dispatchGroup.enter()
+        
+        if (AppGroupsHelper.isKumulosAppGroupDefined()){
+            maybeSetBadge(bestAttemptContent: bestAttemptContent, userInfo: userInfo)
+            trackDeliveredEvent(userInfo: userInfo, notificationId: id)
+        }
+        
+        dispatchGroup.leave();
+        
+        
+        dispatchGroup.notify(queue: .main) {
+            contentHandler(bestAttemptContent)
+        }
     }
     
     fileprivate class func validateUserInfo(userInfo:[AnyHashable:Any]) -> Bool {
@@ -204,7 +216,13 @@ public class KumulosNotificationService {
         }
         
         let props: [String:Any] = ["type" : KS_MESSAGE_TYPE_PUSH, "id":notificationId]
-        analyticsHelper.trackEvent(eventType: KumulosSharedEvent.MESSAGE_DELIVERED.rawValue, properties: props, immediateFlush: true)
+        
+        analyticsHelper.trackEvent(eventType: KumulosEvent.MESSAGE_DELIVERED.rawValue, properties: props, immediateFlush: true, onSyncComplete: {err in
+            self.syncBarrier.signal()
+        })
+
+        _ = syncBarrier.wait(timeout: .now() + .seconds(10))
+        
     }
     
     fileprivate static func initializeAnalyticsHelper() {
