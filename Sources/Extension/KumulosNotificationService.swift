@@ -34,9 +34,7 @@ public class KumulosNotificationService {
             addButtons(messageId: id, bestAttemptContent: bestAttemptContent, buttons: buttons!)
         }
         
-        let dispatchQueue = DispatchQueue(label: "com.kumulos.notifications", qos: .userInitiated, attributes: .concurrent)
         let dispatchGroup = DispatchGroup()
-        
         
         dispatchGroup.enter()
         
