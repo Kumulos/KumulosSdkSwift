@@ -20,7 +20,7 @@ public struct KSConfig {
     let inAppDeepLinkHandlerBlock : InAppDeepLinkHandlerBlock?
 
     let pushOpenedHandlerBlock : PushOpenedHandlerBlock?
-    let _pushReceivedInForegroundHandlerBlock : Any?
+    fileprivate let _pushReceivedInForegroundHandlerBlock : Any?
     @available(iOS 10.0, *)
     var pushReceivedInForegroundHandlerBlock: PushReceivedInForegroundHandlerBlock? {
         get {
