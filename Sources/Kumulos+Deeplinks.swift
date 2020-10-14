@@ -13,11 +13,11 @@ public struct DeepLinkContent {
 }
 
 public struct DeepLink {
-    public let url: String
+    public let url: URL
     public let content: DeepLinkContent
     public let data: [AnyHashable:Any?]
 
-    init?(for url: String, from jsonData:Data) {
+    init?(for url: URL, from jsonData:Data) {
         guard let response = try? JSONSerialization.jsonObject(with: jsonData) as? [AnyHashable:Any],
               let linkData = response["linkData"] as? [AnyHashable:Any?],
               let content = response["content"] as? [AnyHashable:Any?] else {
@@ -31,10 +31,10 @@ public struct DeepLink {
 }
 
 public enum DeepLinkResolution {
-    case lookupFailed
-    case linkNotFound(_ url: String)
-    case linkExpired(_ url:String)
-    case linkLimitExceeded(_ url:String)
+    case lookupFailed(_ url: URL)
+    case linkNotFound(_ url: URL)
+    case linkExpired(_ url:URL)
+    case linkLimitExceeded(_ url:URL)
     case linkMatched(_ data:DeepLink)
 }
 
@@ -95,30 +95,30 @@ class DeepLinkHelper {
             switch res?.statusCode {
             case 200:
                 guard let jsonData = data as? Data,
-                      let link = DeepLink(for: url.absoluteString, from: jsonData) else {
-                    self.invokeDeepLinkHandler(.lookupFailed)
+                      let link = DeepLink(for: url, from: jsonData) else {
+                    self.invokeDeepLinkHandler(.lookupFailed(url))
                     return
                 }
 
                 self.invokeDeepLinkHandler(.linkMatched(link))
                 break
             default:
-                self.invokeDeepLinkHandler(.lookupFailed)
+                self.invokeDeepLinkHandler(.lookupFailed(url))
                 break
             }
         } onFailure: { (res, err) in
             switch res?.statusCode {
             case 404:
-                self.invokeDeepLinkHandler(.linkNotFound(url.absoluteString))
+                self.invokeDeepLinkHandler(.linkNotFound(url))
                 break
             case 410:
-                self.invokeDeepLinkHandler(.linkExpired(url.absoluteString))
+                self.invokeDeepLinkHandler(.linkExpired(url))
                 break
             case 429:
-                self.invokeDeepLinkHandler(.linkLimitExceeded(url.absoluteString))
+                self.invokeDeepLinkHandler(.linkLimitExceeded(url))
                 break
             default:
-                self.invokeDeepLinkHandler(.lookupFailed)
+                self.invokeDeepLinkHandler(.lookupFailed(url))
                 break
             }
         }
