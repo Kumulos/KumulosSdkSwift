@@ -91,8 +91,7 @@ class DeepLinkHelper {
     fileprivate func handleDeepLinkUrl(_ url: URL, wasDeferred: Bool = false) {
         let slug = KSHttpUtil.urlEncode(url.path.trimmingCharacters(in: ["/"]))
 
-        let deferredParam = wasDeferred ? "?wasDeferred=1" : ""
-        let path = "/v1/deeplinks/\(slug ?? "")\(deferredParam)"
+        let path = "/v1/deeplinks/\(slug ?? "")?wasDeferred=\(wasDeferred ? 1 : 0)"
 
         httpClient.sendRequest(.GET, toPath: path, data: nil) { (res, data) in
             switch res?.statusCode {
@@ -105,7 +104,7 @@ class DeepLinkHelper {
 
                 self.invokeDeepLinkHandler(.linkMatched(link))
 
-                let linkProps = ["url": url.absoluteURL, "wasDeferred": wasDeferred] as [String : Any]
+                let linkProps = ["url": url.absoluteString, "wasDeferred": wasDeferred] as [String : Any]
                 Kumulos.getInstance().analyticsHelper.trackEvent(eventType: KumulosEvent.DEEP_LINK_MATCHED.rawValue, properties: linkProps, immediateFlush: false)
                 break
             default:
