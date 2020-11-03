@@ -49,9 +49,11 @@ open class Kumulos {
     internal let baseApiUrl = "https://api.kumulos.com"
     internal let basePushUrl = "https://push.kumulos.com"
     internal let baseCrashUrl = "https://crash.kumulos.com/v1"
+    internal let baseCoreUrl = "https://stats.kumulos.com"
 
     internal let pushHttpClient:KSHttpClient
     internal let rpcHttpClient:KSHttpClient
+    internal let coreHttpClient:KSHttpClient
 
     internal let pushNotificationDeviceType = 1
     internal let pushNotificationProductionTokenType:Int = 1
@@ -185,6 +187,8 @@ open class Kumulos {
         pushHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
         rpcHttpClient = KSHttpClient(baseUrl: URL(string: baseApiUrl)!, requestFormat: .json, responseFormat: .plist)
         rpcHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
+        coreHttpClient = KSHttpClient(baseUrl: URL(string: baseCoreUrl)!, requestFormat: .json, responseFormat: .json)
+        coreHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
 
         analyticsHelper = AnalyticsHelper(apiKey: apiKey, secretKey: secretKey)
         sessionHelper = SessionHelper(sessionIdleTimeout: config.sessionIdleTimeout)
@@ -210,6 +214,7 @@ open class Kumulos {
         operationQueue.cancelAllOperations()
         rpcHttpClient.invalidateSessionCancellingTasks(true)
         pushHttpClient.invalidateSessionCancellingTasks(true)
+        coreHttpClient.invalidateSessionCancellingTasks(true)
     }
 
 }

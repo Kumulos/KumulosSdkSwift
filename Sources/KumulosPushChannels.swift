@@ -58,9 +58,9 @@ public class KumulosPushChannels {
      */
     public func listChannels() -> KumulosPushChannelRequest {
         let request = KumulosPushChannelRequest()
-        let path =  "/v1/app-installs/\(Kumulos.installId)/channels"
+        let path =  "/v1/app-users/\(Kumulos.currentUserIdentifier)/channels"
 
-        sdkInstance.pushHttpClient.sendRequest(.GET, toPath: path, data: nil, onSuccess: { (response, data) in
+        sdkInstance.coreHttpClient.sendRequest(.GET, toPath: path, data: nil, onSuccess: { (response, data) in
             if let successBlock = request.successBlock {
                 successBlock?(self.readChannelsFromResponse(jsonResponse: (data as! [[String : AnyObject]])))
             }
@@ -120,10 +120,10 @@ public class KumulosPushChannels {
         }
         
         if (subscribe == true) {
-            parameters["installId"] = Kumulos.installId
+            parameters["userIdentifier"] = Kumulos.currentUserIdentifier
         }
 
-        sdkInstance.pushHttpClient.sendRequest(.POST, toPath: path, data: parameters, onSuccess: { (response, data) in
+        sdkInstance.coreHttpClient.sendRequest(.POST, toPath: path, data: parameters, onSuccess: { (response, data) in
             if let successBlock = request.successBlock {
                 successBlock?([self.getChannelFromPayload(payload: (data as! [String : AnyObject]))])
             }
@@ -222,7 +222,7 @@ public class KumulosPushChannels {
     private func makeSubscriptionNetworkCall(_ method: KSHttpMethod, parameters: [String:AnyObject])
         -> KumulosPushChannelSubscriptionRequest
     {
-        let path =  "/v1/app-installs/\(Kumulos.installId)/channels/subscriptions"
+        let path =  "/v1/app-users/\(Kumulos.currentUserIdentifier)/channels/subscriptions"
         
         return makeNetworkCall(method, path: path, parameters: parameters)
     }
@@ -230,7 +230,7 @@ public class KumulosPushChannels {
     private func makeNetworkCall(_ method: KSHttpMethod, path: String, parameters: [String : AnyObject]) -> KumulosPushChannelSubscriptionRequest {
         let request = KumulosPushChannelSubscriptionRequest()
 
-        sdkInstance.pushHttpClient.sendRequest(method, toPath: path, data: parameters, onSuccess: { (response, body) in
+        sdkInstance.coreHttpClient.sendRequest(method, toPath: path, data: parameters, onSuccess: { (response, body) in
             if let successBlock = request.successBlock {
                 successBlock?()
             }
