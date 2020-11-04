@@ -93,7 +93,7 @@ class DeepLinkHelper {
 
         let path = "/v1/deeplinks/\(slug ?? "")?wasDeferred=\(wasDeferred ? 1 : 0)"
 
-        httpClient.sendRequest(.GET, toPath: path, data: nil) { (res, data) in
+        httpClient.sendRequest(.GET, toPath: path, data: nil, onSuccess:  { (res, data) in
             switch res?.statusCode {
             case 200:
                 guard let jsonData = data as? Data,
@@ -111,7 +111,7 @@ class DeepLinkHelper {
                 self.invokeDeepLinkHandler(.lookupFailed(url))
                 break
             }
-        } onFailure: { (res, err) in
+        }, onFailure: { (res, err) in
             switch res?.statusCode {
             case 404:
                 self.invokeDeepLinkHandler(.linkNotFound(url))
@@ -126,7 +126,7 @@ class DeepLinkHelper {
                 self.invokeDeepLinkHandler(.lookupFailed(url))
                 break
             }
-        }
+        })
     }
 
     fileprivate func invokeDeepLinkHandler(_ resolution: DeepLinkResolution) {
