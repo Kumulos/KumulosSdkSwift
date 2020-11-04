@@ -58,7 +58,8 @@ public class KumulosPushChannels {
      */
     public func listChannels() -> KumulosPushChannelRequest {
         let request = KumulosPushChannelRequest()
-        let path =  "/v1/app-users/\(Kumulos.currentUserIdentifier)/channels"
+        let encodedIdentifier = KSHttpUtil.urlEncode(KumulosHelper.currentUserIdentifier)
+        let path =  "/v1/app-users/\(encodedIdentifier!)/channels"
 
         sdkInstance.coreHttpClient.sendRequest(.GET, toPath: path, data: nil, onSuccess: { (response, data) in
             if let successBlock = request.successBlock {
@@ -222,7 +223,8 @@ public class KumulosPushChannels {
     private func makeSubscriptionNetworkCall(_ method: KSHttpMethod, parameters: [String:AnyObject])
         -> KumulosPushChannelSubscriptionRequest
     {
-        let path =  "/v1/app-users/\(Kumulos.currentUserIdentifier)/channels/subscriptions"
+        let encodedIdentifier = KSHttpUtil.urlEncode(KumulosHelper.currentUserIdentifier)
+        let path =  "/v1/app-users/\(encodedIdentifier!)/channels/subscriptions"
         
         return makeNetworkCall(method, path: path, parameters: parameters)
     }
