@@ -151,7 +151,6 @@ fileprivate struct CheckinRequestData : Encodable {
 }
 
 public class KumulosCheckinClient {
-    private static let crmUrl = "https://crm.kumulos.com"
     private static let deviceKeyLock = DispatchSemaphore(value: 1)
     private static let kDeviceKeyPref = "kumulosCheckinsDeviceKey"
 
@@ -161,7 +160,7 @@ public class KumulosCheckinClient {
 
     public init() {
         httpClient = KSHttpClient(
-            baseUrl: URL(string: KumulosCheckinClient.crmUrl)!,
+            baseUrl: URL(string: Kumulos.baseCrmCoreUrl)!,
             requestFormat: .rawData,
             responseFormat: .rawData,
             additionalHeaders: [

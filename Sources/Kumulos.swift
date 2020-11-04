@@ -49,7 +49,7 @@ open class Kumulos {
     internal let baseApiUrl = "https://api.kumulos.com"
     internal let basePushUrl = "https://push.kumulos.com"
     internal let baseCrashUrl = "https://crash.kumulos.com/v1"
-    internal let baseCrmCoreUrl = "https://crm.kumulos.com"
+    internal static let baseCrmCoreUrl = "https://crm.kumulos.com"
 
     internal let pushHttpClient:KSHttpClient
     internal let rpcHttpClient:KSHttpClient
@@ -187,7 +187,7 @@ open class Kumulos {
         pushHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
         rpcHttpClient = KSHttpClient(baseUrl: URL(string: baseApiUrl)!, requestFormat: .json, responseFormat: .plist)
         rpcHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
-        coreHttpClient = KSHttpClient(baseUrl: URL(string: baseCrmCoreUrl)!, requestFormat: .json, responseFormat: .json)
+        coreHttpClient = KSHttpClient(baseUrl: URL(string: Kumulos.baseCrmCoreUrl)!, requestFormat: .json, responseFormat: .json)
         coreHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
 
         analyticsHelper = AnalyticsHelper(apiKey: apiKey, secretKey: secretKey)
