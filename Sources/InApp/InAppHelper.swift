@@ -322,6 +322,7 @@ internal class InAppHelper {
             var lastSyncTime = NSDate(timeIntervalSince1970: 0)
             let dateParser = DateFormatter()
             dateParser.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
+            dateParser.timeZone = NSTimeZone(forSecondsFromGMT: 0) as TimeZone
             
             for message in messages {
                 let partId = message["id"] as! Int64
