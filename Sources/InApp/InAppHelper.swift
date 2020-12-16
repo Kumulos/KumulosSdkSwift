@@ -260,6 +260,7 @@ internal class InAppHelper {
                 formatter.timeStyle = .full
                 formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
                 formatter.timeZone = NSTimeZone(forSecondsFromGMT: 0) as TimeZone
+                formatter.locale = Locale(identifier: "en_US_POSIX")
                 if let lastSyncTime = lastSyncTime {
                     after = "?after=\(KSHttpUtil.urlEncode(formatter.string(from: lastSyncTime as Date))!)" ;
                 }
@@ -322,7 +323,8 @@ internal class InAppHelper {
             var lastSyncTime = NSDate(timeIntervalSince1970: 0)
             let dateParser = DateFormatter()
             dateParser.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
-            dateParser.timeZone = NSTimeZone(forSecondsFromGMT: 0) as TimeZone
+            dateParser.locale = Locale(identifier: "en_US_POSIX")
+            dateParser.timeZone = TimeZone(secondsFromGMT: 0)
             
             for message in messages {
                 let partId = message["id"] as! Int64
