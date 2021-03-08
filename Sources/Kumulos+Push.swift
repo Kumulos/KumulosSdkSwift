@@ -217,18 +217,23 @@ public extension Kumulos {
         let params = ["type": KS_MESSAGE_TYPE_PUSH, "id": notification.id]
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_OPENED, properties:params)
     }
+    
+    /**
+        Track a user dismissing a push notification
 
-    internal func pushHandleOpen(withUserInfo: [AnyHashable: Any]?) {
-        guard let userInfo = withUserInfo else {
+        Parameters:
+            - notification: The notification which was dismissed
+    */
+    static func pushTrackDismissed(notification: KSPushNotification?) {
+        guard let notification = notification else {
             return
         }
 
-        let notification = KSPushNotification(userInfo: userInfo)
-        
-        self.pushHandleOpen(notification: notification)
+        let params = ["type": KS_MESSAGE_TYPE_PUSH, "id": notification.id]
+        Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_DISMISSED, properties:params)
     }
   
-
+    
     @available(iOS 10.0, *)
     internal func pushHandleOpen(withUserInfo: [AnyHashable: Any]?, response: UNNotificationResponse?) -> Bool {
         let notification = KSPushNotification(userInfo: withUserInfo, response: response)
@@ -266,6 +271,19 @@ public extension Kumulos {
                userOpenedHandler(notification)
            }
        }
+    }
+    
+    @available(iOS 10.0, *)
+    internal func pushHandleDismissed(withUserInfo: [AnyHashable: Any]?, response: UNNotificationResponse?) -> Bool {
+        let notification = KSPushNotification(userInfo: withUserInfo, response: response)
+
+        if notification.id == 0 {
+            return false
+        }
+
+        Kumulos.pushTrackDismissed(notification: notification)
+
+        return true
     }
 
     fileprivate static func serializeDeviceToken(_ deviceToken: Data) -> String {

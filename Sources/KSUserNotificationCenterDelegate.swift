@@ -42,6 +42,12 @@ class KSUserNotificationCenterDelegate : NSObject, UNUserNotificationCenterDeleg
         }
 
         if (response.actionIdentifier == UNNotificationDismissActionIdentifier) {
+            let handled = Kumulos.sharedInstance.pushHandleDismissed(withUserInfo: userInfo, response: response)
+            if (!handled) {
+                chainCenter(center, didReceive: response, with: completionHandler)
+                return
+            }
+            
             completionHandler()
             return
         }
