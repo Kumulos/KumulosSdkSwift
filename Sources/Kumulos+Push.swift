@@ -218,13 +218,7 @@ public extension Kumulos {
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_OPENED, properties:params)
     }
     
-    /**
-        Track a user dismissing a push notification
-
-        Parameters:
-            - notification: The notification which was dismissed
-    */
-    static func pushTrackDismissed(notification: KSPushNotification?) {
+    private func pushTrackDismissed(notification: KSPushNotification?) {
         guard let notification = notification else {
             return
         }
@@ -233,7 +227,6 @@ public extension Kumulos {
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_DISMISSED, properties:params)
     }
   
-    
     @available(iOS 10.0, *)
     internal func pushHandleOpen(withUserInfo: [AnyHashable: Any]?, response: UNNotificationResponse?) -> Bool {
         let notification = KSPushNotification(userInfo: withUserInfo, response: response)
@@ -281,7 +274,7 @@ public extension Kumulos {
             return false
         }
 
-        Kumulos.pushTrackDismissed(notification: notification)
+        self.pushTrackDismissed(notification: notification)
 
         return true
     }
