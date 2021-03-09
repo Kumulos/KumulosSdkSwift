@@ -226,6 +226,16 @@ public extension Kumulos {
         let params = ["type": KS_MESSAGE_TYPE_PUSH, "id": notification.id]
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_DISMISSED, properties:params)
     }
+    
+    internal func pushHandleOpen(withUserInfo: [AnyHashable: Any]?) {
+        guard let userInfo = withUserInfo else {
+            return
+        }
+
+        let notification = KSPushNotification(userInfo: userInfo)
+
+        self.pushHandleOpen(notification: notification)
+    }
   
     @available(iOS 10.0, *)
     internal func pushHandleOpen(withUserInfo: [AnyHashable: Any]?, response: UNNotificationResponse?) -> Bool {
@@ -366,6 +376,14 @@ class PushHelper {
                 })
             } else {
                 fetchBarrier.signal()
+            }
+            
+            if UIApplication.shared.applicationState == .inactive {
+               if #available(iOS 10, *) {
+                   // Noop (tap handler in delegate will deal with opening the URL)
+               } else {
+                   Kumulos.sharedInstance.pushHandleOpen(withUserInfo:userInfo)
+               }
             }
             
             let aps = userInfo["aps"] as! [AnyHashable:Any]
