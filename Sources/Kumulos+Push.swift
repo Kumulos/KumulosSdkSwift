@@ -224,7 +224,7 @@ public extension Kumulos {
         }
 
         let params = ["type": KS_MESSAGE_TYPE_PUSH, "id": notification.id]
-        Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_DISMISSED, properties:params)
+        Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_DISMISSED, properties:params, immediateFlush: true)
     }
     
     internal func pushHandleOpen(withUserInfo: [AnyHashable: Any]?) {
