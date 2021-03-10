@@ -49,6 +49,10 @@
 		B62FB8AB24244EFE0070A79D /* AppGroupsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62FB8972423997E0070A79D /* AppGroupsHelper.swift */; };
 		B62FB8AF242461C70070A79D /* AnalyticsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1293720A2006378D00EBC8F4 /* AnalyticsHelper.swift */; };
 		B62FB8B02424622F0070A79D /* KSHttp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 123D90A722A160CF004B8392 /* KSHttp.swift */; };
+		B659805625F7CE98008C074D /* PendingNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = B659805525F7CE98008C074D /* PendingNotification.swift */; };
+		B659805725F7CE98008C074D /* PendingNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = B659805525F7CE98008C074D /* PendingNotification.swift */; };
+		B659805D25F81F5C008C074D /* PendingNotificationHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B659805C25F81F5C008C074D /* PendingNotificationHelper.swift */; };
+		B659805E25F81F5C008C074D /* PendingNotificationHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B659805C25F81F5C008C074D /* PendingNotificationHelper.swift */; };
 		B66094EE241BEADF005C3B34 /* KeyValPersistenceHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B66094ED241BEADF005C3B34 /* KeyValPersistenceHelper.swift */; };
 		B6E48F5F2425057E00E8B3B9 /* SessionHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E48F5E2425057E00E8B3B9 /* SessionHelper.swift */; };
 		B6E48F64242BA8D700E8B3B9 /* KSBadgeObserver.m in Sources */ = {isa = PBXBuildFile; fileRef = B6E48F63242BA8D700E8B3B9 /* KSBadgeObserver.m */; };
@@ -99,6 +103,8 @@
 		B62FB894242384020070A79D /* KumulosUserDefaultsKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KumulosUserDefaultsKey.swift; sourceTree = "<group>"; };
 		B62FB8972423997E0070A79D /* AppGroupsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupsHelper.swift; sourceTree = "<group>"; };
 		B62FB8A5242448520070A79D /* KumulosHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = KumulosHelper.swift; path = Sources/Shared/KumulosHelper.swift; sourceTree = SOURCE_ROOT; };
+		B659805525F7CE98008C074D /* PendingNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingNotification.swift; sourceTree = "<group>"; };
+		B659805C25F81F5C008C074D /* PendingNotificationHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingNotificationHelper.swift; sourceTree = "<group>"; };
 		B66094ED241BEADF005C3B34 /* KeyValPersistenceHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyValPersistenceHelper.swift; sourceTree = "<group>"; };
 		B6E48F5E2425057E00E8B3B9 /* SessionHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SessionHelper.swift; path = Sources/SessionHelper.swift; sourceTree = "<group>"; };
 		B6E48F63242BA8D700E8B3B9 /* KSBadgeObserver.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = KSBadgeObserver.m; path = Sources/KSBadgeObserver.m; sourceTree = "<group>"; };
@@ -211,6 +217,8 @@
 				B66094ED241BEADF005C3B34 /* KeyValPersistenceHelper.swift */,
 				B62FB894242384020070A79D /* KumulosUserDefaultsKey.swift */,
 				B62FB8972423997E0070A79D /* AppGroupsHelper.swift */,
+				B659805525F7CE98008C074D /* PendingNotification.swift */,
+				B659805C25F81F5C008C074D /* PendingNotificationHelper.swift */,
 			);
 			name = Shared;
 			path = Sources/Shared;
@@ -361,8 +369,10 @@
 				B62FB8A924244EF90070A79D /* KumulosHelper.swift in Sources */,
 				B62FB8B02424622F0070A79D /* KSHttp.swift in Sources */,
 				B62FB8AA24244EFC0070A79D /* KeyValPersistenceHelper.swift in Sources */,
+				B659805725F7CE98008C074D /* PendingNotification.swift in Sources */,
 				B62FB8AF242461C70070A79D /* AnalyticsHelper.swift in Sources */,
 				B62FB8AB24244EFE0070A79D /* AppGroupsHelper.swift in Sources */,
+				B659805E25F81F5C008C074D /* PendingNotificationHelper.swift in Sources */,
 				6F0EB56923D067F3007EDA84 /* CategoryHelper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -374,6 +384,7 @@
 				6F469D1C205BCE720069D788 /* Kumulos+Engage.swift in Sources */,
 				127B22E01D9BE59E00D9C94B /* Kumulos+Stats.swift in Sources */,
 				127B22D91D9BE59E00D9C94B /* CwlSysctl.swift in Sources */,
+				B659805625F7CE98008C074D /* PendingNotification.swift in Sources */,
 				127B22DF1D9BE59E00D9C94B /* Kumulos+Push.swift in Sources */,
 				B625D077233A7A18003AA551 /* InAppModels.swift in Sources */,
 				A13430A11F013D6E00D185FD /* Kumulos+Crash.swift in Sources */,
@@ -397,6 +408,7 @@
 				128EF6F0233B6FF6006C7A71 /* KSUserNotificationCenterDelegate.swift in Sources */,
 				6FDBD0EA233CF8C2000398EE /* KumulosInApp.swift in Sources */,
 				126F12632507EAB2007DBBE1 /* KumulosCheckins.swift in Sources */,
+				B659805D25F81F5C008C074D /* PendingNotificationHelper.swift in Sources */,
 				B62FB895242384020070A79D /* KumulosUserDefaultsKey.swift in Sources */,
 				B66094EE241BEADF005C3B34 /* KeyValPersistenceHelper.swift in Sources */,
 				1293720B2006378D00EBC8F4 /* AnalyticsHelper.swift in Sources */,

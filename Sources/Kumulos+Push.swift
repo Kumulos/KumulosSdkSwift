@@ -203,6 +203,7 @@ public extension Kumulos {
         Kumulos.trackEvent(eventType: KumulosEvent.DEVICE_UNSUBSCRIBED, properties: [:], immediateFlush: true)
     }
  
+// MARK: Open handling
     /**
         Track a user action triggered by a push notification
 
@@ -218,15 +219,7 @@ public extension Kumulos {
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_OPENED, properties:params)
     }
     
-    private func pushTrackDismissed(notification: KSPushNotification?) {
-        guard let notification = notification else {
-            return
-        }
-
-        let params = ["type": KS_MESSAGE_TYPE_PUSH, "id": notification.id]
-        Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_DISMISSED, properties:params, immediateFlush: true)
-    }
-    
+    @available(iOS 9.0, *)
     internal func pushHandleOpen(withUserInfo: [AnyHashable: Any]?) {
         guard let userInfo = withUserInfo else {
             return
@@ -246,13 +239,17 @@ public extension Kumulos {
         }
 
         self.pushHandleOpen(notification: notification)
-
+        
+        if (AppGroupsHelper.isKumulosAppGroupDefined()){
+            PendingNotificationHelper.remove(id: notification.id)
+        }
+       
         return true
     }
     
     private func pushHandleOpen(notification: KSPushNotification) {
         Kumulos.pushTrackOpen(notification: notification)
-
+        
        // Handle URL pushes
 
        if let url = notification.url {
@@ -275,7 +272,8 @@ public extension Kumulos {
            }
        }
     }
-    
+
+// MARK: Dismissed handling
     @available(iOS 10.0, *)
     internal func pushHandleDismissed(withUserInfo: [AnyHashable: Any]?, response: UNNotificationResponse?) -> Bool {
         let notification = KSPushNotification(userInfo: withUserInfo, response: response)
@@ -284,11 +282,62 @@ public extension Kumulos {
             return false
         }
 
-        self.pushTrackDismissed(notification: notification)
+        self.pushHandleDismissed(notificationId: notification.id)
 
         return true
     }
-
+    
+    @available(iOS 10.0, *)
+    private func pushHandleDismissed(notificationId: Int, dismissedAt: Date? = nil) {
+        if (AppGroupsHelper.isKumulosAppGroupDefined()){
+            PendingNotificationHelper.remove(id: notificationId)
+        }
+        self.pushTrackDismissed(notificationId: notificationId, dismissedAt: dismissedAt)
+    }
+    
+    @available(iOS 10.0, *)
+    private func pushTrackDismissed(notificationId: Int, dismissedAt: Date? = nil) {
+        let params = ["type": KS_MESSAGE_TYPE_PUSH, "id": notificationId]
+              
+        if let unwrappedDismissedAt = dismissedAt {
+            Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_DISMISSED.rawValue, atTime: unwrappedDismissedAt, properties:params, immediateFlush: true)
+        }
+        else{
+            Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_DISMISSED, properties:params, immediateFlush: true)
+        }
+    }
+    
+    @available(iOS 10.0, *)
+    internal func maybeTrackPushDismissedEvents() {
+        if (!AppGroupsHelper.isKumulosAppGroupDefined()){
+            return;
+        }
+        
+        var actualPendingNotificationIds: [Int] = []
+        UNUserNotificationCenter.current().getDeliveredNotifications { (notifications: [UNNotification]) in
+            for notification in notifications {
+                let notification = KSPushNotification(userInfo: notification.request.content.userInfo)
+                if (notification.id == 0){
+                    continue
+                }
+                
+                actualPendingNotificationIds.append(notification.id)
+            }
+            //dump(actualPendingNotificationIds)
+            
+            //TODO: how open vs maybeTrack order interact?
+            
+            let recordedPendingNotifications = PendingNotificationHelper.readAll()
+           
+            let deletions = recordedPendingNotifications.filter({ !actualPendingNotificationIds.contains( $0.id ) })
+            for deletion in deletions {
+                self.pushHandleDismissed(notificationId: deletion.id, dismissedAt: deletion.deliveredAt)
+            }
+            
+        }
+    }
+    
+// MARK: Token handling
     fileprivate static func serializeDeviceToken(_ deviceToken: Data) -> String {
         var token: String = ""
         for i in 0..<deviceToken.count {
@@ -311,7 +360,6 @@ public extension Kumulos {
         
         return Kumulos.sharedInstance.pushNotificationProductionTokenType
     }
-
 }
 
 // MARK: Swizzling

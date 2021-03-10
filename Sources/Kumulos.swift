@@ -165,7 +165,11 @@ open class Kumulos {
         instance = Kumulos(config: config)
 
         instance!.initializeHelpers()
-
+        
+        if #available(iOS 10.0, *) {
+            instance!.maybeTrackPushDismissedEvents()
+        }
+        
         DispatchQueue.global().async {
             instance!.sendDeviceInformation()
         }

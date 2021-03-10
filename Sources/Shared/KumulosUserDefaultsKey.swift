@@ -15,6 +15,7 @@ internal enum KumulosUserDefaultsKey : String {
     case INSTALL_UUID = "KumulosUUID"
     case USER_ID = "KumulosCurrentUserID"
     case BADGE_COUNT = "KumulosBadgeCount"
+    case PENDING_NOTIFICATIONS = "KumulosPendingNotifications"
     
     //exist only in standard defaults for app
     case MIGRATED_TO_GROUPS = "KumulosDidMigrateToAppGroups"
@@ -29,6 +30,7 @@ internal enum KumulosUserDefaultsKey : String {
         SECRET_KEY,
         INSTALL_UUID,
         USER_ID,
-        BADGE_COUNT
+        BADGE_COUNT,
+        PENDING_NOTIFICATIONS
     ]
 }
