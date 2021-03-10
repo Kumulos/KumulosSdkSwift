@@ -407,6 +407,7 @@ internal class InAppHelper {
         if #available(iOS 10, *) {
            let tickleNotificationId = "k-in-app-message:\(id)"
            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [tickleNotificationId])
+           PendingNotificationHelper.remove(identifier: tickleNotificationId)
         }
     }
     

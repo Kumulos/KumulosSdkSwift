@@ -42,7 +42,7 @@ public class KumulosNotificationService {
             trackDeliveredEvent(dispatchGroup: dispatchGroup, userInfo: userInfo, notificationId: id)
             
             if (!isBackgroundPush(userInfo: userInfo)){
-                PendingNotificationHelper.add(notification: PendingNotification(id: id, deliveredAt: Date()))
+                PendingNotificationHelper.add(notification: PendingNotification(id: id, deliveredAt: Date(), identifier: request.identifier))
             }
         }
         

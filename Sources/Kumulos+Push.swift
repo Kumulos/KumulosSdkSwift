@@ -240,9 +240,7 @@ public extension Kumulos {
 
         self.pushHandleOpen(notification: notification)
         
-        if (AppGroupsHelper.isKumulosAppGroupDefined()){
-            PendingNotificationHelper.remove(id: notification.id)
-        }
+        PendingNotificationHelper.remove(id: notification.id)
        
         return true
     }
@@ -289,9 +287,7 @@ public extension Kumulos {
     
     @available(iOS 10.0, *)
     private func pushHandleDismissed(notificationId: Int, dismissedAt: Date? = nil) {
-        if (AppGroupsHelper.isKumulosAppGroupDefined()){
-            PendingNotificationHelper.remove(id: notificationId)
-        }
+        PendingNotificationHelper.remove(id: notificationId)
         self.pushTrackDismissed(notificationId: notificationId, dismissedAt: dismissedAt)
     }
     

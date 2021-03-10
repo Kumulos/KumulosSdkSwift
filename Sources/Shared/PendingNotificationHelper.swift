@@ -20,6 +20,17 @@ internal class PendingNotificationHelper {
         }
     }
     
+    static func remove(identifier: String)
+    {
+        var pendingNotifications = readAll()
+       
+        if let i = pendingNotifications.firstIndex(where: { $0.identifier == identifier }) {
+            pendingNotifications.remove(at: i)
+            
+            save(pendingNotifications: pendingNotifications)
+        }
+    }
+    
     static func readAll() -> [PendingNotification]
     {
         var pendingNotifications = [PendingNotification]();

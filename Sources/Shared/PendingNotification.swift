@@ -8,16 +8,14 @@
 
 import Foundation
 
-public struct PendingNotification: Codable, Equatable {
-    public var id: Int
-    public var deliveredAt: Date
+internal struct PendingNotification: Codable, Equatable {
+    var id: Int
+    var deliveredAt: Date
+    var identifier: String
     
-    public init(id: Int, deliveredAt: Date) {
+    init(id: Int, deliveredAt: Date, identifier: String) {
         self.id = id
         self.deliveredAt = deliveredAt
-    }
-    
-    public static func == (lhs: PendingNotification, rhs: PendingNotification) -> Bool {
-        return lhs.id == rhs.id
+        self.identifier = identifier
     }
 }

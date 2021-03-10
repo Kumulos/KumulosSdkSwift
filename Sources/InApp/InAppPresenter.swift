@@ -130,6 +130,8 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         if #available(iOS 10, *) {
             let tickleNotificationId = "k-in-app-message:\(message.id)"
             UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [tickleNotificationId])
+            
+            PendingNotificationHelper.remove(identifier: tickleNotificationId)
         }
         
         messageQueueLock.wait()
