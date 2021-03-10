@@ -8,7 +8,7 @@
 
 import Foundation
 
-internal struct PendingNotification: Codable, Equatable {
+internal struct PendingNotification: Codable {
     var id: Int
     var deliveredAt: Date
     var identifier: String
