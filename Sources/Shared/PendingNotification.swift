@@ -9,9 +9,9 @@
 import Foundation
 
 internal struct PendingNotification: Codable {
-    var id: Int
-    var deliveredAt: Date
-    var identifier: String
+    let id: Int
+    let deliveredAt: Date
+    let identifier: String
     
     init(id: Int, deliveredAt: Date, identifier: String) {
         self.id = id

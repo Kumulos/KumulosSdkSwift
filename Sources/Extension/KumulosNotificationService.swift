@@ -40,10 +40,7 @@ public class KumulosNotificationService {
         if (AppGroupsHelper.isKumulosAppGroupDefined()){
             maybeSetBadge(bestAttemptContent: bestAttemptContent, userInfo: userInfo)
             trackDeliveredEvent(dispatchGroup: dispatchGroup, userInfo: userInfo, notificationId: id)
-            
-            if (!isBackgroundPush(userInfo: userInfo)){
-                PendingNotificationHelper.add(notification: PendingNotification(id: id, deliveredAt: Date(), identifier: request.identifier))
-            }
+            PendingNotificationHelper.add(notification: PendingNotification(id: id, deliveredAt: Date(), identifier: request.identifier))
         }
         
         dispatchGroup.notify(queue: .main) {
@@ -250,11 +247,10 @@ public class KumulosNotificationService {
     
     fileprivate class func isBackgroundPush(userInfo: [AnyHashable:Any]) -> Bool{
         let aps = userInfo["aps"] as! [AnyHashable:Any]
-        
         if let contentAvailable = aps["content-available"] as? Int, contentAvailable == 1 {
             return true
         }
-        
+
         return false
     }
 }

@@ -319,7 +319,6 @@ public extension Kumulos {
                 
                 actualPendingNotificationIds.append(notification.id)
             }
-            //dump(actualPendingNotificationIds)
             
             //TODO: how open vs maybeTrack order interact?
             

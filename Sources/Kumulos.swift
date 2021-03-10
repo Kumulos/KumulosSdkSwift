@@ -167,7 +167,9 @@ open class Kumulos {
         instance!.initializeHelpers()
         
         if #available(iOS 10.0, *) {
-            instance!.maybeTrackPushDismissedEvents()
+            DispatchQueue.global().asyncAfter(deadline: .now() + 5.0) {
+                instance!.maybeTrackPushDismissedEvents()
+            }
         }
         
         DispatchQueue.global().async {
