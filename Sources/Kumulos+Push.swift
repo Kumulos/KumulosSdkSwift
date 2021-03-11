@@ -299,10 +299,10 @@ public extension Kumulos {
         let params = ["type": KS_MESSAGE_TYPE_PUSH, "id": notificationId]
               
         if let unwrappedDismissedAt = dismissedAt {
-            Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_DISMISSED.rawValue, atTime: unwrappedDismissedAt, properties:params, immediateFlush: true)
+            Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_DISMISSED.rawValue, atTime: unwrappedDismissedAt, properties:params)
         }
         else{
-            Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_DISMISSED, properties:params, immediateFlush: true)
+            Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_DISMISSED, properties:params)
         }
     }
     
