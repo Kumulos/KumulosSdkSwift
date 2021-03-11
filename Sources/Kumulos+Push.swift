@@ -226,6 +226,9 @@ public extension Kumulos {
         }
 
         let notification = KSPushNotification(userInfo: userInfo)
+        if notification.id == 0 {
+            return
+        }
 
         self.pushHandleOpen(notification: notification)
     }
@@ -309,8 +312,8 @@ public extension Kumulos {
             return;
         }
         
-        var actualPendingNotificationIds: [Int] = []
         UNUserNotificationCenter.current().getDeliveredNotifications { (notifications: [UNNotification]) in
+            var actualPendingNotificationIds: [Int] = []
             for notification in notifications {
                 let notification = KSPushNotification(userInfo: notification.request.content.userInfo)
                 if (notification.id == 0){
@@ -319,8 +322,6 @@ public extension Kumulos {
                 
                 actualPendingNotificationIds.append(notification.id)
             }
-            
-            //TODO: how open vs maybeTrack order interact?
             
             let recordedPendingNotifications = PendingNotificationHelper.readAll()
            

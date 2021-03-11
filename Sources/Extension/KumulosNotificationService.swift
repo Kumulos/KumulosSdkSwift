@@ -29,9 +29,11 @@ public class KumulosNotificationService {
         let msgData = msg["data"] as! [AnyHashable:Any]
         let id = msgData["id"] as! Int
         
-        let actionButtons = getButtons(userInfo: userInfo, bestAttemptContent:bestAttemptContent)
-        
-        addCategory(bestAttemptContent:bestAttemptContent, actionArray: actionButtons, id: id)
+        if(bestAttemptContent.categoryIdentifier == "") {
+            let actionButtons = getButtons(userInfo: userInfo, bestAttemptContent:bestAttemptContent)
+            
+            addCategory(bestAttemptContent:bestAttemptContent, actionArray: actionButtons, id: id)
+        }
         
         let dispatchGroup = DispatchGroup()
         
@@ -70,10 +72,6 @@ public class KumulosNotificationService {
     
     fileprivate class func getButtons(userInfo:[AnyHashable:Any], bestAttemptContent: UNMutableNotificationContent) -> NSMutableArray {
         let actionArray = NSMutableArray()
-        
-        if(bestAttemptContent.categoryIdentifier != "") {
-            return actionArray
-        }
         
         let custom = userInfo["custom"] as! [AnyHashable:Any]
         let data = custom["a"] as! [AnyHashable:Any]
