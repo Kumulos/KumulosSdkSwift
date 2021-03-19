@@ -14,7 +14,6 @@ let package = Package(
     ],
     dependencies: [
         .package(
-            // just for testing: forked from Kumulos/KSCrash which has the Package.swift added from kstenerud/KSCrash so we can import our fork in here with SPM support
             url: "https://github.com/Kumulos/KSCrash",
             .branch("master")
         ),
