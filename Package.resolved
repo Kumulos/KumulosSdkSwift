@@ -3,10 +3,10 @@
     "pins": [
       {
         "package": "KSCrash",
-        "repositoryURL": "https://github.com/robdick/KSCrash",
+        "repositoryURL": "https://github.com/Kumulos/KSCrash",
         "state": {
           "branch": "master",
-          "revision": "be1d0e87eff92bcf4bead03d80db390f613eb16c",
+          "revision": "2826099e349089134bc06c2f994a257d96cd632a",
           "version": null
         }
       }

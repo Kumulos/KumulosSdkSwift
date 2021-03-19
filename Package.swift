@@ -3,35 +3,35 @@
 import PackageDescription
 
 let package = Package(
-    name: "KumulosSdk",
+    name: "KumulosSDK",
     platforms: [
         .iOS(.v9)
     ],
     products: [
         .library(
-            name: "KumulosSdk",
-            targets: ["KumulosSdk"]),
+            name: "KumulosSDK",
+            targets: ["KumulosSDK"]),
     ],
     dependencies: [
         .package(
             // just for testing: forked from Kumulos/KSCrash which has the Package.swift added from kstenerud/KSCrash so we can import our fork in here with SPM support
-            url: "https://github.com/robdick/KSCrash",
+            url: "https://github.com/Kumulos/KSCrash",
             .branch("master")
         ),
     ],
     targets: [
         .target(
-            name: "KumulosSdkObjC",
+            name: "KumulosSDKObjC",
             dependencies: [],
-            path: "KumulosSdkObjC",
+            path: "KumulosSDKObjC",
             cSettings: [
                   .headerSearchPath("include"),
             ]
         ),
         .target(
-            name: "KumulosSdk",
+            name: "KumulosSDK",
             dependencies: [
-                "KumulosSdkObjC",
+                "KumulosSDKObjC",
                 "KSCrash"
             ],
             path: "Sources",
