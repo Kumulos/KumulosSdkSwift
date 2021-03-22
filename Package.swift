@@ -5,24 +5,27 @@ import PackageDescription
 let package = Package(
     name: "KumulosSDK",
     platforms: [
-        .iOS(.v9)
+        .iOS(.v10)
     ],
     products: [
         .library(
             name: "KumulosSDK",
             targets: ["KumulosSDK"]),
+        .library(
+            name: "KumulosSDKExtension",
+            targets: ["KumulosSDKExtension"])
     ],
     dependencies: [
         .package(
             url: "https://github.com/Kumulos/KSCrash",
             .branch("master")
-        ),
+        )
     ],
     targets: [
         .target(
             name: "KumulosSDKObjC",
             dependencies: [],
-            path: "KumulosSDKObjC",
+            path: "Sources/ObjC",
             cSettings: [
                   .headerSearchPath("include"),
             ]
@@ -33,10 +36,15 @@ let package = Package(
                 "KumulosSDKObjC",
                 "KSCrash"
             ],
-            path: "Sources",
-            exclude: [
-                "Extension"
-            ]
+            path: "Sources/SDK"
+        ),
+        .target(
+            name: "KumulosSDKExtension",
+            dependencies: [
+                "KumulosSDKObjC",
+                "KSCrash"
+            ],
+            path: "Sources/Extension"
         )
     ],
     swiftLanguageVersions: [.v5]
