@@ -11,8 +11,8 @@ Pod::Spec.new do |s|
   s.swift_version = "5.0"
   s.ios.deployment_target = "9.0"
 
-  s.source_files = "KumulosSdkObjC/**/*.{h,m}", "Sources/**/*.swift"
-  s.exclude_files = "Carthage", "Sources/Extension", "Sources/Exports.swift"
+  s.source_files = "Sources/**/*.{h,m,swift}"
+  s.exclude_files = "Carthage", "Sources/Extension", "Sources/SDK/Exports.swift"
   s.module_name = "KumulosSDK"
   s.preserve_path = 'upload_dsyms.sh'
 

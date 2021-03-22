@@ -11,8 +11,8 @@ Pod::Spec.new do |s|
   s.swift_version = "5.0"
   s.ios.deployment_target = "10.0"
 
-  s.source_files = "KumulosSdkObjC/**/*.{h,m}", "Sources/Extension/**/*.swift", "Sources/Shared/**/*.swift"
-  s.exclude_files = "Carthage", "Sources/Exports.swift"
+  s.source_files = "Sources/ObjC/**/*.{h,m}", "Sources/Extension/**/*.swift", "Sources/Shared/**/*.swift"
+  s.exclude_files = "Carthage", "Sources/SDK/Exports.swift"
   s.module_name = "KumulosSDKExtension"
 
 end
