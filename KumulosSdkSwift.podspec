@@ -18,6 +18,6 @@ Pod::Spec.new do |s|
 
   s.prepare_command = 'chmod +x upload_dsyms.sh'
 
-  s.dependency "KumulosKSCrash", "1.15.21-kumulos.4"
+  s.dependency "KumulosKSCrash", "1.15.21-kumulos1"
 
 end
