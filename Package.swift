@@ -41,7 +41,6 @@ let package = Package(
             name: "KumulosSDKExtension",
             dependencies: [
                 "KumulosSDKObjC",
-                "KSCrash"
             ],
             path: "Sources/Extension"
         )
