@@ -9,7 +9,7 @@ Select an installation method below to get started.
 Add the following line to your app's target in your `Podfile`:
 
 ```
-pod 'KumulosSdkSwift', '~> 8.8'
+pod 'KumulosSdkSwift', '~> 8.9'
 ```
 
 Run `pod install` to install your dependencies.
@@ -19,21 +19,27 @@ Run `pod install` to install your dependencies.
 Add the following line to your `Cartfile`:
 
 ```
-github "Kumulos/KumulosSdkSwift" ~> 8.8
+github "Kumulos/KumulosSdkSwift" ~> 8.9
 ```
 
 Run `carthage update` to install your dependencies then follow the [Carthage integration steps](https://github.com/Carthage/Carthage#getting-started) to link the framework with your project.
 
 Also link your project against:
 
-- SystemConfiguration.framework
-- MessageUI.framework (for iOS projects)
-- libc++
-- libz
+-   SystemConfiguration.framework
+-   MessageUI.framework (for iOS projects)
+-   libc++
+-   libz
 
 And add the `-ObjC` linker flag to 'Other Linker Flags' under 'Build Settings'.
 
 > N.B. make sure to link the dynamic `KSCrash.framework` from the Carthage build, and not the one under `Static/`
+
+## Get Started with Swift Package Manager
+
+1. In Xcode, select File > Swift Packages > Add Package Dependency.
+2. Follow the prompts using the URL for this repository and a minimum semantic version of 8.9.0
+3. Visit the [iOS integration guide](https://docs.kumulos.com/integration/swift/) for more information on integrating the SDK into your project.
 
 ## Initializing and using the SDK
 
@@ -58,8 +64,8 @@ This project is licensed under the MIT license with portions licensed under the 
 
 ## Requirements
 
-- iOS9+
-- Swift5.0
+-   iOS9+
+-   Swift5.0
 
 ## Swift Version Support
 
