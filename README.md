@@ -37,9 +37,13 @@ And add the `-ObjC` linker flag to 'Other Linker Flags' under 'Build Settings'.
 
 ## Get Started with Swift Package Manager
 
-1. In Xcode, select File > Swift Packages > Add Package Dependency.
-2. Follow the prompts using the URL for this repository and a minimum semantic version of 8.9.0
-3. Visit the [iOS integration guide](https://docs.kumulos.com/integration/swift/) for more information on integrating the SDK into your project.
+In Xcode add a package dependency by selecting:
+
+```
+File > Swift Packages > Add Package Dependency
+```
+
+Choose this repository URL for the package repository and `8.9.0` for the version where prompted. You can then follow the integration steps below or read the full [Kumulos Swift integration guide](https://docs.kumulos.com/integration/swift) for more information.
 
 ## Initializing and using the SDK
 
