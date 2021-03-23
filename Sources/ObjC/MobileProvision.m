@@ -7,7 +7,7 @@
 //  Copyright (c) 2013 The Blindsight Corporation. All rights reserved.
 //  Released under the BSD 2-Clause License (see LICENSE)
 
-#import "MobileProvision.h"
+#import "include/MobileProvision.h"
 #import "TargetConditionals.h"
 
 @implementation MobileProvision
@@ -32,7 +32,7 @@
  UUID, // string - 79F37E8E-CC8D-4819-8C13-A678479211CE
  Version, // integer - 1
  ProvisionsAllDevices // true or false  ***NB: not sure if this is where this is
- 
+
  */
 
 + (NSDictionary*) getMobileProvision {
@@ -41,12 +41,12 @@
         NSString *provisioningPath = [[NSBundle mainBundle] pathForResource:@"embedded" ofType:@"mobileprovision"];
         if (!provisioningPath)
             return @{};
-        
+
         // NSISOLatin1 keeps the binary wrapper from being parsed as unicode and dropped as invalid
         NSString *binaryString = [NSString stringWithContentsOfFile:provisioningPath encoding:NSISOLatin1StringEncoding error:NULL];
         if (!binaryString)
             return nil;
-        
+
         NSScanner *scanner = [NSScanner scannerWithString:binaryString];
         BOOL ok = [scanner scanUpToString:@"<plist" intoString:nil];
         if (!ok) { NSLog(@"unable to find beginning of plist"); return nil; }
@@ -74,7 +74,7 @@
     if (mobileProvision) {
         entitlements = [mobileProvision objectForKey:@"Entitlements"];
     }
-    
+
     if (!mobileProvision) {
         // failure to read other than it simply not existing
         return UIApplicationReleaseUnknown;

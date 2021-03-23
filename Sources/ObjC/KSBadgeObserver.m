@@ -1,4 +1,4 @@
-#import "KSBadgeObserver.h"
+#import "include/KSBadgeObserver.h"
 #import <UIKit/UIKit.h>
 
 @implementation KSBadgeObserver : NSObject
@@ -9,7 +9,7 @@ KSBadgeChangedCallback _callback;
 - (id) init: (KSBadgeChangedCallback)callback {
     if (self = [super init]) {
         _callback = callback;
-      
+
         [[UIApplication sharedApplication] addObserver:self forKeyPath:@"applicationIconBadgeNumber" options:NSKeyValueObservingOptionNew context:nil];
     }
     return self;
@@ -19,7 +19,7 @@ KSBadgeChangedCallback _callback;
                       ofObject:(id)object
                         change:(NSDictionary*)change
                        context:(void*)context {
-    
+
     if ([keyPath isEqualToString:@"applicationIconBadgeNumber"]) {
         NSNumber* newBadgeCount = change[@"new"];
 

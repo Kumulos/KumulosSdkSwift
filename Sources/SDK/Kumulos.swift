@@ -58,7 +58,7 @@ open class Kumulos {
     internal let pushNotificationDeviceType = 1
     internal let pushNotificationProductionTokenType:Int = 1
 
-    internal let sdkVersion : String = "8.8.0"
+    internal let sdkVersion : String = "8.9.0"
 
     var networkRequestsInProgress = 0
 
@@ -165,13 +165,13 @@ open class Kumulos {
         instance = Kumulos(config: config)
 
         instance!.initializeHelpers()
-        
+
         if #available(iOS 10.0, *) {
             DispatchQueue.global().asyncAfter(deadline: .now() + 5.0) {
                 instance!.maybeTrackPushDismissedEvents()
             }
         }
-        
+
         DispatchQueue.global().async {
             instance!.sendDeviceInformation()
         }
