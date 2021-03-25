@@ -73,7 +73,11 @@ public class KumulosInApp {
             let request = NSFetchRequest<InAppMessageEntity>(entityName: "Message")
             request.returnsObjectsAsFaults = false
             request.includesPendingChanges = false
-            request.sortDescriptors = [ NSSortDescriptor(key: "updatedAt", ascending: false) ]
+            request.sortDescriptors = [
+                NSSortDescriptor(key: "sentAt", ascending: false),
+                NSSortDescriptor(key: "updatedAt", ascending: false),
+                NSSortDescriptor(key: "id", ascending: false)
+            ]
             request.predicate = NSPredicate(format: "(inboxConfig != nil)")
             request.propertiesToFetch = ["id", "inboxConfig", "inboxFrom", "inboxTo", "dismissedAt", "readAt"]
             

@@ -29,10 +29,10 @@ internal class InAppHelper {
 
 
     internal let MESSAGE_TYPE_IN_APP = 2
-
+    
     private var syncBarrier: DispatchSemaphore
     private var syncQueue: DispatchQueue
-
+    private let STORED_IN_APP_LIMIT = 50;
 
     // MARK: Initialization
 
@@ -379,8 +379,6 @@ internal class InAppHelper {
                     if (model.dismissedAt == nil){
                         model.dismissedAt = dateParser.date(from: inboxDeletedAt!) as NSDate?
                     }
-
-                    removeNotificationTickle(id: model.id)
                 }
 
                 model.expiresAt = dateParser.date(from: message["expiresAt"] as? String ?? "") as NSDate?
@@ -389,9 +387,9 @@ internal class InAppHelper {
                     lastSyncTime = model.updatedAt
                 }
             }
-
+            
             // Evict
-            evictMessages(context: context)
+            var evicted = evictMessages(context: context)
 
             do{
                 try context.save()
@@ -400,7 +398,24 @@ internal class InAppHelper {
                 print("Failed to persist messages: \(err)")
                 return
             }
-
+            
+            //exceeders evicted after saving as fetchLimit is ignored when have unsaved changes
+            let exceedersEvicted = evictMessagesExceedingLimit(context: context)
+            if (exceedersEvicted.count > 0){
+                evicted += exceedersEvicted
+                do{
+                    try context.save()
+                }
+                catch let err {
+                    print("Failed to evict exceeding messages: \(err)")
+                    return
+                }
+            }
+            
+            for messageEvicted in evicted {
+                removeNotificationTickle(id: messageEvicted.id)
+            }
+            
             UserDefaults.standard.set(lastSyncTime, forKey: KumulosUserDefaultsKey.MESSAGES_LAST_SYNC_TIME.rawValue)
 
             trackMessageDelivery(messages: messages)
@@ -419,13 +434,18 @@ internal class InAppHelper {
         }
     }
 
-    private func evictMessages(context: NSManagedObjectContext) -> Void {
+    private func evictMessages(context: NSManagedObjectContext) -> [InAppMessageEntity] {
         let fetchRequest:NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "Message")
         fetchRequest.includesPendingChanges = true
-
+        
         let messageExpiredCondition = "(expiresAt != nil AND expiresAt <= %@)"
+        
+        let noInboxAndMessageDismissed = "(inboxConfig = nil AND dismissedAt != nil)"
+        let noInboxAndMessageExpired = "(inboxConfig = nil AND "+messageExpiredCondition+")"
+        let inboxExpiredAndMessageDismissedOrExpired = "(inboxTo != nil AND inboxTo < %@ AND (dismissedAt != nil OR "+messageExpiredCondition+"))"
+        
         let predicate: NSPredicate? =
-            NSPredicate(format: "(inboxConfig = nil AND dismissedAt != nil) OR (inboxConfig = nil AND "+messageExpiredCondition+") OR (inboxTo != nil AND inboxTo < %@ AND (dismissedAt != nil OR "+messageExpiredCondition+"))", NSDate(), NSDate(), NSDate())
+            NSPredicate(format: noInboxAndMessageDismissed+" OR "+noInboxAndMessageExpired+" OR "+inboxExpiredAndMessageDismissedOrExpired, NSDate(), NSDate(), NSDate())
         fetchRequest.predicate = predicate
 
         var toEvict: [InAppMessageEntity]
@@ -433,12 +453,38 @@ internal class InAppHelper {
             toEvict = try context.fetch(fetchRequest) as! [InAppMessageEntity]
         } catch let err {
             print("Failed to evict messages: \(err)")
-            return;
+            return [];
         }
 
         for messageToEvict in toEvict {
             context.delete(messageToEvict)
         }
+        
+        return toEvict
+    }
+    
+    private func evictMessagesExceedingLimit(context: NSManagedObjectContext) -> [InAppMessageEntity] {
+        let fetchRequest:NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "Message")
+        fetchRequest.sortDescriptors = [
+            NSSortDescriptor(key: "sentAt", ascending: false),
+            NSSortDescriptor(key: "updatedAt", ascending: false),
+            NSSortDescriptor(key: "id", ascending: false)
+        ]
+        fetchRequest.fetchOffset = STORED_IN_APP_LIMIT
+       
+        var toEvict: [InAppMessageEntity]
+        do {
+            toEvict = try context.fetch(fetchRequest) as! [InAppMessageEntity]
+        } catch let err {
+            print("Failed to evict exceeding messages: \(err)")
+            return [];
+        }
+        
+        for messageToEvict in toEvict {
+            context.delete(messageToEvict)
+        }
+        
+        return toEvict
     }
 
     private func getMessagesToPresent(_ presentedWhenOptions: [String]) -> [InAppMessage] {
@@ -456,8 +502,11 @@ internal class InAppHelper {
             let predicate = NSPredicate(format: "((presentedWhen IN %@) OR (id IN %@)) AND (dismissedAt = nil) AND (expiresAt = nil OR expiresAt > %@)", presentedWhenOptions, self.pendingTickleIds, NSDate())
             fetchRequest.predicate = predicate
 
-            let sortDescriptor = NSSortDescriptor(key: "updatedAt", ascending: true)
-            fetchRequest.sortDescriptors = [sortDescriptor]
+            fetchRequest.sortDescriptors = [
+                NSSortDescriptor(key: "sentAt", ascending: true),
+                NSSortDescriptor(key: "updatedAt", ascending: true),
+                NSSortDescriptor(key: "id", ascending: true)
+            ]
 
             var entities: [Any] = []
             do {
@@ -476,7 +525,6 @@ internal class InAppHelper {
 
         return messages
     }
-
 
     internal func handleMessageOpened(message: InAppMessage) -> Void {
         _ = markInboxItemRead(withId: message.id);
@@ -640,6 +688,9 @@ internal class InAppHelper {
                 messageEntities[0].inboxFrom = nil
                 messageEntities[0].inboxConfig = nil
                 messageEntities[0].dismissedAt = NSDate()
+                if (messageEntities[0].readAt == nil){
+                    messageEntities[0].readAt = NSDate()
+                }
             }
 
             do{
