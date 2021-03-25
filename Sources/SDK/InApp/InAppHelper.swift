@@ -397,7 +397,8 @@ internal class InAppHelper {
                 return
             }
             
-            //exceeders evicted after saving as fetchLimit is ignored when have unsaved changes
+            //exceeders evicted after saving because fetchOffset is ignored when have unsaved changes
+            //https://stackoverflow.com/questions/10725252/possible-issue-with-fetchlimit-and-fetchoffset-in-a-core-data-query
             let exceedersEvicted = evictMessagesExceedingLimit(context: context)
             if (exceedersEvicted.count > 0){
                 evicted += exceedersEvicted
