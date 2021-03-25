@@ -15,7 +15,7 @@ public class InAppInboxItem {
     internal(set) open var availableFrom: Date?
     internal(set) open var availableTo: Date?
     internal(set) open var dismissedAt : Date?
-    internal var readAt : Date?
+    private var readAt : Date?
     
     init(entity: InAppMessageEntity) {
         id = Int64(entity.id)
