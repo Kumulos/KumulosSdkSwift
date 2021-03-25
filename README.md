@@ -26,10 +26,10 @@ Run `carthage update` to install your dependencies then follow the [Carthage int
 
 Also link your project against:
 
--   SystemConfiguration.framework
--   MessageUI.framework (for iOS projects)
--   libc++
--   libz
+- SystemConfiguration.framework
+- MessageUI.framework (for iOS projects)
+- libc++
+- libz
 
 And add the `-ObjC` linker flag to 'Other Linker Flags' under 'Build Settings'.
 
@@ -43,7 +43,7 @@ In Xcode add a package dependency by selecting:
 File > Swift Packages > Add Package Dependency
 ```
 
-Choose this repository URL for the package repository and `8.9.0` for the version where prompted. You can then follow the integration steps below or read the full [Kumulos Swift integration guide](https://docs.kumulos.com/integration/swift) for more information.
+Choose this repository URL for the package repository and `8.10.0` for the version where prompted. You can then follow the integration steps below or read the full [Kumulos Swift integration guide](https://docs.kumulos.com/integration/swift) for more information.
 
 ## Initializing and using the SDK
 
@@ -68,8 +68,8 @@ This project is licensed under the MIT license with portions licensed under the 
 
 ## Requirements
 
--   iOS9+
--   Swift5.0
+- iOS9+
+- Swift5.0
 
 ## Swift Version Support
 
