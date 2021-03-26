@@ -387,7 +387,7 @@ internal class InAppHelper {
             }
             
             // Evict
-            var evicted = evictMessages(context: context)
+            var idsEvicted = evictMessages(context: context)
             
             do{
                 try context.save()
@@ -399,9 +399,10 @@ internal class InAppHelper {
             
             //exceeders evicted after saving because fetchOffset is ignored when have unsaved changes
             //https://stackoverflow.com/questions/10725252/possible-issue-with-fetchlimit-and-fetchoffset-in-a-core-data-query
-            let exceedersEvicted = evictMessagesExceedingLimit(context: context)
-            if (exceedersEvicted.count > 0){
-                evicted += exceedersEvicted
+            let exceederIdsEvicted = evictMessagesExceedingLimit(context: context)
+            if (exceederIdsEvicted.count > 0){
+                idsEvicted += exceederIdsEvicted
+                
                 do{
                     try context.save()
                 }
@@ -411,8 +412,8 @@ internal class InAppHelper {
                 }
             }
             
-            for messageEvicted in evicted {
-                removeNotificationTickle(id: messageEvicted.id)
+            for idEvicted in idsEvicted {
+                removeNotificationTickle(id: idEvicted)
             }
             
             UserDefaults.standard.set(lastSyncTime, forKey: KumulosUserDefaultsKey.MESSAGES_LAST_SYNC_TIME.rawValue)
@@ -433,7 +434,7 @@ internal class InAppHelper {
         }
     }
     
-    private func evictMessages(context: NSManagedObjectContext) -> [InAppMessageEntity] {
+    private func evictMessages(context: NSManagedObjectContext) -> [Int64] {
         let fetchRequest:NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "Message")
         fetchRequest.includesPendingChanges = true
         
@@ -455,14 +456,16 @@ internal class InAppHelper {
             return [];
         }
         
+        var idsEvicted: [Int64] = []
         for messageToEvict in toEvict {
+            idsEvicted.append(messageToEvict.id)
             context.delete(messageToEvict)
         }
         
-        return toEvict
+        return idsEvicted
     }
     
-    private func evictMessagesExceedingLimit(context: NSManagedObjectContext) -> [InAppMessageEntity] {
+    private func evictMessagesExceedingLimit(context: NSManagedObjectContext) -> [Int64] {
         let fetchRequest:NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "Message")
         fetchRequest.sortDescriptors = [
             NSSortDescriptor(key: "sentAt", ascending: false),
@@ -479,11 +482,13 @@ internal class InAppHelper {
             return [];
         }
         
+        var idsEvicted: [Int64] = []
         for messageToEvict in toEvict {
+            idsEvicted.append(messageToEvict.id)
             context.delete(messageToEvict)
         }
         
-        return toEvict
+        return idsEvicted
     }
     
     private func getMessagesToPresent(_ presentedWhenOptions: [String]) -> [InAppMessage] {
