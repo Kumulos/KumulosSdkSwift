@@ -526,7 +526,7 @@ internal class InAppHelper {
     }
     
     internal func handleMessageOpened(message: InAppMessage) -> Void {
-        _ = markInboxItemRead(withId: message.id);
+        _ = markInboxItemRead(withId: message.id, shouldWait: false);
         
         let props: [String:Any] = ["type" : MESSAGE_TYPE_IN_APP, "id":message.id]
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_OPENED, properties: props)
@@ -705,9 +705,9 @@ internal class InAppHelper {
         return result
     }
     
-    func markInboxItemRead(withId : Int64) -> Bool {
+    func markInboxItemRead(withId : Int64, shouldWait: Bool) -> Bool {
         var result = true;
-        messagesContext!.performAndWait({
+        let block = {
             let context = self.messagesContext!
             let entity: NSEntityDescription? = NSEntityDescription.entity(forEntityName: "Message", in: context)
             
@@ -743,7 +743,9 @@ internal class InAppHelper {
                 print("Failed to mark as read message with id: \(withId) \(err)")
                 return
             }
-        });
+        }
+        shouldWait ? messagesContext!.performAndWait(block) : messagesContext!.perform(block);
+        
         
         if (!result){
             return result
@@ -765,7 +767,7 @@ internal class InAppHelper {
                 continue
             }
             
-            if (!markInboxItemRead(withId: item.id)){
+            if (!markInboxItemRead(withId: item.id, shouldWait: true)){
                 result = false
             }
         }

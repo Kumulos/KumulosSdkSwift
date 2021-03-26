@@ -123,7 +123,7 @@ public class KumulosInApp {
         if (item.isRead()){
             return false
         }
-        return Kumulos.sharedInstance.inAppHelper.markInboxItemRead(withId: item.id)
+        return Kumulos.sharedInstance.inAppHelper.markInboxItemRead(withId: item.id, shouldWait: true)
     }
     
     public static func markAllInboxItemsAsRead() -> Bool {
