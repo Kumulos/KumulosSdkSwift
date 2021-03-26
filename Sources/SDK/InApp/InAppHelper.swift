@@ -714,7 +714,8 @@ internal class InAppHelper {
             let fetchRequest:NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "Message")
             fetchRequest.entity = entity
             fetchRequest.includesPendingChanges = false
-            fetchRequest.predicate = NSPredicate(format: "id = %i", withId)
+            fetchRequest.includesPropertyValues = false
+            fetchRequest.predicate = NSPredicate(format: "id = %i AND readAt = nil", withId)
             
             var messageEntities: [InAppMessageEntity]
             do {
@@ -725,6 +726,11 @@ internal class InAppHelper {
                 return;
             }
             
+            if (messageEntities.count == 0){
+                result = false
+                return
+            }
+                
             if (messageEntities.count == 1){
                 messageEntities[0].readAt = NSDate()
             }

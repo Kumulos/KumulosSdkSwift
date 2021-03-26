@@ -120,6 +120,9 @@ public class KumulosInApp {
     }
     
     public static func markAsRead(item: InAppInboxItem) -> Bool {
+        if (item.isRead()){
+            return false
+        }
         return Kumulos.sharedInstance.inAppHelper.markInboxItemRead(withId: item.id)
     }
     
