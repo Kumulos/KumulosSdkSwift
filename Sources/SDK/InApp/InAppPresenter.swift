@@ -326,7 +326,7 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         }
        else if (type == "MESSAGE_OPENED") {
             loadingSpinner?.stopAnimating()
-            Kumulos.sharedInstance.inAppHelper.trackMessageOpened(message: self.currentMessage!)
+            Kumulos.sharedInstance.inAppHelper.handleMessageOpened(message: self.currentMessage!)
        } else if (type  == "MESSAGE_CLOSED") {
             self.handleMessageClosed()
        } else if (type == "EXECUTE_ACTIONS") {

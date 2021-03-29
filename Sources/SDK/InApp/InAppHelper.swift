@@ -19,20 +19,18 @@ typealias fetchBlock = @convention(block) (_ obj:Any, _ application:UIApplicatio
 private var ks_existingBackgroundFetchDelegate: IMP? = nil
 
 internal class InAppHelper {
-   
+    
     private var presenter: InAppPresenter
     private var pendingTickleIds: NSMutableOrderedSet = NSMutableOrderedSet(capacity: 1)
     private var registered : Bool = false
     
     var messagesContext: NSManagedObjectContext? = nil;
     
-    
-    
     internal let MESSAGE_TYPE_IN_APP = 2
     
     private var syncBarrier: DispatchSemaphore
     private var syncQueue: DispatchQueue
-    
+    private let STORED_IN_APP_LIMIT = 50;
     
     // MARK: Initialization
     
@@ -41,7 +39,7 @@ internal class InAppHelper {
         syncBarrier = DispatchSemaphore(value: 0)
         syncQueue = DispatchQueue(label: "kumulos.in-app.sync")
     }
-
+    
     func initialize() {
         initContext()
         handleEnrollmentAndSyncSetup()
@@ -92,12 +90,12 @@ internal class InAppHelper {
         }
         
         #if DEBUG
-            sync(onComplete)
+        sync(onComplete)
         #else
         let lastSyncTime = UserDefaults.standard.object(forKey: KumulosUserDefaultsKey.MESSAGES_LAST_SYNC_TIME.rawValue) as? Date
-            if lastSyncTime != nil && lastSyncTime!.timeIntervalSinceNow < -3600 as Double {
-                sync(onComplete)
-            }
+        if lastSyncTime != nil && lastSyncTime!.timeIntervalSinceNow < -3600 as Double {
+            sync(onComplete)
+        }
         #endif
     }
     
@@ -110,7 +108,7 @@ internal class InAppHelper {
         let block : fetchBlock = { (obj:Any, application:UIApplication, completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> Void in
             var fetchResult : UIBackgroundFetchResult = .noData
             let fetchBarrier = DispatchSemaphore(value: 0)
-
+            
             if let _ = ks_existingBackgroundFetchDelegate {
                 unsafeBitCast(ks_existingBackgroundFetchDelegate, to: kumulos_applicationPerformFetchWithCompletionHandler.self)(obj, performFetchSelector, application, { (result : UIBackgroundFetchResult) in
                     fetchResult = result
@@ -119,11 +117,11 @@ internal class InAppHelper {
             } else {
                 fetchBarrier.signal()
             }
-
+            
             if (Kumulos.sharedInstance.inAppHelper.inAppEnabled()){
                 Kumulos.sharedInstance.inAppHelper.sync { (result:Int) in
                     _ = fetchBarrier.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(20))
-
+                    
                     if result < 0 {
                         fetchResult = .failed
                     } else if result > 0 {
@@ -201,7 +199,7 @@ internal class InAppHelper {
         
         registered = true
         
-         _ = setupSyncTask
+        _ = setupSyncTask
         NotificationCenter.default.addObserver(self, selector: #selector(appBecameActive), name: UIApplication.didBecomeActiveNotification, object: nil)
         
         DispatchQueue.main.async(execute: {
@@ -216,10 +214,10 @@ internal class InAppHelper {
             }
             
             self.sync(onComplete)
-           
+            
         })
     }
-
+    
     private func resetMessagingState() -> Void {
         NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
         UserDefaults.standard.removeObject(forKey: KumulosUserDefaultsKey.IN_APP_CONSENTED.rawValue)
@@ -236,7 +234,7 @@ internal class InAppHelper {
             } catch {
                 return
             }
-
+            
             for message in messages {
                 context?.delete(message)
             }
@@ -265,10 +263,10 @@ internal class InAppHelper {
                     after = "?after=\(KSHttpUtil.urlEncode(formatter.string(from: lastSyncTime as Date))!)" ;
                 }
             }
-
+            
             let encodedIdentifier = KSHttpUtil.urlEncode(KumulosHelper.currentUserIdentifier)
             let path = "/v1/users/\(encodedIdentifier!)/messages\(after)"
-        
+            
             Kumulos.sharedInstance.pushHttpClient.sendRequest(.GET, toPath: path, data: nil, onSuccess: { response, decodedBody in
                 let messagesToPersist = decodedBody as? [[AnyHashable : Any]]
                 if (messagesToPersist == nil || messagesToPersist!.count == 0) {
@@ -304,7 +302,7 @@ internal class InAppHelper {
                     onComplete?(-1)
                 }
                 
-                 self.syncBarrier.signal()
+                self.syncBarrier.signal()
             })
         })
         _ = syncBarrier.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(20))
@@ -333,7 +331,7 @@ internal class InAppHelper {
                 fetchRequest.entity = entity
                 let predicate: NSPredicate = NSPredicate(format: "id = %i", partId)
                 fetchRequest.predicate = predicate
-
+                
                 var fetchedObjects: [InAppMessageEntity];
                 do {
                     fetchedObjects = try context.fetch(fetchRequest) as! [InAppMessageEntity]
@@ -343,14 +341,22 @@ internal class InAppHelper {
                 
                 // Upsert
                 let model: InAppMessageEntity = fetchedObjects.count == 1 ? fetchedObjects[0] : InAppMessageEntity(entity: entity!, insertInto: context)
-               
+                
                 model.id = partId
                 model.updatedAt = dateParser.date(from: message["updatedAt"] as! String)! as NSDate
                 if (model.dismissedAt == nil){
                     model.dismissedAt =  dateParser.date(from: message["openedAt"] as? String ?? "") as NSDate?
                 }
                 model.presentedWhen = message["presentedWhen"] as! String
-
+                
+                if (model.readAt == nil){
+                    model.readAt =  dateParser.date(from: message["readAt"] as? String ?? "") as NSDate?
+                }
+                
+                if (model.sentAt == nil){
+                    model.sentAt =  dateParser.date(from: message["sentAt"] as? String ?? "") as NSDate?
+                }
+                
                 model.content = message["content"] as! NSDictionary
                 model.data = message["data"] as? NSDictionary
                 model.badgeConfig = message["badge"] as? NSDictionary
@@ -371,8 +377,6 @@ internal class InAppHelper {
                     if (model.dismissedAt == nil){
                         model.dismissedAt = dateParser.date(from: inboxDeletedAt!) as NSDate?
                     }
-                    
-                    removeNotificationTickle(id: model.id)
                 }
                 
                 model.expiresAt = dateParser.date(from: message["expiresAt"] as? String ?? "") as NSDate?
@@ -383,7 +387,7 @@ internal class InAppHelper {
             }
             
             // Evict
-            evictMessages(context: context)
+            var idsEvicted = evictMessages(context: context)
             
             do{
                 try context.save()
@@ -391,6 +395,25 @@ internal class InAppHelper {
             catch let err {
                 print("Failed to persist messages: \(err)")
                 return
+            }
+            
+            //exceeders evicted after saving because fetchOffset is ignored when have unsaved changes
+            //https://stackoverflow.com/questions/10725252/possible-issue-with-fetchlimit-and-fetchoffset-in-a-core-data-query
+            let exceederIdsEvicted = evictMessagesExceedingLimit(context: context)
+            if (exceederIdsEvicted.count > 0){
+                idsEvicted += exceederIdsEvicted
+                
+                do{
+                    try context.save()
+                }
+                catch let err {
+                    print("Failed to evict exceeding messages: \(err)")
+                    return
+                }
+            }
+            
+            for idEvicted in idsEvicted {
+                removeNotificationTickle(id: idEvicted)
             }
             
             UserDefaults.standard.set(lastSyncTime, forKey: KumulosUserDefaultsKey.MESSAGES_LAST_SYNC_TIME.rawValue)
@@ -405,19 +428,24 @@ internal class InAppHelper {
         }
         
         if #available(iOS 10, *) {
-           let tickleNotificationId = "k-in-app-message:\(id)"
-           UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [tickleNotificationId])
-           PendingNotificationHelper.remove(identifier: tickleNotificationId)
+            let tickleNotificationId = "k-in-app-message:\(id)"
+            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [tickleNotificationId])
+            PendingNotificationHelper.remove(identifier: tickleNotificationId)
         }
     }
     
-    private func evictMessages(context: NSManagedObjectContext) -> Void {
+    private func evictMessages(context: NSManagedObjectContext) -> [Int64] {
         let fetchRequest:NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "Message")
         fetchRequest.includesPendingChanges = true
         
         let messageExpiredCondition = "(expiresAt != nil AND expiresAt <= %@)"
+        
+        let noInboxAndMessageDismissed = "(inboxConfig = nil AND dismissedAt != nil)"
+        let noInboxAndMessageExpired = "(inboxConfig = nil AND "+messageExpiredCondition+")"
+        let inboxExpiredAndMessageDismissedOrExpired = "(inboxTo != nil AND inboxTo < %@ AND (dismissedAt != nil OR "+messageExpiredCondition+"))"
+        
         let predicate: NSPredicate? =
-            NSPredicate(format: "(inboxConfig = nil AND dismissedAt != nil) OR (inboxConfig = nil AND "+messageExpiredCondition+") OR (inboxTo != nil AND inboxTo < %@ AND (dismissedAt != nil OR "+messageExpiredCondition+"))", NSDate(), NSDate(), NSDate())
+            NSPredicate(format: noInboxAndMessageDismissed+" OR "+noInboxAndMessageExpired+" OR "+inboxExpiredAndMessageDismissedOrExpired, NSDate(), NSDate(), NSDate())
         fetchRequest.predicate = predicate
         
         var toEvict: [InAppMessageEntity]
@@ -425,31 +453,64 @@ internal class InAppHelper {
             toEvict = try context.fetch(fetchRequest) as! [InAppMessageEntity]
         } catch let err {
             print("Failed to evict messages: \(err)")
-            return;
+            return [];
         }
         
+        var idsEvicted: [Int64] = []
         for messageToEvict in toEvict {
+            idsEvicted.append(messageToEvict.id)
             context.delete(messageToEvict)
         }
+        
+        return idsEvicted
     }
-   
+    
+    private func evictMessagesExceedingLimit(context: NSManagedObjectContext) -> [Int64] {
+        let fetchRequest:NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "Message")
+        fetchRequest.sortDescriptors = [
+            NSSortDescriptor(key: "sentAt", ascending: false),
+            NSSortDescriptor(key: "updatedAt", ascending: false),
+            NSSortDescriptor(key: "id", ascending: false)
+        ]
+        fetchRequest.fetchOffset = STORED_IN_APP_LIMIT
+        
+        var toEvict: [InAppMessageEntity]
+        do {
+            toEvict = try context.fetch(fetchRequest) as! [InAppMessageEntity]
+        } catch let err {
+            print("Failed to evict exceeding messages: \(err)")
+            return [];
+        }
+        
+        var idsEvicted: [Int64] = []
+        for messageToEvict in toEvict {
+            idsEvicted.append(messageToEvict.id)
+            context.delete(messageToEvict)
+        }
+        
+        return idsEvicted
+    }
+    
     private func getMessagesToPresent(_ presentedWhenOptions: [String]) -> [InAppMessage] {
         var messages: [InAppMessage] = []
         
         messagesContext!.performAndWait({
             let context = self.messagesContext!
             let entity: NSEntityDescription? = NSEntityDescription.entity(forEntityName: "Message", in: context)
-           
+            
             let fetchRequest:NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "Message")
             fetchRequest.entity = entity
             fetchRequest.includesPendingChanges = false
             fetchRequest.returnsObjectsAsFaults = false
-
+            
             let predicate = NSPredicate(format: "((presentedWhen IN %@) OR (id IN %@)) AND (dismissedAt = nil) AND (expiresAt = nil OR expiresAt > %@)", presentedWhenOptions, self.pendingTickleIds, NSDate())
             fetchRequest.predicate = predicate
-
-            let sortDescriptor = NSSortDescriptor(key: "updatedAt", ascending: true)
-            fetchRequest.sortDescriptors = [sortDescriptor]
+            
+            fetchRequest.sortDescriptors = [
+                NSSortDescriptor(key: "sentAt", ascending: true),
+                NSSortDescriptor(key: "updatedAt", ascending: true),
+                NSSortDescriptor(key: "id", ascending: true)
+            ]
             
             var entities: [Any] = []
             do {
@@ -458,7 +519,7 @@ internal class InAppHelper {
                 print("Failed to fetch: \(err)")
                 return;
             }
-          
+            
             if (entities.isEmpty){
                 return
             }
@@ -469,15 +530,15 @@ internal class InAppHelper {
         return messages
     }
     
-
-    internal func trackMessageOpened(message: InAppMessage) -> Void {
-        let props: [String:Any] = ["type" : MESSAGE_TYPE_IN_APP, "id":message.id]
+    internal func handleMessageOpened(message: InAppMessage) -> Void {
+        _ = markInboxItemRead(withId: message.id, shouldWait: false);
         
+        let props: [String:Any] = ["type" : MESSAGE_TYPE_IN_APP, "id":message.id]
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_OPENED, properties: props)
     }
     
     internal func markMessageDismissed(message: InAppMessage) -> Void {
-
+        
         let props: [String:Any] = ["type" : MESSAGE_TYPE_IN_APP, "id":message.id]
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_DISMISSED, properties: props)
         
@@ -493,7 +554,7 @@ internal class InAppHelper {
             fetchRequest.entity = entity
             fetchRequest.includesPendingChanges = false
             fetchRequest.predicate = NSPredicate(format: "id = %i", message.id)
-
+            
             var messageEntities: [InAppMessageEntity]
             do {
                 messageEntities = try context.fetch(fetchRequest) as! [InAppMessageEntity]
@@ -504,6 +565,9 @@ internal class InAppHelper {
             
             if (messageEntities.count == 1){
                 messageEntities[0].dismissedAt = NSDate()
+                if (messageEntities[0].readAt == nil){
+                    messageEntities[0].readAt = NSDate()
+                }
             }
             
             do{
@@ -544,7 +608,7 @@ internal class InAppHelper {
             fetchRequest.includesPendingChanges = false
             fetchRequest.returnsObjectsAsFaults = false
             fetchRequest.predicate = NSPredicate(format: "id = %i", withId)
-             
+            
             var items: [InAppMessageEntity]
             do {
                 items = try context.fetch(fetchRequest) as! [InAppMessageEntity]
@@ -572,7 +636,7 @@ internal class InAppHelper {
         if (!inAppEnabled() || deepLink == nil){
             return;
         }
-               
+        
         DispatchQueue.global(qos: .default).async(execute: {
             let data = deepLink!["data"] as! [AnyHashable:Any];
             let inAppPartId:Int = data["id"] as! Int
@@ -581,18 +645,18 @@ internal class InAppHelper {
             defer { objc_sync_exit(self.pendingTickleIds) }
             
             self.pendingTickleIds.add(inAppPartId)
-
+            
             let messagesToPresent = self.getMessagesToPresent([])
-
+            
             let tickleMessageFound = messagesToPresent.contains(where: { (message) -> Bool in
                 return message.id == inAppPartId
             })
-
+            
             if (!tickleMessageFound) {
                 self.sync()
                 return
             }
-
+            
             self.presenter.queueMessagesForPresentation(messages: messagesToPresent, tickleIds: self.pendingTickleIds)
         })
     }
@@ -600,7 +664,7 @@ internal class InAppHelper {
     func deleteMessageFromInbox(withId : Int64) -> Bool {
         let props: [String:Any] = ["type" : MESSAGE_TYPE_IN_APP, "id":withId]
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_DELETED_FROM_INBOX, properties: props)
-
+        
         removeNotificationTickle(id: withId)
         
         var result = true;
@@ -612,7 +676,7 @@ internal class InAppHelper {
             fetchRequest.entity = entity
             fetchRequest.includesPendingChanges = false
             fetchRequest.predicate = NSPredicate(format: "id = %i", withId)
-
+            
             var messageEntities: [InAppMessageEntity]
             do {
                 messageEntities = try context.fetch(fetchRequest) as! [InAppMessageEntity]
@@ -628,6 +692,9 @@ internal class InAppHelper {
                 messageEntities[0].inboxFrom = nil
                 messageEntities[0].inboxConfig = nil
                 messageEntities[0].dismissedAt = NSDate()
+                if (messageEntities[0].readAt == nil){
+                    messageEntities[0].readAt = NSDate()
+                }
             }
             
             do{
@@ -639,7 +706,77 @@ internal class InAppHelper {
                 return
             }
         });
-
+        
+        return result
+    }
+    
+    func markInboxItemRead(withId : Int64, shouldWait: Bool) -> Bool {
+        var result = true;
+        let block = {
+            let context = self.messagesContext!
+            let entity: NSEntityDescription? = NSEntityDescription.entity(forEntityName: "Message", in: context)
+            
+            let fetchRequest:NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "Message")
+            fetchRequest.entity = entity
+            fetchRequest.includesPendingChanges = false
+            fetchRequest.includesPropertyValues = false
+            fetchRequest.predicate = NSPredicate(format: "id = %i AND readAt = nil", withId)
+            
+            var messageEntities: [InAppMessageEntity]
+            do {
+                messageEntities = try context.fetch(fetchRequest) as! [InAppMessageEntity]
+            } catch let err {
+                result = false;
+                print("Failed to mark as read message with id: \(withId) \(err)")
+                return;
+            }
+            
+            if (messageEntities.count == 0){
+                result = false
+                return
+            }
+            
+            if (messageEntities.count == 1){
+                messageEntities[0].readAt = NSDate()
+            }
+            
+            do{
+                try context.save()
+            }
+            catch let err {
+                result = false;
+                print("Failed to mark as read message with id: \(withId) \(err)")
+                return
+            }
+        }
+        shouldWait ? messagesContext!.performAndWait(block) : messagesContext!.perform(block);
+        
+        
+        if (!result){
+            return result
+        }
+        
+        let props: [String:Any] = ["type" : MESSAGE_TYPE_IN_APP, "id":withId]
+        Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_READ, properties: props)
+        
+        removeNotificationTickle(id: withId)
+        
+        return result
+    }
+    
+    func markAllInboxItemsAsRead() -> Bool {
+        var result = true;
+        let inboxItems = KumulosInApp.getInboxItems()
+        for item in inboxItems {
+            if (item.isRead()){
+                continue
+            }
+            
+            if (!markInboxItemRead(withId: item.id, shouldWait: true)){
+                result = false
+            }
+        }
+        
         return result
     }
     
@@ -665,7 +802,7 @@ internal class InAppHelper {
         messageEntity.managedObjectClassName = NSStringFromClass(InAppMessageEntity.self);
         
         var messageProps: [NSAttributeDescription] = [];
-        messageProps.reserveCapacity(11);
+        messageProps.reserveCapacity(13);
         
         let partId = NSAttributeDescription();
         partId.name = "id";
@@ -737,13 +874,25 @@ internal class InAppHelper {
         expiresAt.isOptional = true;
         messageProps.append(expiresAt);
         
+        let readAt = NSAttributeDescription();
+        readAt.name = "readAt";
+        readAt.attributeType = NSAttributeType.dateAttributeType;
+        readAt.isOptional = true;
+        messageProps.append(readAt);
+        
+        let sentAt = NSAttributeDescription();
+        sentAt.name = "sentAt";
+        sentAt.attributeType = NSAttributeType.dateAttributeType;
+        sentAt.isOptional = true;
+        messageProps.append(sentAt);
+        
         messageEntity.properties = messageProps;
         
         model.entities = [messageEntity]
-                
+        
         return model;
     }
-
+    
     @objc
     class KSJsonValueTransformer: ValueTransformer {
         override class func transformedValueClass() -> AnyClass {

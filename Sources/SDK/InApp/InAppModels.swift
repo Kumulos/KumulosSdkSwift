@@ -20,6 +20,8 @@ class InAppMessageEntity : NSManagedObject {
     @NSManaged var inboxFrom : NSDate?
     @NSManaged var inboxTo : NSDate?
     @NSManaged var expiresAt : NSDate?
+    @NSManaged var readAt : NSDate?
+    @NSManaged var sentAt : NSDate?
 }
 
 public class InAppMessage: NSObject {
@@ -30,6 +32,8 @@ public class InAppMessage: NSObject {
     internal(set) open var badgeConfig : NSDictionary?
     internal(set) open var inboxConfig : NSDictionary?
     internal(set) open var dismissedAt : NSDate?
+    internal(set) open var readAt : NSDate?
+    internal(set) open var sentAt : NSDate?
     
     init(entity: InAppMessageEntity) {
         id = Int64(entity.id)
@@ -39,6 +43,8 @@ public class InAppMessage: NSObject {
         badgeConfig = entity.badgeConfig?.copy() as? NSDictionary
         inboxConfig = entity.inboxConfig?.copy() as? NSDictionary
         dismissedAt = entity.dismissedAt?.copy() as? NSDate
+        readAt = entity.readAt?.copy() as? NSDate
+        sentAt = entity.sentAt?.copy() as? NSDate
     }
 
     public override func isEqual(_ object: Any?) -> Bool {

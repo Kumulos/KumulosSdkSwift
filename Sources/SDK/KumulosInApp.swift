@@ -15,6 +15,7 @@ public class InAppInboxItem {
     internal(set) open var availableFrom: Date?
     internal(set) open var availableTo: Date?
     internal(set) open var dismissedAt : Date?
+    private var readAt : Date?
     
     init(entity: InAppMessageEntity) {
         id = Int64(entity.id)
@@ -27,6 +28,7 @@ public class InAppInboxItem {
         availableFrom = entity.inboxFrom?.copy() as? Date
         availableTo = entity.inboxTo?.copy() as? Date
         dismissedAt = entity.dismissedAt?.copy() as? Date
+        readAt = entity.readAt?.copy() as? Date
     }
 
     public func isAvailable() -> Bool {
@@ -37,6 +39,10 @@ public class InAppInboxItem {
         }
 
         return true;
+    }
+    
+    public func isRead() -> Bool {
+        return readAt != nil;
     }
 }
 
@@ -67,9 +73,13 @@ public class KumulosInApp {
             let request = NSFetchRequest<InAppMessageEntity>(entityName: "Message")
             request.returnsObjectsAsFaults = false
             request.includesPendingChanges = false
-            request.sortDescriptors = [ NSSortDescriptor(key: "updatedAt", ascending: false) ]
+            request.sortDescriptors = [
+                NSSortDescriptor(key: "sentAt", ascending: false),
+                NSSortDescriptor(key: "updatedAt", ascending: false),
+                NSSortDescriptor(key: "id", ascending: false)
+            ]
             request.predicate = NSPredicate(format: "(inboxConfig != nil)")
-            request.propertiesToFetch = ["id", "inboxConfig", "inboxFrom", "inboxTo", "dismissedAt"]
+            request.propertiesToFetch = ["id", "inboxConfig", "inboxFrom", "inboxTo", "dismissedAt", "readAt"]
             
             
             var items: [InAppMessageEntity] = []
@@ -107,5 +117,16 @@ public class KumulosInApp {
     
     public static func deleteMessageFromInbox(item: InAppInboxItem) -> Bool {
         return Kumulos.sharedInstance.inAppHelper.deleteMessageFromInbox(withId: item.id)
+    }
+    
+    public static func markAsRead(item: InAppInboxItem) -> Bool {
+        if (item.isRead()){
+            return false
+        }
+        return Kumulos.sharedInstance.inAppHelper.markInboxItemRead(withId: item.id, shouldWait: true)
+    }
+    
+    public static func markAllInboxItemsAsRead() -> Bool {
+        return Kumulos.sharedInstance.inAppHelper.markAllInboxItemsAsRead()
     }
 }
