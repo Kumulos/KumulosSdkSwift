@@ -735,7 +735,7 @@ internal class InAppHelper {
                 result = false
                 return
             }
-                
+            
             if (messageEntities.count == 1){
                 messageEntities[0].readAt = NSDate()
             }
