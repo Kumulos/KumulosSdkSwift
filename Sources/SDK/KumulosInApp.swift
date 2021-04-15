@@ -15,6 +15,8 @@ public class InAppInboxItem {
     internal(set) open var availableFrom: Date?
     internal(set) open var availableTo: Date?
     internal(set) open var dismissedAt : Date?
+    internal(set) open var sentAt: Date?//TODO: backfill?
+    internal(set) open var data: NSDictionary?
     private var readAt : Date?
     
     init(entity: InAppMessageEntity) {
@@ -29,6 +31,8 @@ public class InAppInboxItem {
         availableTo = entity.inboxTo?.copy() as? Date
         dismissedAt = entity.dismissedAt?.copy() as? Date
         readAt = entity.readAt?.copy() as? Date
+        sentAt = entity.sentAt?.copy() as? Date
+        data = entity.data?.copy() as? NSDictionary
     }
 
     public func isAvailable() -> Bool {
