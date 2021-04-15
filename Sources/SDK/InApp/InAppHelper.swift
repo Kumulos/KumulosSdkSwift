@@ -813,6 +813,59 @@ internal class InAppHelper {
         return result
     }
     
+    func readInboxSummary(inboxSummaryBlock: @escaping InboxSummaryBlock) -> Void {
+        if Kumulos.sharedInstance.inAppHelper.messagesContext == nil {
+            self.fireInboxSummaryCallback(callback: inboxSummaryBlock, summary: nil)
+            return
+        }
+
+        Kumulos.sharedInstance.inAppHelper.messagesContext!.perform({
+            guard let context = Kumulos.sharedInstance.inAppHelper.messagesContext else {
+                self.fireInboxSummaryCallback(callback: inboxSummaryBlock, summary: nil)
+                return
+            }
+            
+            let request = NSFetchRequest<InAppMessageEntity>(entityName: "Message")
+            request.returnsObjectsAsFaults = false
+            request.includesPendingChanges = false
+            request.predicate = NSPredicate(format: "(inboxConfig != nil)")
+            request.propertiesToFetch = ["id", "inboxFrom", "inboxTo", "readAt"]
+            
+            var items: [InAppMessageEntity] = []
+            do {
+                items = try context.fetch(request) as [InAppMessageEntity]
+            } catch {
+                print("Failed to fetch items: \(error)")
+
+                self.fireInboxSummaryCallback(callback: inboxSummaryBlock, summary: nil)
+                return
+            }
+            
+            var totalCount: Int64 = 0
+            var unreadCount: Int64 = 0
+            for item in items {
+                let inboxItem = InAppInboxItem(entity: item)
+
+                if inboxItem.isAvailable() == false {
+                    continue
+                }
+                
+                totalCount += 1
+                if (item.readAt == nil){
+                    unreadCount += 1
+                }
+            }
+            
+            self.fireInboxSummaryCallback(callback: inboxSummaryBlock, summary: InAppInboxSummary(totalCount: totalCount, unreadCount: unreadCount))
+        })
+    }
+    
+    private func fireInboxSummaryCallback(callback: @escaping InboxSummaryBlock, summary: InAppInboxSummary?){
+        DispatchQueue.main.async {
+            callback(summary)
+        }
+    }
+    
     // MARK: Data model
     
     private func mapEntitiesToModels(entities: [InAppMessageEntity] ) -> [InAppMessage]{

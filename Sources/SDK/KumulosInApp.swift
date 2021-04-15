@@ -50,7 +50,18 @@ public class InAppInboxItem {
     }
 }
 
+public class InAppInboxSummary: NSObject {
+    private(set) open var totalCount: Int64
+    private(set) open var unreadCount: Int64
+    
+    init(totalCount: Int64, unreadCount: Int64) {
+        self.totalCount = totalCount
+        self.unreadCount = unreadCount
+    }
+}
+
 public typealias InboxUpdatedHandlerBlock = () -> Void
+public typealias InboxSummaryBlock = (InAppInboxSummary?) -> Void
 
 public class KumulosInApp {
     private static var _inboxUpdatedHandlerBlock: InboxUpdatedHandlerBlock?
@@ -145,6 +156,12 @@ public class KumulosInApp {
         _inboxUpdatedHandlerBlock = inboxUpdatedHandlerBlock
     }
     
+    public static func getInboxSummaryAsync(inboxSummaryBlock: @escaping InboxSummaryBlock){
+        Kumulos.sharedInstance.inAppHelper.readInboxSummary(inboxSummaryBlock: inboxSummaryBlock)
+    }
+    
+
+    // Internal helpers
     static func maybeRunInboxUpdatedHandler(inboxNeedsUpdate: Bool) -> Void {
         if (!inboxNeedsUpdate){
             return;
