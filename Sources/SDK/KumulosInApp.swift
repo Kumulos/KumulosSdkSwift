@@ -50,7 +50,11 @@ public class InAppInboxItem {
     }
 }
 
+public typealias InboxUpdatedHandlerBlock = () -> Void
+
 public class KumulosInApp {
+    private static var _inboxUpdatedHandlerBlock: InboxUpdatedHandlerBlock?
+    
     public static func updateConsent(forUser consentGiven: Bool) {
         if Kumulos.inAppConsentStrategy != InAppConsentStrategy.ExplicitByUser {
             NSException(name:NSExceptionName(rawValue: "Kumulos: Invalid In-app consent strategy"), reason:"You can only manage in-app messaging consent when the feature is enabled and strategy is set to KSInAppConsentStrategyExplicitByUser", userInfo:nil).raise()
@@ -127,10 +131,29 @@ public class KumulosInApp {
         if (item.isRead()){
             return false
         }
-        return Kumulos.sharedInstance.inAppHelper.markInboxItemRead(withId: item.id, shouldWait: true)
+        let res = Kumulos.sharedInstance.inAppHelper.markInboxItemRead(withId: item.id, shouldWait: true)
+        maybeRunInboxUpdatedHandler(inboxNeedsUpdate: res)
+        
+        return res
     }
     
     public static func markAllInboxItemsAsRead() -> Bool {
         return Kumulos.sharedInstance.inAppHelper.markAllInboxItemsAsRead()
+    }
+    
+    public static func setOnInboxUpdatedHandler(inboxUpdatedHandlerBlock: InboxUpdatedHandlerBlock?) -> Void {
+        _inboxUpdatedHandlerBlock = inboxUpdatedHandlerBlock
+    }
+    
+    static func maybeRunInboxUpdatedHandler(inboxNeedsUpdate: Bool) -> Void {
+        if (!inboxNeedsUpdate){
+            return;
+        }
+        
+        if let inboxUpdatedHandler = _inboxUpdatedHandlerBlock {
+            DispatchQueue.main.async {
+                inboxUpdatedHandler()
+            }
+        }
     }
 }
