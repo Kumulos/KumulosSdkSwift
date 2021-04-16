@@ -56,9 +56,9 @@ public class InAppInboxItem {
     }
 }
 
-public class InAppInboxSummary: NSObject {
-    private(set) open var totalCount: Int64
-    private(set) open var unreadCount: Int64
+public struct InAppInboxSummary {
+    public let totalCount: Int64
+    public let unreadCount: Int64
     
     init(totalCount: Int64, unreadCount: Int64) {
         self.totalCount = totalCount
