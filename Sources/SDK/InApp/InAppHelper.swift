@@ -814,17 +814,12 @@ internal class InAppHelper {
     }
     
     func readInboxSummary(inboxSummaryBlock: @escaping InboxSummaryBlock) -> Void {
-        if Kumulos.sharedInstance.inAppHelper.messagesContext == nil {
+        guard let context = Kumulos.sharedInstance.inAppHelper.messagesContext else {
             self.fireInboxSummaryCallback(callback: inboxSummaryBlock, summary: nil)
             return
         }
-
-        Kumulos.sharedInstance.inAppHelper.messagesContext!.perform({
-            guard let context = Kumulos.sharedInstance.inAppHelper.messagesContext else {
-                self.fireInboxSummaryCallback(callback: inboxSummaryBlock, summary: nil)
-                return
-            }
-            
+        
+        context.perform({
             let request = NSFetchRequest<InAppMessageEntity>(entityName: "Message")
             request.includesPendingChanges = false
             request.predicate = NSPredicate(format: "(inboxConfig != nil)")

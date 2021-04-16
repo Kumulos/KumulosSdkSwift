@@ -82,19 +82,13 @@ public class KumulosInApp {
         Kumulos.sharedInstance.inAppHelper.updateUserConsent(consentGiven: consentGiven)
     }
     
-    public static func getInboxItems() -> [InAppInboxItem]
-     {
-        if Kumulos.sharedInstance.inAppHelper.messagesContext == nil {
+    public static func getInboxItems() -> [InAppInboxItem] {
+        guard let context = Kumulos.sharedInstance.inAppHelper.messagesContext else {
             return []
         }
-
+    
         var results: [InAppInboxItem] = []
-        
-        Kumulos.sharedInstance.inAppHelper.messagesContext!.performAndWait({
-            guard let context = Kumulos.sharedInstance.inAppHelper.messagesContext else {
-                return
-            }
-            
+        context.performAndWait({
             let request = NSFetchRequest<InAppMessageEntity>(entityName: "Message")
             request.includesPendingChanges = false
             request.sortDescriptors = [
