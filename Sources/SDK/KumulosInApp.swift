@@ -59,11 +59,6 @@ public class InAppInboxItem {
 public struct InAppInboxSummary {
     public let totalCount: Int64
     public let unreadCount: Int64
-    
-    init(totalCount: Int64, unreadCount: Int64) {
-        self.totalCount = totalCount
-        self.unreadCount = unreadCount
-    }
 }
 
 public typealias InboxUpdatedHandlerBlock = () -> Void
