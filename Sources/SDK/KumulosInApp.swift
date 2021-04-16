@@ -90,7 +90,6 @@ public class KumulosInApp {
             }
             
             let request = NSFetchRequest<InAppMessageEntity>(entityName: "Message")
-            request.returnsObjectsAsFaults = false
             request.includesPendingChanges = false
             request.sortDescriptors = [
                 NSSortDescriptor(key: "sentAt", ascending: false),
@@ -98,8 +97,7 @@ public class KumulosInApp {
                 NSSortDescriptor(key: "id", ascending: false)
             ]
             request.predicate = NSPredicate(format: "(inboxConfig != nil)")
-            request.propertiesToFetch = ["id", "inboxConfig", "inboxFrom", "inboxTo", "dismissedAt", "readAt"]
-            
+            request.propertiesToFetch = ["id", "inboxConfig", "inboxFrom", "inboxTo", "dismissedAt", "readAt", "sentAt", "data"]
             
             var items: [InAppMessageEntity] = []
             do {
@@ -152,7 +150,7 @@ public class KumulosInApp {
         return Kumulos.sharedInstance.inAppHelper.markAllInboxItemsAsRead()
     }
     
-    public static func setOnInboxUpdatedHandler(inboxUpdatedHandlerBlock: InboxUpdatedHandlerBlock?) -> Void {
+    public static func setOnInboxUpdated(inboxUpdatedHandlerBlock: InboxUpdatedHandlerBlock?) -> Void {
         _inboxUpdatedHandlerBlock = inboxUpdatedHandlerBlock
     }
     

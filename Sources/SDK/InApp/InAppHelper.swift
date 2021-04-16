@@ -826,10 +826,9 @@ internal class InAppHelper {
             }
             
             let request = NSFetchRequest<InAppMessageEntity>(entityName: "Message")
-            request.returnsObjectsAsFaults = false
             request.includesPendingChanges = false
             request.predicate = NSPredicate(format: "(inboxConfig != nil)")
-            request.propertiesToFetch = ["id", "inboxFrom", "inboxTo", "readAt"]
+            request.propertiesToFetch = ["inboxFrom", "inboxTo", "readAt"]
             
             var items: [InAppMessageEntity] = []
             do {
@@ -844,9 +843,7 @@ internal class InAppHelper {
             var totalCount: Int64 = 0
             var unreadCount: Int64 = 0
             for item in items {
-                let inboxItem = InAppInboxItem(entity: item)
-
-                if inboxItem.isAvailable() == false {
+                if (!item.isAvailable()){
                     continue
                 }
                 
