@@ -22,6 +22,19 @@ class InAppMessageEntity : NSManagedObject {
     @NSManaged var expiresAt : NSDate?
     @NSManaged var readAt : NSDate?
     @NSManaged var sentAt : NSDate?
+    
+    internal func isAvailable() -> Bool {
+        let availableFrom = inboxFrom as Date?
+        let availableTo = inboxTo as Date?
+        
+        if (availableFrom != nil && availableFrom!.timeIntervalSinceNow > 0) {
+            return false;
+        } else if (availableTo != nil && availableTo!.timeIntervalSinceNow < 0) {
+            return false;
+        }
+
+        return true;
+    }
 }
 
 public class InAppMessage: NSObject {

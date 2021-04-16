@@ -324,6 +324,7 @@ internal class InAppHelper {
             dateParser.locale = Locale(identifier: "en_US_POSIX")
             dateParser.timeZone = TimeZone(secondsFromGMT: 0)
             
+            var fetchedWithInbox = false
             for message in messages {
                 let partId = message["id"] as! Int64
                 
@@ -363,6 +364,10 @@ internal class InAppHelper {
                 model.inboxConfig = message["inbox"] as? NSDictionary
                 
                 if (model.inboxConfig != nil){
+                    //crude way to refresh when new inbox, updated readAt, updated inbox title/subtite
+                    //may cause redundant refreshes (if message with inbox updated, but not inbox itself).
+                    fetchedWithInbox = true
+                    
                     let inbox = model.inboxConfig!
                     
                     model.inboxFrom = dateParser.date(from: inbox["from"] as? String ?? "") as NSDate?
@@ -387,7 +392,7 @@ internal class InAppHelper {
             }
             
             // Evict
-            var idsEvicted = evictMessages(context: context)
+            var (idsEvicted, evictedWithInbox) = evictMessages(context: context)
             
             do{
                 try context.save()
@@ -399,7 +404,7 @@ internal class InAppHelper {
             
             //exceeders evicted after saving because fetchOffset is ignored when have unsaved changes
             //https://stackoverflow.com/questions/10725252/possible-issue-with-fetchlimit-and-fetchoffset-in-a-core-data-query
-            let exceederIdsEvicted = evictMessagesExceedingLimit(context: context)
+            let (exceederIdsEvicted, evictedExceedersWithInbox) = evictMessagesExceedingLimit(context: context)
             if (exceederIdsEvicted.count > 0){
                 idsEvicted += exceederIdsEvicted
                 
@@ -419,6 +424,9 @@ internal class InAppHelper {
             UserDefaults.standard.set(lastSyncTime, forKey: KumulosUserDefaultsKey.MESSAGES_LAST_SYNC_TIME.rawValue)
             
             trackMessageDelivery(messages: messages)
+            
+            let inboxUpdated = fetchedWithInbox || evictedWithInbox || evictedExceedersWithInbox
+            KumulosInApp.maybeRunInboxUpdatedHandler(inboxNeedsUpdate: inboxUpdated)
         })
     }
     
@@ -434,7 +442,7 @@ internal class InAppHelper {
         }
     }
     
-    private func evictMessages(context: NSManagedObjectContext) -> [Int64] {
+    private func evictMessages(context: NSManagedObjectContext) -> ([Int64], Bool) {
         let fetchRequest:NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "Message")
         fetchRequest.includesPendingChanges = true
         
@@ -453,19 +461,23 @@ internal class InAppHelper {
             toEvict = try context.fetch(fetchRequest) as! [InAppMessageEntity]
         } catch let err {
             print("Failed to evict messages: \(err)")
-            return [];
+            return ([], false);
         }
         
         var idsEvicted: [Int64] = []
+        var evictedInbox = false
         for messageToEvict in toEvict {
             idsEvicted.append(messageToEvict.id)
+            if (messageToEvict.inboxConfig != nil){
+                evictedInbox = true
+            }
             context.delete(messageToEvict)
         }
         
-        return idsEvicted
+        return (idsEvicted, evictedInbox)
     }
     
-    private func evictMessagesExceedingLimit(context: NSManagedObjectContext) -> [Int64] {
+    private func evictMessagesExceedingLimit(context: NSManagedObjectContext) -> ([Int64], Bool) {
         let fetchRequest:NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "Message")
         fetchRequest.sortDescriptors = [
             NSSortDescriptor(key: "sentAt", ascending: false),
@@ -479,16 +491,20 @@ internal class InAppHelper {
             toEvict = try context.fetch(fetchRequest) as! [InAppMessageEntity]
         } catch let err {
             print("Failed to evict exceeding messages: \(err)")
-            return [];
+            return ([], false);
         }
         
         var idsEvicted: [Int64] = []
+        var evictedInbox = false
         for messageToEvict in toEvict {
             idsEvicted.append(messageToEvict.id)
+            if (messageToEvict.inboxConfig != nil){
+                evictedInbox = true
+            }
             context.delete(messageToEvict)
         }
         
-        return idsEvicted
+        return (idsEvicted, evictedInbox)
     }
     
     private func getMessagesToPresent(_ presentedWhenOptions: [String]) -> [InAppMessage] {
@@ -531,7 +547,14 @@ internal class InAppHelper {
     }
     
     internal func handleMessageOpened(message: InAppMessage) -> Void {
-        _ = markInboxItemRead(withId: message.id, shouldWait: false);
+        var markedRead = false
+        if (message.readAt == nil){
+            markedRead = markInboxItemRead(withId: message.id, shouldWait: false);
+        }
+       
+        if (message.inboxConfig != nil){
+            KumulosInApp.maybeRunInboxUpdatedHandler(inboxNeedsUpdate: markedRead);
+        }
         
         let props: [String:Any] = ["type" : MESSAGE_TYPE_IN_APP, "id":message.id]
         Kumulos.trackEvent(eventType: KumulosEvent.MESSAGE_OPENED, properties: props)
@@ -707,6 +730,8 @@ internal class InAppHelper {
             }
         });
         
+        KumulosInApp.maybeRunInboxUpdatedHandler(inboxNeedsUpdate: result);
+        
         return result
     }
     
@@ -767,17 +792,70 @@ internal class InAppHelper {
     func markAllInboxItemsAsRead() -> Bool {
         var result = true;
         let inboxItems = KumulosInApp.getInboxItems()
+        var inboxNeedsUpdate = false
         for item in inboxItems {
             if (item.isRead()){
                 continue
             }
             
-            if (!markInboxItemRead(withId: item.id, shouldWait: true)){
+            let success = markInboxItemRead(withId: item.id, shouldWait: true)
+            if (success && !inboxNeedsUpdate) {
+                inboxNeedsUpdate = true;
+            }
+            
+            if (!success){
                 result = false
             }
         }
         
+        KumulosInApp.maybeRunInboxUpdatedHandler(inboxNeedsUpdate: inboxNeedsUpdate);
+        
         return result
+    }
+    
+    func readInboxSummary(inboxSummaryBlock: @escaping InboxSummaryBlock) -> Void {
+        guard let context = Kumulos.sharedInstance.inAppHelper.messagesContext else {
+            self.fireInboxSummaryCallback(callback: inboxSummaryBlock, summary: nil)
+            return
+        }
+        
+        context.perform({
+            let request = NSFetchRequest<InAppMessageEntity>(entityName: "Message")
+            request.includesPendingChanges = false
+            request.predicate = NSPredicate(format: "(inboxConfig != nil)")
+            request.propertiesToFetch = ["inboxFrom", "inboxTo", "readAt"]
+            
+            var items: [InAppMessageEntity] = []
+            do {
+                items = try context.fetch(request) as [InAppMessageEntity]
+            } catch {
+                print("Failed to fetch items: \(error)")
+
+                self.fireInboxSummaryCallback(callback: inboxSummaryBlock, summary: nil)
+                return
+            }
+            
+            var totalCount: Int64 = 0
+            var unreadCount: Int64 = 0
+            for item in items {
+                if (!item.isAvailable()){
+                    continue
+                }
+                
+                totalCount += 1
+                if (item.readAt == nil){
+                    unreadCount += 1
+                }
+            }
+            
+            self.fireInboxSummaryCallback(callback: inboxSummaryBlock, summary: InAppInboxSummary(totalCount: totalCount, unreadCount: unreadCount))
+        })
+    }
+    
+    private func fireInboxSummaryCallback(callback: @escaping InboxSummaryBlock, summary: InAppInboxSummary?){
+        DispatchQueue.main.async {
+            callback(summary)
+        }
     }
     
     // MARK: Data model

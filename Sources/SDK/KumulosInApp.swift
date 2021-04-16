@@ -15,6 +15,8 @@ public class InAppInboxItem {
     internal(set) open var availableFrom: Date?
     internal(set) open var availableTo: Date?
     internal(set) open var dismissedAt : Date?
+    internal(set) open var sentAt: Date
+    internal(set) open var data: NSDictionary?
     private var readAt : Date?
     
     init(entity: InAppMessageEntity) {
@@ -29,6 +31,14 @@ public class InAppInboxItem {
         availableTo = entity.inboxTo?.copy() as? Date
         dismissedAt = entity.dismissedAt?.copy() as? Date
         readAt = entity.readAt?.copy() as? Date
+        data = entity.data?.copy() as? NSDictionary
+        
+        if let sentAtNonNil = entity.sentAt?.copy() as? Date {
+            sentAt = sentAtNonNil
+        }
+        else{
+            sentAt = entity.updatedAt.copy() as! Date
+        }
     }
 
     public func isAvailable() -> Bool {
@@ -46,7 +56,17 @@ public class InAppInboxItem {
     }
 }
 
+public struct InAppInboxSummary {
+    public let totalCount: Int64
+    public let unreadCount: Int64
+}
+
+public typealias InboxUpdatedHandlerBlock = () -> Void
+public typealias InboxSummaryBlock = (InAppInboxSummary?) -> Void
+
 public class KumulosInApp {
+    private static var _inboxUpdatedHandlerBlock: InboxUpdatedHandlerBlock?
+    
     public static func updateConsent(forUser consentGiven: Bool) {
         if Kumulos.inAppConsentStrategy != InAppConsentStrategy.ExplicitByUser {
             NSException(name:NSExceptionName(rawValue: "Kumulos: Invalid In-app consent strategy"), reason:"You can only manage in-app messaging consent when the feature is enabled and strategy is set to KSInAppConsentStrategyExplicitByUser", userInfo:nil).raise()
@@ -57,21 +77,14 @@ public class KumulosInApp {
         Kumulos.sharedInstance.inAppHelper.updateUserConsent(consentGiven: consentGiven)
     }
     
-    public static func getInboxItems() -> [InAppInboxItem]
-     {
-        if Kumulos.sharedInstance.inAppHelper.messagesContext == nil {
+    public static func getInboxItems() -> [InAppInboxItem] {
+        guard let context = Kumulos.sharedInstance.inAppHelper.messagesContext else {
             return []
         }
-
+    
         var results: [InAppInboxItem] = []
-        
-        Kumulos.sharedInstance.inAppHelper.messagesContext!.performAndWait({
-            guard let context = Kumulos.sharedInstance.inAppHelper.messagesContext else {
-                return
-            }
-            
+        context.performAndWait({
             let request = NSFetchRequest<InAppMessageEntity>(entityName: "Message")
-            request.returnsObjectsAsFaults = false
             request.includesPendingChanges = false
             request.sortDescriptors = [
                 NSSortDescriptor(key: "sentAt", ascending: false),
@@ -79,8 +92,7 @@ public class KumulosInApp {
                 NSSortDescriptor(key: "id", ascending: false)
             ]
             request.predicate = NSPredicate(format: "(inboxConfig != nil)")
-            request.propertiesToFetch = ["id", "inboxConfig", "inboxFrom", "inboxTo", "dismissedAt", "readAt"]
-            
+            request.propertiesToFetch = ["id", "inboxConfig", "inboxFrom", "inboxTo", "dismissedAt", "readAt", "sentAt", "data", "updatedAt"]
             
             var items: [InAppMessageEntity] = []
             do {
@@ -123,10 +135,35 @@ public class KumulosInApp {
         if (item.isRead()){
             return false
         }
-        return Kumulos.sharedInstance.inAppHelper.markInboxItemRead(withId: item.id, shouldWait: true)
+        let res = Kumulos.sharedInstance.inAppHelper.markInboxItemRead(withId: item.id, shouldWait: true)
+        maybeRunInboxUpdatedHandler(inboxNeedsUpdate: res)
+        
+        return res
     }
     
     public static func markAllInboxItemsAsRead() -> Bool {
         return Kumulos.sharedInstance.inAppHelper.markAllInboxItemsAsRead()
+    }
+    
+    public static func setOnInboxUpdated(inboxUpdatedHandlerBlock: InboxUpdatedHandlerBlock?) -> Void {
+        _inboxUpdatedHandlerBlock = inboxUpdatedHandlerBlock
+    }
+    
+    public static func getInboxSummaryAsync(inboxSummaryBlock: @escaping InboxSummaryBlock){
+        Kumulos.sharedInstance.inAppHelper.readInboxSummary(inboxSummaryBlock: inboxSummaryBlock)
+    }
+    
+
+    // Internal helpers
+    static func maybeRunInboxUpdatedHandler(inboxNeedsUpdate: Bool) -> Void {
+        if (!inboxNeedsUpdate){
+            return;
+        }
+        
+        if let inboxUpdatedHandler = _inboxUpdatedHandlerBlock {
+            DispatchQueue.main.async {
+                inboxUpdatedHandler()
+            }
+        }
     }
 }
