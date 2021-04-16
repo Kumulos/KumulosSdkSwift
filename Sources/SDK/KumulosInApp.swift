@@ -15,7 +15,7 @@ public class InAppInboxItem {
     internal(set) open var availableFrom: Date?
     internal(set) open var availableTo: Date?
     internal(set) open var dismissedAt : Date?
-    internal(set) open var sentAt: Date?//TODO: backfill?
+    internal(set) open var sentAt: Date
     internal(set) open var data: NSDictionary?
     private var readAt : Date?
     
@@ -31,8 +31,14 @@ public class InAppInboxItem {
         availableTo = entity.inboxTo?.copy() as? Date
         dismissedAt = entity.dismissedAt?.copy() as? Date
         readAt = entity.readAt?.copy() as? Date
-        sentAt = entity.sentAt?.copy() as? Date
         data = entity.data?.copy() as? NSDictionary
+        
+        if let sentAtNonNil = entity.sentAt?.copy() as? Date {
+            sentAt = sentAtNonNil
+        }
+        else{
+            sentAt = entity.updatedAt.copy() as! Date
+        }
     }
 
     public func isAvailable() -> Bool {
@@ -97,7 +103,7 @@ public class KumulosInApp {
                 NSSortDescriptor(key: "id", ascending: false)
             ]
             request.predicate = NSPredicate(format: "(inboxConfig != nil)")
-            request.propertiesToFetch = ["id", "inboxConfig", "inboxFrom", "inboxTo", "dismissedAt", "readAt", "sentAt", "data"]
+            request.propertiesToFetch = ["id", "inboxConfig", "inboxFrom", "inboxTo", "dismissedAt", "readAt", "sentAt", "data", "updatedAt"]
             
             var items: [InAppMessageEntity] = []
             do {
