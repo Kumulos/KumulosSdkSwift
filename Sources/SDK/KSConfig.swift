@@ -48,7 +48,7 @@ open class KSConfigBuilder: NSObject {
         _apiKey = apiKey
         _secretKey = secretKey
         _enableCrash = false
-        _sessionIdleTimeout = 40
+        _sessionIdleTimeout = 25
     }
     
     public func enableCrash() -> KSConfigBuilder {
