@@ -200,7 +200,7 @@ internal struct KSHttpUtil {
         return encoded
     }
     
-    static func getQueryStringParameter(url: String, param: String) -> String? {
+    static func getQueryStringParameter(_ url: String, _ param: String) -> String? {
       guard let url = URLComponents(string: url) else { return nil }
       return url.queryItems?.first(where: { $0.name == param })?.value
     }
