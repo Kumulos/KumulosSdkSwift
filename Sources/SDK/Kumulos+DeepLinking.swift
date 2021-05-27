@@ -92,7 +92,11 @@ class DeepLinkHelper {
         let slug = KSHttpUtil.urlEncode(url.path.trimmingCharacters(in: ["/"]))
 
         let path = "/v1/deeplinks/\(slug ?? "")?wasDeferred=\(wasDeferred ? 1 : 0)"
-
+        let webInstallId = KSHttpUtil.getQueryStringParameter(url.absoluteString, "webInstallId");
+        if (webInstallId != nil){
+            path = path + "&webInstallId=" + webInstallId;
+        }
+        
         httpClient.sendRequest(.GET, toPath: path, data: nil, onSuccess:  { (res, data) in
             switch res?.statusCode {
             case 200:
