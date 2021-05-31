@@ -91,8 +91,11 @@ class DeepLinkHelper {
     fileprivate func handleDeepLinkUrl(_ url: URL, wasDeferred: Bool = false) {
         let slug = KSHttpUtil.urlEncode(url.path.trimmingCharacters(in: ["/"]))
 
-        let path = "/v1/deeplinks/\(slug ?? "")?wasDeferred=\(wasDeferred ? 1 : 0)"
-
+        var path = "/v1/deeplinks/\(slug ?? "")?wasDeferred=\(wasDeferred ? 1 : 0)"
+        if let query = url.query {
+            path = path + "&" + query
+        }
+        
         httpClient.sendRequest(.GET, toPath: path, data: nil, onSuccess:  { (res, data) in
             switch res?.statusCode {
             case 200:
