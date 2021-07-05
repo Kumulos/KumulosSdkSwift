@@ -40,6 +40,8 @@
 		B625D075233A7A18003AA551 /* InAppPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B625D072233A7A17003AA551 /* InAppPresenter.swift */; };
 		B625D076233A7A18003AA551 /* InAppHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B625D073233A7A17003AA551 /* InAppHelper.swift */; };
 		B625D077233A7A18003AA551 /* InAppModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B625D074233A7A17003AA551 /* InAppModels.swift */; };
+		B62819402693563800D7B876 /* MediaHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B628193F2693563700D7B876 /* MediaHelper.swift */; };
+		B62819412693563800D7B876 /* MediaHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B628193F2693563700D7B876 /* MediaHelper.swift */; };
 		B62FB895242384020070A79D /* KumulosUserDefaultsKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62FB894242384020070A79D /* KumulosUserDefaultsKey.swift */; };
 		B62FB8982423997E0070A79D /* AppGroupsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62FB8972423997E0070A79D /* AppGroupsHelper.swift */; };
 		B62FB8A6242448520070A79D /* KumulosHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62FB8A5242448520070A79D /* KumulosHelper.swift */; };
@@ -100,6 +102,7 @@
 		B625D072233A7A17003AA551 /* InAppPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InAppPresenter.swift; sourceTree = "<group>"; };
 		B625D073233A7A17003AA551 /* InAppHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InAppHelper.swift; sourceTree = "<group>"; };
 		B625D074233A7A17003AA551 /* InAppModels.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InAppModels.swift; sourceTree = "<group>"; };
+		B628193F2693563700D7B876 /* MediaHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaHelper.swift; sourceTree = "<group>"; };
 		B62FB894242384020070A79D /* KumulosUserDefaultsKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KumulosUserDefaultsKey.swift; sourceTree = "<group>"; };
 		B62FB8972423997E0070A79D /* AppGroupsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupsHelper.swift; sourceTree = "<group>"; };
 		B62FB8A5242448520070A79D /* KumulosHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = KumulosHelper.swift; path = Sources/Shared/KumulosHelper.swift; sourceTree = SOURCE_ROOT; };
@@ -219,6 +222,7 @@
 				B62FB8972423997E0070A79D /* AppGroupsHelper.swift */,
 				B659805525F7CE98008C074D /* PendingNotification.swift */,
 				B659805C25F81F5C008C074D /* PendingNotificationHelper.swift */,
+				B628193F2693563700D7B876 /* MediaHelper.swift */,
 			);
 			name = Shared;
 			path = Sources/Shared;
@@ -370,6 +374,7 @@
 				B62FB8B02424622F0070A79D /* KSHttp.swift in Sources */,
 				B62FB8AA24244EFC0070A79D /* KeyValPersistenceHelper.swift in Sources */,
 				B659805725F7CE98008C074D /* PendingNotification.swift in Sources */,
+				B62819412693563800D7B876 /* MediaHelper.swift in Sources */,
 				B62FB8AF242461C70070A79D /* AnalyticsHelper.swift in Sources */,
 				B62FB8AB24244EFE0070A79D /* AppGroupsHelper.swift in Sources */,
 				B659805E25F81F5C008C074D /* PendingNotificationHelper.swift in Sources */,
@@ -393,6 +398,7 @@
 				123D90A822A160D0004B8392 /* KSHttp.swift in Sources */,
 				127B22DB1D9BE59E00D9C94B /* KSAPIOperation.swift in Sources */,
 				127B22DE1D9BE59E00D9C94B /* Kumulos+API.swift in Sources */,
+				B62819402693563800D7B876 /* MediaHelper.swift in Sources */,
 				B62FB8982423997E0070A79D /* AppGroupsHelper.swift in Sources */,
 				127B22DD1D9BE59E00D9C94B /* Kumulos.swift in Sources */,
 				B625D076233A7A18003AA551 /* InAppHelper.swift in Sources */,

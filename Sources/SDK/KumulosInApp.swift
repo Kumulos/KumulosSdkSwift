@@ -18,6 +18,9 @@ public class InAppInboxItem {
     internal(set) open var sentAt: Date
     internal(set) open var data: NSDictionary?
     private var readAt : Date?
+    private var imagePath: String?
+    
+    private static let defaultImageWidth: UInt = 300
     
     init(entity: InAppMessageEntity) {
         id = Int64(entity.id)
@@ -39,6 +42,8 @@ public class InAppInboxItem {
         else{
             sentAt = entity.updatedAt.copy() as! Date
         }
+        
+        imagePath = inboxConfig["imagePath"] as? String
     }
 
     public func isAvailable() -> Bool {
@@ -53,6 +58,18 @@ public class InAppInboxItem {
     
     public func isRead() -> Bool {
         return readAt != nil;
+    }
+    
+    public func getImageUrl() -> URL? {
+        return self.getImageUrl(width: InAppInboxItem.defaultImageWidth)
+    }
+    
+    public func getImageUrl(width: UInt) -> URL? {
+        if let imagePathNotNil = imagePath {
+            return MediaHelper.getCompletePictureUrl(pictureUrl: imagePathNotNil, width: width)
+        }
+        
+        return nil
     }
 }
 
@@ -152,7 +169,6 @@ public class KumulosInApp {
     public static func getInboxSummaryAsync(inboxSummaryBlock: @escaping InboxSummaryBlock){
         Kumulos.sharedInstance.inAppHelper.readInboxSummary(inboxSummaryBlock: inboxSummaryBlock)
     }
-    
 
     // Internal helpers
     static func maybeRunInboxUpdatedHandler(inboxNeedsUpdate: Bool) -> Void {

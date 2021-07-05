@@ -109,13 +109,11 @@ public class KumulosNotificationService {
         let attachments = userInfo["attachments"] as? [AnyHashable : Any]
         let pictureUrl = attachments?["pictureUrl"] as? String
 
-        if pictureUrl == nil {
-            return
-        }
+        guard let picUrlNonNull = pictureUrl else { return }
 
-        let picExtension = getPictureExtension(pictureUrl)
-        let url = getCompletePictureUrl(pictureUrl!)
-
+        let picExtension = getPictureExtension(picUrlNonNull)
+        let url = MediaHelper.getCompletePictureUrl(pictureUrl: picUrlNonNull as String, width: UInt(floor(UIScreen.main.bounds.size.width)))
+        
         dispatchGroup.enter()
 
         loadAttachment(url!, withExtension: picExtension, completionHandler: { attachment in
@@ -137,18 +135,6 @@ public class KumulosNotificationService {
         }
 
         return "." + (pictureExtension)
-    }
-
-    fileprivate class func getCompletePictureUrl(_ pictureUrl: String) -> URL? {
-        if (((pictureUrl as NSString).substring(with: NSRange(location: 0, length: 8))) == "https://") || (((pictureUrl as NSString).substring(with: NSRange(location: 0, length: 7))) == "http://") {
-            return URL(string: pictureUrl)
-        }
-
-        let width = UIScreen.main.bounds.size.width
-        let num = Int(floor(width))
-
-        let completeString = String(format: "%@%@%ld%@%@", KS_MEDIA_RESIZER_BASE_URL, "/", num, "x/", pictureUrl)
-        return URL(string: completeString)
     }
 
     fileprivate class func loadAttachment(_ url: URL, withExtension pictureExtension: String?, completionHandler: @escaping (UNNotificationAttachment?) -> Void) {
