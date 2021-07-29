@@ -10,7 +10,7 @@ import UserNotifications
 /*!
  *  The KumulosDelegate defines the methods for completion or failure of Kumulos operations.
  */
-protocol KumulosDelegate: class {
+protocol KumulosDelegate: AnyObject {
     func didComplete(_ kumulos: Kumulos, operation: KSAPIOperation, method: String, results: KSResponse)
     func didFail(_ kumulos: Kumulos, operation: KSAPIOperation, error: NSError?)
 }
@@ -214,7 +214,7 @@ open class Kumulos {
         sessionHelper.initialize()
         inAppHelper.initialize()
         _ = pushHelper.pushInit
-        deepLinkHelper?.checkForDeferredLink()
+        deepLinkHelper?.checkForNonContinuationLinkMatch()
     }
 
     deinit {

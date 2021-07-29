@@ -8,7 +8,7 @@ import Foundation
 public typealias KSAPIOperationSuccessBlock = ((KSResponse, KSAPIOperation)->Void)?
 public typealias KSAPIOperationFailureBlock = ((NSError?, KSAPIOperation)->Void)?
 
-protocol KSAPIOperationDelegate: class {
+protocol KSAPIOperationDelegate: AnyObject {
     func didComplete(_ operation: KSAPIOperation, results: KSResponse)
     func didFail(_ operation: KSAPIOperation, error: NSError?)
 }
