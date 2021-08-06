@@ -182,6 +182,8 @@ class DeepLinkHelper {
             switch res?.statusCode {
             case 200:
                 guard let jsonData = data as? Data,
+                      let response = try? JSONSerialization.jsonObject(with: jsonData) as? [AnyHashable:Any],
+                      let url = URL(string: response["linkUrl"] as! String),
                       let link = DeepLink(for: url, from: jsonData) else {
                     self.invokeDeepLinkHandler(.lookupFailed(url))
                     return
