@@ -13,7 +13,7 @@ enum KSHttpError : Error {
 }
 
 typealias KSHttpSuccessBlock = (_ response:HTTPURLResponse?, _ decodedBody:Any?) -> Void
-typealias KSHttpFailureBlock = (_ response:HTTPURLResponse?, _ error:Error?) -> Void
+typealias KSHttpFailureBlock = (_ response:HTTPURLResponse?, _ error:Error?, _ decodedBody: Any?) -> Void
 
 enum KSHttpDataFormat {
     case json
@@ -159,12 +159,12 @@ internal class KSHttpClient {
     fileprivate func sendRequest(request:URLRequest, onSuccess:@escaping KSHttpSuccessBlock, onFailure:@escaping KSHttpFailureBlock) -> URLSessionDataTask {
         let task = urlSession.dataTask(with: request) { (data, response, error) in
             guard let httpResponse = response as? HTTPURLResponse else {
-                onFailure(nil, KSHttpError.responseCastingError)
+                onFailure(nil, KSHttpError.responseCastingError, nil)
                 return
             }
 
             if error != nil {
-                onFailure(httpResponse, error)
+                onFailure(httpResponse, error, nil)
                 return
             }
 
@@ -175,7 +175,7 @@ internal class KSHttpClient {
             }
 
             if httpResponse.statusCode > 299 {
-                onFailure(httpResponse, KSHttpError.badStatusCode)
+                onFailure(httpResponse, KSHttpError.badStatusCode, decodedBody)
                 return;
             }
 

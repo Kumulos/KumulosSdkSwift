@@ -123,7 +123,7 @@ open class KSAPIOperation: Operation {
             {
                 self.onRequestError()
             }
-        }) { (response, error) in
+        }) { (response, error, data) in
             Kumulos.apiMethodRequestComplete()
 
             self.delegate?.didFail(self, error: nil)

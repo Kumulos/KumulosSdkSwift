@@ -189,7 +189,7 @@ public class KumulosCheckinClient {
         do {
             let reqData = try jsonEncoder.encode(CheckinRequestData(deviceKey: deviceKey(), checkin: checkin))
 
-            httpClient.sendRequest(.POST, toPath: path, data: reqData, onSuccess: makeSuccessHandler(201, KumulosCheckin.self, onComplete)) { (res, err) in
+            httpClient.sendRequest(.POST, toPath: path, data: reqData, onSuccess: makeSuccessHandler(201, KumulosCheckin.self, onComplete)) { (res, err, data) in
                 onComplete(.failure(.networkError(err)))
             }
         } catch {
@@ -202,7 +202,7 @@ public class KumulosCheckinClient {
         let encodedKey = KSHttpUtil.urlEncode(deviceKey()) ?? ""
         let path = "/v1/users/\(encodedUserId)/open-checkins?deviceKey=\(encodedKey)"
 
-        httpClient.sendRequest(.GET, toPath: path, data: nil, onSuccess: makeSuccessHandler(200, [KumulosCheckin].self, onComplete)) { (res, err) in
+        httpClient.sendRequest(.GET, toPath: path, data: nil, onSuccess: makeSuccessHandler(200, [KumulosCheckin].self, onComplete)) { (res, err, data) in
             onComplete(.failure(.networkError(err)))
         }
     }
@@ -231,7 +231,7 @@ public class KumulosCheckinClient {
             return
         }
 
-        httpClient.sendRequest(.DELETE, toPath: path, data: nil, onSuccess: makeSuccessHandler(200, KumulosCheckin.self, onComplete)) { (res, err) in
+        httpClient.sendRequest(.DELETE, toPath: path, data: nil, onSuccess: makeSuccessHandler(200, KumulosCheckin.self, onComplete)) { (res, err, data) in
             onComplete(.failure(.networkError(err)))
         }
     }

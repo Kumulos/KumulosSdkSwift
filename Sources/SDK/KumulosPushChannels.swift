@@ -65,7 +65,7 @@ public class KumulosPushChannels {
             if let successBlock = request.successBlock {
                 successBlock?(self.readChannelsFromResponse(jsonResponse: (data as! [[String : AnyObject]])))
             }
-        }) { (response, error) in
+        }) { (response, error, data)  in
             if let failureBlock = request.failureBlock {
                 failureBlock?(error)
             }
@@ -128,7 +128,7 @@ public class KumulosPushChannels {
             if let successBlock = request.successBlock {
                 successBlock?([self.getChannelFromPayload(payload: (data as! [String : AnyObject]))])
             }
-        }) { (response, error) in
+        }) { (response, error, data) in
             if let failureBlock = request.failureBlock {
                 failureBlock?(error)
             }
@@ -236,7 +236,7 @@ public class KumulosPushChannels {
             if let successBlock = request.successBlock {
                 successBlock?()
             }
-        }) { (response, error) in
+        }) { (response, error, data) in
             if let failureBlock = request.failureBlock {
                 failureBlock?(error)
             }

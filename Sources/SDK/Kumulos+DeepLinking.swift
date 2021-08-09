@@ -149,7 +149,7 @@ class DeepLinkHelper {
                 self.invokeDeepLinkHandler(.lookupFailed(url))
                 break
             }
-        }, onFailure: { (res, err) in
+        }, onFailure: { (res, err, data) in
             switch res?.statusCode {
             case 404:
                 self.invokeDeepLinkHandler(.linkNotFound(url))

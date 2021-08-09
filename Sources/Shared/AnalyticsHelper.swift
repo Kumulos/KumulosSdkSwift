@@ -236,7 +236,7 @@ internal class AnalyticsHelper {
                 return
             }
             self.syncEvents(context: context, onSyncComplete)
-        }) { (response, error) in
+        }) { (response, error, data) in
             print("Failed to send events")
             onSyncComplete?(error)
         }
