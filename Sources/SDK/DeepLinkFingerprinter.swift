@@ -19,7 +19,6 @@ fileprivate enum DeferredState<R> {
     case resolved(R)
 }
 
-// TODO: consider rejection / timeouts?
 fileprivate class Deferred<R> {
     var state : DeferredState<R>
     var pendingWatchers : [(R) -> Void]
@@ -113,8 +112,6 @@ class DeepLinkFingerprinter : NSObject, WKScriptMessageHandler, WKNavigationDele
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        // TODO: Reject?
-        print("Failed navigation \(error)")
         DispatchQueue.main.async { self.cleanUpWebView() }
     }
 
@@ -129,7 +126,7 @@ class DeepLinkFingerprinter : NSObject, WKScriptMessageHandler, WKNavigationDele
 
             webView?.evaluateJavaScript(evalString, completionHandler: nil)
         } catch {
-            //Noop / reject?
+            // Noop
         }
       }
 
