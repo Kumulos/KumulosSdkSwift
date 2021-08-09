@@ -175,36 +175,37 @@ class DeepLinkHelper {
 
         let path = "/v1/deeplinks/_taps?fingerprint=\(encodedComponents)"
 
-        // TODO: refactor this a little, probably get URL from response data
-        let url = URL(string: "https://kumulos.com")!
-
         httpClient.sendRequest(.GET, toPath: path, data: nil, onSuccess:  { (res, data) in
             switch res?.statusCode {
             case 200:
                 guard let jsonData = data as? Data,
                       let response = try? JSONSerialization.jsonObject(with: jsonData) as? [AnyHashable:Any],
-                      let url = URL(string: response["linkUrl"] as! String),
+                      let urlString = response["linkUrl"] as? String,
+                      let url = URL(string: urlString),
                       let link = DeepLink(for: url, from: jsonData) else {
-                    self.invokeDeepLinkHandler(.lookupFailed(url))
+                    // Fingerprint matches that fail to parse correctly can't know the URL so
+                    // don't invoke any error handler.
                     return
                 }
 
                 self.invokeDeepLinkHandler(.linkMatched(link))
 
-                // TODO: any other props we want to include here about the resolution?
                 let linkProps = ["url": url.absoluteString, "wasDeferred": false] as [String : Any]
                 Kumulos.getInstance().analyticsHelper.trackEvent(eventType: KumulosEvent.DEEP_LINK_MATCHED.rawValue, properties: linkProps, immediateFlush: false)
                 break
             default:
-                self.invokeDeepLinkHandler(.lookupFailed(url))
+                // Noop
                 break
             }
-        }, onFailure: { (res, err) in
-            // TODO: figure out which error cases should actually invoke the handler
+        }, onFailure: { (res, err, data) in
+            guard let jsonData = data as? Data,
+                  let response = try? JSONSerialization.jsonObject(with: jsonData) as? [AnyHashable:Any],
+                  let urlString = response["linkUrl"] as? String,
+                  let url = URL(string: urlString) else {
+                return
+            }
+
             switch res?.statusCode {
-            case 404:
-                self.invokeDeepLinkHandler(.linkNotFound(url))
-                break
             case 410:
                 self.invokeDeepLinkHandler(.linkExpired(url))
                 break
@@ -212,7 +213,7 @@ class DeepLinkHelper {
                 self.invokeDeepLinkHandler(.linkLimitExceeded(url))
                 break
             default:
-                self.invokeDeepLinkHandler(.lookupFailed(url))
+                // Noop
                 break
             }
         })
