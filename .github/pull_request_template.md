@@ -34,3 +34,7 @@ Update docs site with correct version number references
 
 - [ ] https://docs.kumulos.com/developer-guide/sdk-reference/swift/
 - [ ] https://docs.kumulos.com/getting-started/integrate-app/
+
+Update changelog:
+
+- [ ] https://docs.kumulos.com/developer-guide/sdk-reference/swift/#changelog
