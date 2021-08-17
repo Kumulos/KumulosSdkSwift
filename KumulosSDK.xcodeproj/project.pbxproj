@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		12020A4326B30E78002B235B /* DeepLinkFingerprinter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12020A4226B30E78002B235B /* DeepLinkFingerprinter.swift */; };
 		123D90A822A160D0004B8392 /* KSHttp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 123D90A722A160CF004B8392 /* KSHttp.swift */; };
 		126F12632507EAB2007DBBE1 /* KumulosCheckins.swift in Sources */ = {isa = PBXBuildFile; fileRef = 126F12622507EAB2007DBBE1 /* KumulosCheckins.swift */; };
 		127B22D91D9BE59E00D9C94B /* CwlSysctl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 127B22CE1D9BE59E00D9C94B /* CwlSysctl.swift */; };
@@ -62,6 +63,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		12020A4226B30E78002B235B /* DeepLinkFingerprinter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DeepLinkFingerprinter.swift; path = Sources/SDK/DeepLinkFingerprinter.swift; sourceTree = "<group>"; };
 		123D90A722A160CF004B8392 /* KSHttp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KSHttp.swift; sourceTree = "<group>"; };
 		126F12622507EAB2007DBBE1 /* KumulosCheckins.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = KumulosCheckins.swift; path = Sources/SDK/KumulosCheckins.swift; sourceTree = "<group>"; };
 		127B22CE1D9BE59E00D9C94B /* CwlSysctl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CwlSysctl.swift; path = Sources/SDK/CwlSysctl.swift; sourceTree = "<group>"; };
@@ -173,6 +175,7 @@
 				127B22D41D9BE59E00D9C94B /* Kumulos+Push.swift */,
 				127B22D51D9BE59E00D9C94B /* Kumulos+Stats.swift */,
 				12862D7F252F74FC00BD0E77 /* Kumulos+DeepLinking.swift */,
+				12020A4226B30E78002B235B /* DeepLinkFingerprinter.swift */,
 				A16790811E49D8BD00C276AF /* KumulosPushChannels.swift */,
 				126F12622507EAB2007DBBE1 /* KumulosCheckins.swift */,
 				127B22D61D9BE59E00D9C94B /* KumulosSDK.h */,
@@ -313,7 +316,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0730;
-				LastUpgradeCheck = 1110;
+				LastUpgradeCheck = 1250;
 				ORGANIZATIONNAME = Kumulos;
 				TargetAttributes = {
 					12985A59238D6F3100671FBF = {
@@ -401,6 +404,7 @@
 				B62819402693563800D7B876 /* MediaHelper.swift in Sources */,
 				B62FB8982423997E0070A79D /* AppGroupsHelper.swift in Sources */,
 				127B22DD1D9BE59E00D9C94B /* Kumulos.swift in Sources */,
+				12020A4326B30E78002B235B /* DeepLinkFingerprinter.swift in Sources */,
 				B625D076233A7A18003AA551 /* InAppHelper.swift in Sources */,
 				B625D075233A7A18003AA551 /* InAppPresenter.swift in Sources */,
 				127B22DC1D9BE59E00D9C94B /* KSResponse.swift in Sources */,
@@ -512,6 +516,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -573,6 +578,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;

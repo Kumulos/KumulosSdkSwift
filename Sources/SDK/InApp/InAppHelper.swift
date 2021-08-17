@@ -297,7 +297,7 @@ internal class InAppHelper {
                 
                 self.syncBarrier.signal()
                 
-            }, onFailure: { response, error in
+            }, onFailure: { response, error, data in
                 if onComplete != nil {
                     onComplete?(-1)
                 }
