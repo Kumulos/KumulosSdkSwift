@@ -90,6 +90,7 @@ public class KumulosNotificationService {
             
             let icon = getButtonIcon(button: buttonDict)
             
+            //TODO - Necessary to guard this constructor with 15+ ?
             let action = UNNotificationAction(identifier: id, title: text, options: .foreground, icon: icon)
             actionArray.add(action);
         }
