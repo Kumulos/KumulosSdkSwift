@@ -37,7 +37,7 @@ class InAppMessageEntity : NSManagedObject {
     }
 }
 
-public class InAppMessage: NSObject {
+class InAppMessage: NSObject {
     internal(set) open var id: Int64
     internal(set) open var updatedAt: NSDate
     internal(set) open var content: NSDictionary
@@ -66,5 +66,17 @@ public class InAppMessage: NSObject {
         }
 
         return super.isEqual(object)
+    }
+}
+
+public struct InAppButtonPress {
+    let deepLinkData : [AnyHashable:Any]
+    let messageId : Int64
+    let messageData : NSDictionary?
+
+    init(deepLinkData:[AnyHashable:Any], messageId:Int64, messageData:NSDictionary?) {
+        self.deepLinkData = deepLinkData
+        self.messageId = messageId
+        self.messageData = messageData
     }
 }
