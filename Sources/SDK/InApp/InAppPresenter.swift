@@ -392,13 +392,13 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
             }
 
             if (userAction != nil) {
-                self.handleUserAction(userAction: userAction!)
+                self.handleUserAction(message: message, userAction: userAction!)
                 self.cancelCurrentPresentationQueue(waitForViewCleanup: true)
             }
         }
     }
 
-    func handleUserAction(userAction: NSDictionary) -> Void {
+    func handleUserAction(message: InAppMessage, userAction: NSDictionary) -> Void {
         let type = userAction["type"] as! String
                 
         if (type == InAppAction.PROMPT_PUSH_PERMISSION.rawValue) {
@@ -409,7 +409,8 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
             }
             DispatchQueue.main.async {
                 let data = userAction.value(forKeyPath: "data.deepLink") as? [AnyHashable:Any] ?? [:]
-                Kumulos.sharedInstance.config.inAppDeepLinkHandlerBlock?(data)
+                let buttonPress = InAppButtonPress(deepLinkData: data, messageId: message.id, messageData: message.data)
+                Kumulos.sharedInstance.config.inAppDeepLinkHandlerBlock?(buttonPress)
             }
         } else if (type == InAppAction.OPEN_URL.rawValue) {
             guard let url = URL(string: userAction.value(forKeyPath: "data.url") as! String) else {
