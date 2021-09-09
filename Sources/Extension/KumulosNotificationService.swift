@@ -87,12 +87,32 @@ public class KumulosNotificationService {
 
             let id = buttonDict["id"] as! String
             let text = buttonDict["text"] as! String
-
-            let action = UNNotificationAction(identifier: id, title: text, options: .foreground)
+            
+            let icon = getButtonIcon(button: buttonDict)
+            
+            let action = UNNotificationAction(identifier: id, title: text, options: .foreground, icon: icon)
             actionArray.add(action);
         }
 
         return actionArray;
+    }
+    
+    fileprivate class func getButtonIcon(button:AnyHashable:Any]) -> UNNotificationActionIcon? {
+        guard buttonDict["icon"] != nil else {
+            return nil
+        }
+        
+        let iconDict = buttonDict["icon"] as! [String:String]
+        
+        let iconType = iconDict["type"] as !String
+        let iconId = iconDict["iconId"] as !String
+        
+        if (iconType === "custom") {
+            //TODO - What if this doesnt exist? Catch exception -> return nil?
+            return UNNotificationActionIcon(templateImageName: iconId)
+        }
+        
+        return UNNotificationActionIcon(systemImageName: iconId)
     }
 
     fileprivate class func addCategory(bestAttemptContent: UNMutableNotificationContent, actionArray:NSMutableArray, id: Int) {
