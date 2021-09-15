@@ -104,14 +104,9 @@ public class KumulosNotificationService {
     
     @available(iOSApplicationExtension 15.0, *)
     fileprivate class func getButtonIcon(button:[AnyHashable:Any]) -> UNNotificationActionIcon? {
-        guard button["icon"] != nil else {
+        guard let icon = button["icon"] as? [String:String], let iconType = icon["type"], let iconId = icon["id"] else {
             return nil
         }
-        
-        let iconDict = button["icon"] as! [String:String]
-        
-        let iconType = iconDict["type"] as! String
-        let iconId = iconDict["iconId"] as! String
         
         if (iconType == "custom") {
             //TODO - What if this doesnt exist? Catch exception -> return nil?
