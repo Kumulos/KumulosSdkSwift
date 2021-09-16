@@ -33,7 +33,7 @@ internal enum KumulosEvent : String {
     case MESSAGE_READ = "k.message.read"
 }
 
-public typealias InAppDeepLinkHandlerBlock = ([AnyHashable:Any]) -> Void
+public typealias InAppDeepLinkHandlerBlock = (InAppButtonPress) -> Void
 public typealias PushOpenedHandlerBlock = (KSPushNotification) -> Void
 
 @available(iOS 10.0, *)
@@ -59,7 +59,7 @@ open class Kumulos {
     internal let pushNotificationDeviceType = 1
     internal let pushNotificationProductionTokenType:Int = 1
 
-    internal let sdkVersion : String = "8.13.0"
+    internal let sdkVersion : String = "9.0.0"
 
     var networkRequestsInProgress = 0
 
