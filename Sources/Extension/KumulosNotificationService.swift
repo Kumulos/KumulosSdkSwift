@@ -88,7 +88,7 @@ public class KumulosNotificationService {
             let id = buttonDict["id"] as! String
             let text = buttonDict["text"] as! String
             
-            if #available(iOSApplicationExtension 15.0, *) {
+            if #available(iOS 15.0, *) {
                 let icon = getButtonIcon(button: buttonDict)
                 let action = UNNotificationAction(identifier: id, title: text, options: .foreground, icon: icon)
                 actionArray.add(action);
@@ -102,7 +102,7 @@ public class KumulosNotificationService {
         return actionArray;
     }
     
-    @available(iOSApplicationExtension 15.0, *)
+    @available(iOS 15.0, *)
     fileprivate class func getButtonIcon(button:[AnyHashable:Any]) -> UNNotificationActionIcon? {
         guard let icon = button["icon"] as? [String:String], let iconType = icon["type"], let iconId = icon["id"] else {
             return nil
