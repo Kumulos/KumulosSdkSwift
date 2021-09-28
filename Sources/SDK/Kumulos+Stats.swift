@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import UserNotifications
 
 #if os(iOS) || os(watchOS) || os(tvOS)
     import UIKit
@@ -111,10 +112,36 @@ public extension Kumulos{
             "sdk" : sdk,
             "runtime" : runtime,
             "os" : os,
-            "device" : device
+            "device" : device,
+            "ios": self.getiOSAttrs()
         ]
         
         Kumulos.trackEvent(eventType: KumulosEvent.STATS_CALL_HOME.rawValue, properties: finalParameters)
+    }
+
+    fileprivate func getiOSAttrs() -> [String:Any] {
+        var push = [
+            "scheduled": false,
+            "timeSensitive": false
+        ]
+
+        if #available(iOS 15.0, *) {
+            let permsBarrier = DispatchSemaphore(value: 0)
+
+            UNUserNotificationCenter.current().getNotificationSettings { settings in
+                push["scheduled"] = settings.scheduledDeliverySetting == .enabled
+                push["timeSensitive"] = settings.timeSensitiveSetting == .enabled
+
+                permsBarrier.signal()
+            }
+
+            _ = permsBarrier.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(5))
+        }
+
+        return [
+            "hasGroup": AppGroupsHelper.isKumulosAppGroupDefined(),
+            "push": push
+        ]
     }
     
 }
