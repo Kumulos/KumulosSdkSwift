@@ -247,8 +247,13 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         }
 
         frame.addSubview(webView)
-        
-        let request = URLRequest(url: URL(string: inAppRendererUrl)!, cachePolicy: .returnCacheDataElseLoad, timeoutInterval: 30)
+
+        #if DEBUG
+        let cachePolicy = URLRequest.CachePolicy.useProtocolCachePolicy
+        #else
+        let cachePolicy = URLRequest.CachePolicy.reloadIgnoringCacheData
+        #endif
+        let request = URLRequest(url: URL(string: inAppRendererUrl)!, cachePolicy: cachePolicy, timeoutInterval: 8)
         webView.load(request)
         
         // Spinner
@@ -346,10 +351,30 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
     }
     
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        // Handles transfer errors after starting load
         self.cancelCurrentPresentationQueue(waitForViewCleanup: false)
     }
     
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        // Handles connection/timeout errors for the main frame load
+        self.cancelCurrentPresentationQueue(waitForViewCleanup: false)
+    }
+
+    func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        // Handles HTTP responses for all status codes
+        if let httpResponse = navigationResponse.response as? HTTPURLResponse,
+           let url = httpResponse.url {
+            if url.absoluteString.starts(with: inAppRendererUrl) && httpResponse.statusCode >= 400 {
+                decisionHandler(.cancel)
+                cancelCurrentPresentationQueue(waitForViewCleanup: false)
+                return
+            }
+        }
+
+        decisionHandler(.allow)
+    }
+
+    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
         self.cancelCurrentPresentationQueue(waitForViewCleanup: false)
     }
 
