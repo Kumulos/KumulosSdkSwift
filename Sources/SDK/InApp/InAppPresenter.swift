@@ -382,7 +382,8 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         if let message = self.currentMessage {
             
             var hasClose = false;
-            var trackEvent : String?
+            var conversionEvent : String?
+            var conversionEventData : [String:Any]?
             var subscribeToChannelUuid : String?
             var userAction : NSDictionary?
             
@@ -394,9 +395,10 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
                 case .CLOSE_MESSAGE:
                     hasClose = true
                 case .TRACK_EVENT:
-                    trackEvent = data!["eventType"] as? String
+                    conversionEvent = data?["eventType"] as? String
+                    conversionEventData = data?["data"] as? [String:Any]
                 case .SUBSCRIBE_CHANNEL:
-                    subscribeToChannelUuid = data!["channelUuid"] as? String
+                    subscribeToChannelUuid = data?["channelUuid"] as? String
                 default:
                     userAction = action
                 }
@@ -407,8 +409,8 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
                 self.postClientMessage(type: "CLOSE_MESSAGE", data: nil)
             }
 
-            if let trackEvent = trackEvent {
-                Kumulos.trackEventImmediately(eventType: trackEvent, properties: nil);
+            if let conversionEvent = conversionEvent {
+                Kumulos.trackEventImmediately(eventType: conversionEvent, properties: conversionEventData);
             }
 
             if let subscribeToChannelUuid = subscribeToChannelUuid {
