@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		12020A4326B30E78002B235B /* DeepLinkFingerprinter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12020A4226B30E78002B235B /* DeepLinkFingerprinter.swift */; };
 		123D90A822A160D0004B8392 /* KSHttp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 123D90A722A160CF004B8392 /* KSHttp.swift */; };
+		1251B2C0271D78E700A0F251 /* UrlBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1251B2BF271D78E700A0F251 /* UrlBuilder.swift */; };
 		126F12632507EAB2007DBBE1 /* KumulosCheckins.swift in Sources */ = {isa = PBXBuildFile; fileRef = 126F12622507EAB2007DBBE1 /* KumulosCheckins.swift */; };
 		127B22D91D9BE59E00D9C94B /* CwlSysctl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 127B22CE1D9BE59E00D9C94B /* CwlSysctl.swift */; };
 		127B22DB1D9BE59E00D9C94B /* KSAPIOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 127B22D01D9BE59E00D9C94B /* KSAPIOperation.swift */; };
@@ -65,6 +66,7 @@
 /* Begin PBXFileReference section */
 		12020A4226B30E78002B235B /* DeepLinkFingerprinter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DeepLinkFingerprinter.swift; path = Sources/SDK/DeepLinkFingerprinter.swift; sourceTree = "<group>"; };
 		123D90A722A160CF004B8392 /* KSHttp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KSHttp.swift; sourceTree = "<group>"; };
+		1251B2BF271D78E700A0F251 /* UrlBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UrlBuilder.swift; path = Sources/SDK/UrlBuilder.swift; sourceTree = "<group>"; };
 		126F12622507EAB2007DBBE1 /* KumulosCheckins.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = KumulosCheckins.swift; path = Sources/SDK/KumulosCheckins.swift; sourceTree = "<group>"; };
 		127B22CE1D9BE59E00D9C94B /* CwlSysctl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CwlSysctl.swift; path = Sources/SDK/CwlSysctl.swift; sourceTree = "<group>"; };
 		127B22CF1D9BE59E00D9C94B /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Sources/SDK/Info.plist; sourceTree = "<group>"; };
@@ -187,6 +189,7 @@
 				B6E48F5E2425057E00E8B3B9 /* SessionHelper.swift */,
 				B6E48F63242BA8D700E8B3B9 /* KSBadgeObserver.m */,
 				B6E48F65242BA8F600E8B3B9 /* KSBadgeObserver.h */,
+				1251B2BF271D78E700A0F251 /* UrlBuilder.swift */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
@@ -400,6 +403,7 @@
 				B62FB8A6242448520070A79D /* KumulosHelper.swift in Sources */,
 				123D90A822A160D0004B8392 /* KSHttp.swift in Sources */,
 				127B22DB1D9BE59E00D9C94B /* KSAPIOperation.swift in Sources */,
+				1251B2C0271D78E700A0F251 /* UrlBuilder.swift in Sources */,
 				127B22DE1D9BE59E00D9C94B /* Kumulos+API.swift in Sources */,
 				B62819402693563800D7B876 /* MediaHelper.swift in Sources */,
 				B62FB8982423997E0070A79D /* AppGroupsHelper.swift in Sources */,

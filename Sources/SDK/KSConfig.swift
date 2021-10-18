@@ -30,6 +30,8 @@ public struct KSConfig {
 
     let deepLinkCname : URL?
     let deepLinkHandler : DeepLinkHandler?
+
+    let baseUrlMap : ServiceUrlMap
 }
 
 open class KSConfigBuilder: NSObject {
@@ -43,12 +45,14 @@ open class KSConfigBuilder: NSObject {
     private var _pushReceivedInForegroundHandlerBlock: Any?
     private var _deepLinkCname : URL?
     private var _deepLinkHandler : DeepLinkHandler?
+    private var _baseUrlMap : ServiceUrlMap
     
     public init(apiKey: String, secretKey: String) {
         _apiKey = apiKey
         _secretKey = secretKey
         _enableCrash = false
         _sessionIdleTimeout = 23
+        _baseUrlMap = UrlBuilder.defaultMapping()
     }
     
     public func enableCrash() -> KSConfigBuilder {
@@ -88,6 +92,15 @@ open class KSConfigBuilder: NSObject {
 
         return self
     }
+
+    /**
+     Internal SDK embedding API, do not call or depend on this method in your app
+     */
+    public func setBaseUrlMapping(baseUrlMap:ServiceUrlMap) -> KSConfigBuilder {
+        _baseUrlMap = baseUrlMap
+
+        return self
+    }
     
     public func build() -> KSConfig {
         return KSConfig(
@@ -100,7 +113,8 @@ open class KSConfigBuilder: NSObject {
             pushOpenedHandlerBlock: _pushOpenedHandlerBlock,
             _pushReceivedInForegroundHandlerBlock: _pushReceivedInForegroundHandlerBlock,
             deepLinkCname: nil,
-            deepLinkHandler: _deepLinkHandler
+            deepLinkHandler: _deepLinkHandler,
+            baseUrlMap: _baseUrlMap
         )
     }
 }

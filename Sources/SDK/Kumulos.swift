@@ -47,10 +47,7 @@ public enum InAppConsentStrategy : String {
 
 // MARK: class
 open class Kumulos {
-    internal let baseApiUrl = "https://api.kumulos.com"
-    internal let basePushUrl = "https://push.kumulos.com"
-    internal let baseCrashUrl = "https://crash.kumulos.com/v1"
-    internal static let baseCrmCoreUrl = "https://crm.kumulos.com"
+    internal let urlBuilder:UrlBuilder
 
     internal let pushHttpClient:KSHttpClient
     internal let rpcHttpClient:KSHttpClient
@@ -162,6 +159,8 @@ open class Kumulos {
         KeyValPersistenceHelper.maybeMigrateUserDefaultsToAppGroups()
         KeyValPersistenceHelper.set(config.apiKey, forKey: KumulosUserDefaultsKey.API_KEY.rawValue)
         KeyValPersistenceHelper.set(config.secretKey, forKey: KumulosUserDefaultsKey.SECRET_KEY.rawValue)
+        KeyValPersistenceHelper.set(config.baseUrlMap[.events], forKey: KumulosUserDefaultsKey.EVENTS_BASE_URL.rawValue)
+        KeyValPersistenceHelper.set(config.baseUrlMap[.media], forKey: KumulosUserDefaultsKey.MEDIA_BASE_URL.rawValue)
 
         instance = Kumulos(config: config)
 
@@ -190,14 +189,16 @@ open class Kumulos {
 
         sessionToken = UUID().uuidString
 
-        pushHttpClient = KSHttpClient(baseUrl: URL(string: basePushUrl)!, requestFormat: .json, responseFormat: .json)
+        urlBuilder = UrlBuilder(baseUrlMap: config.baseUrlMap)
+
+        pushHttpClient = KSHttpClient(baseUrl: URL(string: urlBuilder.urlForService(.push))!, requestFormat: .json, responseFormat: .json)
         pushHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
-        rpcHttpClient = KSHttpClient(baseUrl: URL(string: baseApiUrl)!, requestFormat: .json, responseFormat: .plist)
+        rpcHttpClient = KSHttpClient(baseUrl: URL(string: urlBuilder.urlForService(.backend))!, requestFormat: .json, responseFormat: .plist)
         rpcHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
-        coreHttpClient = KSHttpClient(baseUrl: URL(string: Kumulos.baseCrmCoreUrl)!, requestFormat: .json, responseFormat: .json)
+        coreHttpClient = KSHttpClient(baseUrl: URL(string: urlBuilder.urlForService(.crm))!, requestFormat: .json, responseFormat: .json)
         coreHttpClient.setBasicAuth(user: config.apiKey, password: config.secretKey)
 
-        analyticsHelper = AnalyticsHelper(apiKey: apiKey, secretKey: secretKey)
+        analyticsHelper = AnalyticsHelper(apiKey: apiKey, secretKey: secretKey, baseEventsUrl: urlBuilder.urlForService(.events))
         sessionHelper = SessionHelper(sessionIdleTimeout: config.sessionIdleTimeout)
         inAppHelper = InAppHelper()
         pushHelper = PushHelper()
@@ -206,7 +207,7 @@ open class Kumulos {
         })
 
         if config.deepLinkHandler != nil {
-            deepLinkHelper = DeepLinkHelper(config)
+            deepLinkHelper = DeepLinkHelper(config, urlBuilder: urlBuilder)
         }
     }
 

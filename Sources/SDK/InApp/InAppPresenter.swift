@@ -24,8 +24,6 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
    
     private let messageQueueLock = DispatchSemaphore(value: 1)
     
-    private let inAppRendererUrl : String = "https://iar.app.delivery"
-    
     private var webView : WKWebView?
     private var loadingSpinner : UIActivityIndicatorView?
     private var frame : UIView?
@@ -253,7 +251,8 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         #else
         let cachePolicy = URLRequest.CachePolicy.reloadIgnoringCacheData
         #endif
-        let request = URLRequest(url: URL(string: inAppRendererUrl)!, cachePolicy: cachePolicy, timeoutInterval: 8)
+        let url = Kumulos.getInstance().urlBuilder.urlForService(.iar)
+        let request = URLRequest(url: URL(string: url)!, cachePolicy: cachePolicy, timeoutInterval: 8)
         webView.load(request)
         
         // Spinner
@@ -364,7 +363,8 @@ class InAppPresenter : NSObject, WKScriptMessageHandler, WKNavigationDelegate{
         // Handles HTTP responses for all status codes
         if let httpResponse = navigationResponse.response as? HTTPURLResponse,
            let url = httpResponse.url {
-            if url.absoluteString.starts(with: inAppRendererUrl) && httpResponse.statusCode >= 400 {
+            let baseUrl = Kumulos.getInstance().urlBuilder.urlForService(.iar)
+            if url.absoluteString.starts(with: baseUrl) && httpResponse.statusCode >= 400 {
                 decisionHandler(.cancel)
                 cancelCurrentPresentationQueue(waitForViewCleanup: false)
                 return

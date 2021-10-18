@@ -20,20 +20,21 @@ public extension Kumulos {
      Send any pending reports to the API
      */
     internal func trackAndReportCrashes() {
-       let url =  "\(baseCrashUrl)/track/\(apiKey)/kscrash/\(Kumulos.installId)"
+        let baseUrl = urlBuilder.urlForService(.crash)
+        let url =  "\(baseUrl)/v1/track/\(apiKey)/kscrash/\(Kumulos.installId)"
 
-       let installation = KSCrashInstallationStandard.sharedInstance()
-       installation?.url = URL(string: url)
+        let installation = KSCrashInstallationStandard.sharedInstance()
+        installation?.url = URL(string: url)
 
-       installation?.install()
+        installation?.install()
 
-       installation?.sendAllReports { (reports, completed, error) -> Void in
-           if(completed) {
-               print("Sent \(String(describing: reports?.count)) reports")
-           } else {
-               print("Failed to send reports: \(String(describing: error))")
-           }
-       }
+        installation?.sendAllReports { (reports, completed, error) -> Void in
+            if (completed) {
+                print("Sent \(String(describing: reports?.count)) reports")
+            } else {
+                print("Failed to send reports: \(String(describing: error))")
+            }
+        }
     }
 
     static func logException(name: String, reason: String, language: String, lineOfCode: String, stackTrace: [Any], logAllThreads: Bool)  {

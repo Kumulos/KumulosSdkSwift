@@ -10,7 +10,6 @@ import UIKit
 import UserNotifications
 
 public class KumulosNotificationService {
-    internal static let KS_MEDIA_RESIZER_BASE_URL = "https://i.app.delivery"
     fileprivate static var analyticsHelper: AnalyticsHelper?
     private static let syncBarrier = DispatchSemaphore(value: 0)
 
@@ -240,14 +239,17 @@ public class KumulosNotificationService {
     }
 
     fileprivate class func initializeAnalyticsHelper() {
-        let apiKey = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.API_KEY.rawValue) as! String?
-        let secretKey = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.SECRET_KEY.rawValue) as! String?
-        if (apiKey == nil || secretKey == nil){
+        let apiKey = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.API_KEY.rawValue)
+        let secretKey = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.SECRET_KEY.rawValue)
+
+        guard let apiKey = apiKey as? String, let secretKey = secretKey as? String else {
             print("Extension: authorization credentials not present")
             return;
         }
 
-        analyticsHelper = AnalyticsHelper(apiKey: apiKey!, secretKey: secretKey!)
+        let eventsBaseUrl = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.EVENTS_BASE_URL.rawValue) as? String ?? "https://events.kumulos.com";
+
+        analyticsHelper = AnalyticsHelper(apiKey: apiKey, secretKey: secretKey, baseEventsUrl: eventsBaseUrl)
     }
 
     fileprivate class func isBackgroundPush(userInfo: [AnyHashable:Any]) -> Bool{

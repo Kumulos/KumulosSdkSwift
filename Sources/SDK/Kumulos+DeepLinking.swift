@@ -47,10 +47,10 @@ class DeepLinkHelper {
     let httpClient: KSHttpClient
     var anyContinuationHandled : Bool
 
-    init(_ config: KSConfig) {
+    init(_ config: KSConfig, urlBuilder:UrlBuilder) {
         self.config = config
         httpClient = KSHttpClient(
-            baseUrl: URL(string: "https://links.kumulos.com")!,
+            baseUrl: URL(string: urlBuilder.urlForService(.ddl))!,
             requestFormat: .rawData,
             responseFormat: .rawData,
             additionalHeaders: [

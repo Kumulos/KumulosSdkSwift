@@ -12,6 +12,8 @@ internal enum KumulosUserDefaultsKey : String {
     
     case API_KEY = "KumulosApiKey"
     case SECRET_KEY = "KumulosSecretKey"
+    case EVENTS_BASE_URL = "KumulosEventsBaseUrl"
+    case MEDIA_BASE_URL = "KumulosMediaBaseUrl"
     case INSTALL_UUID = "KumulosUUID"
     case USER_ID = "KumulosCurrentUserID"
     case BADGE_COUNT = "KumulosBadgeCount"
@@ -28,6 +30,7 @@ internal enum KumulosUserDefaultsKey : String {
     static let sharedKeys = [
         API_KEY,
         SECRET_KEY,
+        EVENTS_BASE_URL,
         INSTALL_UUID,
         USER_ID,
         BADGE_COUNT,
