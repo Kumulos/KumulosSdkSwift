@@ -25,11 +25,10 @@ internal class AnalyticsHelper {
     private var analyticsContext : NSManagedObjectContext?
     private var migrationAnalyticsContext : NSManagedObjectContext?
     private var eventsHttpClient:KSHttpClient
-    private let baseEventsUrl = "https://events.kumulos.com"
 
     // MARK: Initialization
 
-    init(apiKey: String, secretKey: String) {
+    init(apiKey: String, secretKey: String, baseEventsUrl: String) {
         analyticsContext = nil
         migrationAnalyticsContext = nil
 

@@ -17,7 +17,9 @@ public class MediaHelper {
             return URL(string: pictureUrl)
         }
 
-        let completeString = String(format: "%@%@%ld%@%@", MediaHelper.mediaResizerBaseUrl, "/", width, "x/", pictureUrl)
+        let baseUrl = KeyValPersistenceHelper.object(forKey: KumulosUserDefaultsKey.MEDIA_BASE_URL.rawValue) as? String ?? mediaResizerBaseUrl;
+
+        let completeString = String(format: "%@%@%ld%@%@", baseUrl, "/", width, "x/", pictureUrl)
         return URL(string: completeString)
     }
 }

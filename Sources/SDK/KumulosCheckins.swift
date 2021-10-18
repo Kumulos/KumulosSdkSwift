@@ -160,7 +160,7 @@ public class KumulosCheckinClient {
 
     public init() {
         httpClient = KSHttpClient(
-            baseUrl: URL(string: Kumulos.baseCrmCoreUrl)!,
+            baseUrl: URL(string: Kumulos.getInstance().urlBuilder.urlForService(.crm))!,
             requestFormat: .rawData,
             responseFormat: .rawData,
             additionalHeaders: [
