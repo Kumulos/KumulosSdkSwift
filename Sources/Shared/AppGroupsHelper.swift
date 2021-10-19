@@ -8,6 +8,10 @@
 
 import Foundation
 
+public struct AppGroupConfig {
+    public static var suffix : String = ".kumulos"
+}
+
 internal class AppGroupsHelper {
 
     internal static func isKumulosAppGroupDefined() -> Bool {
@@ -32,7 +36,7 @@ internal class AppGroupsHelper {
             }
         }
        
-       return "group." + targetBundle.bundleIdentifier! + ".kumulos"
+        return "group.\(targetBundle.bundleIdentifier!)\(AppGroupConfig.suffix)"
     }
 }
 

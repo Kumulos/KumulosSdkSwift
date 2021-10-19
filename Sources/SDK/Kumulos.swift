@@ -56,7 +56,7 @@ open class Kumulos {
     internal let pushNotificationDeviceType = 1
     internal let pushNotificationProductionTokenType:Int = 1
 
-    internal let sdkVersion : String = "9.2.2"
+    internal let sdkVersion : String = "9.2.3"
 
     var networkRequestsInProgress = 0
 
