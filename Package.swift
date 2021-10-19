@@ -35,14 +35,20 @@ let package = Package(
                 "KumulosSDKObjC",
                 "KSCrash"
             ],
-            path: "Sources/SDK"
+            path: "Sources/SDK",
+            exclude: [
+                "Info.plist"
+            ]
         ),
         .target(
             name: "KumulosSDKExtension",
             dependencies: [
                 "KumulosSDKObjC",
             ],
-            path: "Sources/Extension"
+            path: "Sources/Extension",
+            exclude: [
+                "Info.plist"
+            ]
         )
     ],
     swiftLanguageVersions: [.v5]

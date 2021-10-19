@@ -70,9 +70,9 @@ class InAppMessage: NSObject {
 }
 
 public struct InAppButtonPress {
-    let deepLinkData : [AnyHashable:Any]
-    let messageId : Int64
-    let messageData : NSDictionary?
+    public let deepLinkData : [AnyHashable:Any]
+    public let messageId : Int64
+    public let messageData : NSDictionary?
 
     init(deepLinkData:[AnyHashable:Any], messageId:Int64, messageData:NSDictionary?) {
         self.deepLinkData = deepLinkData

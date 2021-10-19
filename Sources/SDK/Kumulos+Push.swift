@@ -160,7 +160,8 @@ public extension Kumulos {
             }
         }
     }
-        
+
+    @available(iOS, deprecated: 10.0)
     fileprivate static func requestTokenLegacy() {
          // Determine the type of notifications we want to ask permission for, for example we may want to alert the user, update the badge number and play a sound
          let notificationTypes: UIUserNotificationType = [UIUserNotificationType.alert, UIUserNotificationType.badge, UIUserNotificationType.sound]
