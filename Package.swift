@@ -17,7 +17,7 @@ let package = Package(
     ],
     dependencies: [
         .package(
-            url: "https://github.com/Kumulos/KSCrash.git", .exact("1.15.21-kumulos.4")
+            url: "https://github.com/kstenerud/KSCrash.git", .exact("1.15.25")
         )
     ],
     targets: [
