@@ -86,9 +86,9 @@ internal class KSHttpClient {
     // MARK: Helpers
 
     fileprivate func newRequestToPath(_ path:String, method:KSHttpMethod, body:Any?) -> URLRequest {
-        let url = URL(string: path, relativeTo: self.baseUrl)
+        let url = self.baseUrl.appendingPathComponent(path, isDirectory: false)
 
-        var urlRequest = URLRequest(url: url!)
+        var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = method.rawValue
 
         if let auth = self.authHeader {
