@@ -30,6 +30,7 @@ enum KSHttpMethod : String {
 
 internal class KSHttpClient {
     private let baseUrl : URL
+    private let baseUrlComponents: URLComponents?
     private let urlSession : URLSession
     private var authHeader : String?
     private let requestFormat : KSHttpDataFormat
@@ -39,6 +40,7 @@ internal class KSHttpClient {
 
     init(baseUrl: URL, requestFormat: KSHttpDataFormat, responseFormat: KSHttpDataFormat, additionalHeaders:[AnyHashable:Any]? = nil) {
         self.baseUrl = baseUrl
+        self.baseUrlComponents = URLComponents(url: baseUrl, resolvingAgainstBaseURL: false)
         self.requestFormat = requestFormat
         self.responseFormat = responseFormat
 
@@ -86,9 +88,10 @@ internal class KSHttpClient {
     // MARK: Helpers
 
     fileprivate func newRequestToPath(_ path:String, method:KSHttpMethod, body:Any?) -> URLRequest {
-        let url = self.baseUrl.appendingPathComponent(path, isDirectory: false)
+        let fullPath = "\(self.baseUrlComponents?.path ?? "")\(path)"
+        let url = URL(string: fullPath, relativeTo: self.baseUrl)
 
-        var urlRequest = URLRequest(url: url)
+        var urlRequest = URLRequest(url: url!)
         urlRequest.httpMethod = method.rawValue
 
         if let auth = self.authHeader {
