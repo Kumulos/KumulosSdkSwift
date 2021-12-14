@@ -91,7 +91,7 @@ internal class KSHttpClient {
         let fullPath = "\(self.baseUrlComponents?.path ?? "")\(path)"
         let url = URL(string: fullPath, relativeTo: self.baseUrl)
 
-        var urlRequest = URLRequest(url: url)
+        var urlRequest = URLRequest(url: url!)
         urlRequest.httpMethod = method.rawValue
 
         if let auth = self.authHeader {
