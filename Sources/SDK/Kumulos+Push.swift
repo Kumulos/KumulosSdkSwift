@@ -406,63 +406,70 @@ class PushHelper {
         let kumulosDidFailToRegister = imp_implementationWithBlock(didFailToRegBlock as Any)
         existingDidFailToReg = class_replaceMethod(klass, didFailToRegisterSelector, kumulosDidFailToRegister, didFailToRegType)
 
-        // iOS9 did receive remote delegate
         // iOS9+ content-available handler
         let didReceiveSelector = #selector(UIApplicationDelegate.application(_:didReceiveRemoteNotification:fetchCompletionHandler:))
         let receiveType = NSString(string: "v@:@@@?").utf8String
         let didReceive : didReceiveBlock = { (obj:Any, _ application: UIApplication, userInfo: [AnyHashable : Any], completionHandler: @escaping (UIBackgroundFetchResult) -> Void) in
-            var fetchResult : UIBackgroundFetchResult = .noData
-            let fetchBarrier = DispatchSemaphore(value: 0)
+                let notification = KSPushNotification(userInfo: userInfo)
+                let hasInApp = notification.inAppDeepLink() != nil
 
-            if let _ = existingDidReceive {
-                unsafeBitCast(existingDidReceive, to: kumulos_applicationDidReceiveRemoteNotificationFetchCompletionHandler.self)(obj, didReceiveSelector, application, userInfo, { (result : UIBackgroundFetchResult) in
-                    fetchResult = result
-                    fetchBarrier.signal()
-                })
-            } else {
-                fetchBarrier.signal()
-            }
-            
-            if UIApplication.shared.applicationState == .inactive {
-               if #available(iOS 10, *) {
-                   // Noop (tap handler in delegate will deal with opening the URL)
-               } else {
-                   Kumulos.sharedInstance.pushHandleOpen(withUserInfo:userInfo)
-               }
-            }
-            
-            let aps = userInfo["aps"] as! [AnyHashable:Any]
-            guard let contentAvailable = aps["content-available"] as? Int, contentAvailable == 1 else {
-                if #available(iOS 10, *) {} else {
-                    self.setBadge(userInfo: userInfo)
-                    self.trackPushDelivery(userInfo: userInfo)
+                self.setBadge(userInfo: userInfo)
+                self.trackPushDelivery(notification: notification)
+
+                if existingDidReceive == nil && !hasInApp {
+                    // Nothing to do
+                    completionHandler(.noData)
+                    return
+                } else if existingDidReceive != nil && !hasInApp {
+                    // Only existing delegate work to do
+                    unsafeBitCast(existingDidReceive, to: kumulos_applicationDidReceiveRemoteNotificationFetchCompletionHandler.self)(obj, didReceiveSelector, application, userInfo, completionHandler)
+                    return
                 }
-                
-                completionHandler(fetchResult)
-                return
-            }
-          
-            self.setBadge(userInfo: userInfo)
-            self.trackPushDelivery(userInfo: userInfo)
-            
-            Kumulos.sharedInstance.inAppHelper.sync { (result:Int) in
-                _ = fetchBarrier.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(20))
 
-                if result < 0 {
-                    fetchResult = .failed
-                } else if result > 0 {
-                    fetchResult = .newData
+                var fetchResult : UIBackgroundFetchResult = .noData
+                let group = DispatchGroup()
+
+                if existingDidReceive != nil {
+                    group.enter()
+                    DispatchQueue.main.async {
+                        unsafeBitCast(existingDidReceive, to: kumulos_applicationDidReceiveRemoteNotificationFetchCompletionHandler.self)(obj, didReceiveSelector, application, userInfo, { (result : UIBackgroundFetchResult) in
+                            DispatchQueue.main.async {
+                                if fetchResult == .noData {
+                                    fetchResult = result
+                                }
+
+                                group.leave()
+                            }
+                        })
+                    }
                 }
-                // No data case is default, allow override from other handler
 
+                if hasInApp {
+                    group.enter()
+                    Kumulos.sharedInstance.inAppHelper.sync { (result:Int) in
+                        DispatchQueue.main.async {
+                            if result < 0 {
+                                fetchResult = .failed
+                            } else if result > 0 {
+                                fetchResult = .newData
+                            }
+                            // No data case is default, allow override from other handler
+                            
+                            group.leave()
+                    }
+                }
+            }
+
+            group.notify(queue: .main) {
                 completionHandler(fetchResult)
             }
         }
         let kumulosDidReceive = imp_implementationWithBlock(unsafeBitCast(didReceive, to: AnyObject.self))
         existingDidReceive = class_replaceMethod(klass, didReceiveSelector, kumulosDidReceive, receiveType)
         if #available(iOS 10, *) {
-            let delegate = KSUserNotificationCenterDelegate()
             
+            let delegate = KSUserNotificationCenterDelegate()
+
             Kumulos.sharedInstance.notificationCenter = delegate
             UNUserNotificationCenter.current().delegate = delegate
         }
@@ -475,8 +482,7 @@ class PushHelper {
         }
     }
     
-    fileprivate func trackPushDelivery(userInfo: [AnyHashable : Any]){
-        let notification = KSPushNotification(userInfo: userInfo)
+    fileprivate func trackPushDelivery(notification: KSPushNotification) {
         if (notification.id == 0) {
             return
         }
