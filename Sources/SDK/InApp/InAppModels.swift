@@ -67,6 +67,10 @@ class InAppMessage: NSObject {
 
         return super.isEqual(object)
     }
+    
+    override var hash: Int {
+        self.id.hashValue
+    }
 }
 
 public struct InAppButtonPress {
