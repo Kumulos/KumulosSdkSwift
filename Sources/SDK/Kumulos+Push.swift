@@ -410,52 +410,52 @@ class PushHelper {
         let didReceiveSelector = #selector(UIApplicationDelegate.application(_:didReceiveRemoteNotification:fetchCompletionHandler:))
         let receiveType = NSString(string: "v@:@@@?").utf8String
         let didReceive : didReceiveBlock = { (obj:Any, _ application: UIApplication, userInfo: [AnyHashable : Any], completionHandler: @escaping (UIBackgroundFetchResult) -> Void) in
-                let notification = KSPushNotification(userInfo: userInfo)
-                let hasInApp = notification.inAppDeepLink() != nil
+            let notification = KSPushNotification(userInfo: userInfo)
+            let hasInApp = notification.inAppDeepLink() != nil
 
-                self.setBadge(userInfo: userInfo)
-                self.trackPushDelivery(notification: notification)
+            self.setBadge(userInfo: userInfo)
+            self.trackPushDelivery(notification: notification)
 
-                if existingDidReceive == nil && !hasInApp {
-                    // Nothing to do
-                    completionHandler(.noData)
-                    return
-                } else if existingDidReceive != nil && !hasInApp {
-                    // Only existing delegate work to do
-                    unsafeBitCast(existingDidReceive, to: kumulos_applicationDidReceiveRemoteNotificationFetchCompletionHandler.self)(obj, didReceiveSelector, application, userInfo, completionHandler)
-                    return
-                }
+            if existingDidReceive == nil && !hasInApp {
+                // Nothing to do
+                completionHandler(.noData)
+                return
+            } else if existingDidReceive != nil && !hasInApp {
+                // Only existing delegate work to do
+                unsafeBitCast(existingDidReceive, to: kumulos_applicationDidReceiveRemoteNotificationFetchCompletionHandler.self)(obj, didReceiveSelector, application, userInfo, completionHandler)
+                return
+            }
 
-                var fetchResult : UIBackgroundFetchResult = .noData
-                let group = DispatchGroup()
+            var fetchResult : UIBackgroundFetchResult = .noData
+            let group = DispatchGroup()
 
-                if existingDidReceive != nil {
-                    group.enter()
-                    DispatchQueue.main.async {
-                        unsafeBitCast(existingDidReceive, to: kumulos_applicationDidReceiveRemoteNotificationFetchCompletionHandler.self)(obj, didReceiveSelector, application, userInfo, { (result : UIBackgroundFetchResult) in
-                            DispatchQueue.main.async {
-                                if fetchResult == .noData {
-                                    fetchResult = result
-                                }
-
-                                group.leave()
-                            }
-                        })
-                    }
-                }
-
-                if hasInApp {
-                    group.enter()
-                    Kumulos.sharedInstance.inAppHelper.sync { (result:Int) in
+            if existingDidReceive != nil {
+                group.enter()
+                DispatchQueue.main.async {
+                    unsafeBitCast(existingDidReceive, to: kumulos_applicationDidReceiveRemoteNotificationFetchCompletionHandler.self)(obj, didReceiveSelector, application, userInfo, { (result : UIBackgroundFetchResult) in
                         DispatchQueue.main.async {
-                            if result < 0 {
-                                fetchResult = .failed
-                            } else if result > 0 {
-                                fetchResult = .newData
+                            if fetchResult == .noData {
+                                fetchResult = result
                             }
-                            // No data case is default, allow override from other handler
-                            
+
                             group.leave()
+                        }
+                    })
+                }
+            }
+
+            if hasInApp {
+                group.enter()
+                Kumulos.sharedInstance.inAppHelper.sync { (result:Int) in
+                    DispatchQueue.main.async {
+                        if result < 0 {
+                            fetchResult = .failed
+                        } else if result > 0 {
+                            fetchResult = .newData
+                        }
+                        // No data case is default, allow override from other handler
+                        
+                        group.leave()
                     }
                 }
             }
