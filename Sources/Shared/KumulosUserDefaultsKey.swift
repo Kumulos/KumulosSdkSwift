@@ -21,7 +21,8 @@ internal enum KumulosUserDefaultsKey : String {
     
     //exist only in standard defaults for app
     case MIGRATED_TO_GROUPS = "KumulosDidMigrateToAppGroups"
-    case MESSAGES_LAST_SYNC_TIME = "KumulosMessagesLastSyncTime"
+    case IN_APP_LAST_SYNCED_AT = "KumulosMessagesLastSyncedAt"
+    case IN_APP_MOST_RECENT_UPDATED_AT = "KumulosInAppMostRecentUpdatedAt"
     case IN_APP_CONSENTED = "KumulosInAppConsented"
     
     //exist only in standard defaults for extension
@@ -31,6 +32,7 @@ internal enum KumulosUserDefaultsKey : String {
         API_KEY,
         SECRET_KEY,
         EVENTS_BASE_URL,
+        MEDIA_BASE_URL,
         INSTALL_UUID,
         USER_ID,
         BADGE_COUNT,

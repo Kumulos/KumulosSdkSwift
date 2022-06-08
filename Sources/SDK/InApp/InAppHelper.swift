@@ -18,25 +18,25 @@ typealias kumulos_applicationPerformFetchWithCompletionHandler = @convention(c) 
 typealias fetchBlock = @convention(block) (_ obj:Any, _ application:UIApplication, _ completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> Void;
 private var ks_existingBackgroundFetchDelegate: IMP? = nil
 
+typealias InAppSyncCompletionHandler = (_ result:Int) -> Void
+
 internal class InAppHelper {
     
     private var presenter: InAppPresenter
     private var pendingTickleIds: NSMutableOrderedSet = NSMutableOrderedSet(capacity: 1)
-    private var registered : Bool = false
     
     var messagesContext: NSManagedObjectContext? = nil;
     
     internal let MESSAGE_TYPE_IN_APP = 2
     
-    private var syncBarrier: DispatchSemaphore
     private var syncQueue: DispatchQueue
-    private let STORED_IN_APP_LIMIT = 50;
+    private let STORED_IN_APP_LIMIT = 50
+    private let SYNC_DEBOUNCE_SECONDS = 3600 as TimeInterval
     
     // MARK: Initialization
     
     init() {
         presenter = InAppPresenter()
-        syncBarrier = DispatchSemaphore(value: 0)
         syncQueue = DispatchQueue(label: "kumulos.in-app.sync")
     }
     
@@ -83,7 +83,7 @@ internal class InAppHelper {
     @objc func appBecameActive() -> Void {
         presentImmediateAndNextOpenContent()
         
-        let onComplete: ((Int) -> Void)? = { result in
+        let onComplete: InAppSyncCompletionHandler = { result in
             if result > 0 {
                 self.presentImmediateAndNextOpenContent()
             }
@@ -92,10 +92,7 @@ internal class InAppHelper {
         #if DEBUG
         sync(onComplete)
         #else
-        let lastSyncTime = UserDefaults.standard.object(forKey: KumulosUserDefaultsKey.MESSAGES_LAST_SYNC_TIME.rawValue) as? Date
-        if lastSyncTime != nil && lastSyncTime!.timeIntervalSinceNow < -3600 as Double {
-            sync(onComplete)
-        }
+        syncDebounced(onComplete)
         #endif
     }
     
@@ -193,35 +190,23 @@ internal class InAppHelper {
             return;
         }
         
-        if registered == true {
-            return
-        }
-        
-        registered = true
-        
         _ = setupSyncTask
         NotificationCenter.default.addObserver(self, selector: #selector(appBecameActive), name: UIApplication.didBecomeActiveNotification, object: nil)
         
-        DispatchQueue.main.async(execute: {
-            if UIApplication.shared.applicationState == .background {
-                return
+       
+        let onComplete: InAppSyncCompletionHandler = { result in
+            if result > 0 {
+                self.presentImmediateAndNextOpenContent()
             }
-            
-            let onComplete: ((Int) -> Void)? = { result in
-                if result > 0 {
-                    self.presentImmediateAndNextOpenContent()
-                }
-            }
-            
-            self.sync(onComplete)
-            
-        })
+        }
+        self.sync(onComplete)
     }
     
     private func resetMessagingState() -> Void {
         NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
         UserDefaults.standard.removeObject(forKey: KumulosUserDefaultsKey.IN_APP_CONSENTED.rawValue)
-        UserDefaults.standard.removeObject(forKey: KumulosUserDefaultsKey.MESSAGES_LAST_SYNC_TIME.rawValue)
+        UserDefaults.standard.removeObject(forKey: KumulosUserDefaultsKey.IN_APP_LAST_SYNCED_AT.rawValue)
+        UserDefaults.standard.removeObject(forKey: KumulosUserDefaultsKey.IN_APP_MOST_RECENT_UPDATED_AT.rawValue)
         
         messagesContext!.performAndWait({
             let context = self.messagesContext
@@ -248,65 +233,71 @@ internal class InAppHelper {
     }
     
     // MARK: Message management
+    func syncDebounced(_ onComplete: InAppSyncCompletionHandler? = nil) {
+        syncQueue.async {
+            let lastSyncedAt = UserDefaults.standard.object(forKey: KumulosUserDefaultsKey.IN_APP_LAST_SYNCED_AT.rawValue) as? Date ?? Date(timeIntervalSince1970: 0)
+
+            if lastSyncedAt.timeIntervalSinceNow < self.SYNC_DEBOUNCE_SECONDS {
+                return
+            }
+
+            self.sync(onComplete)
+        }
+    }
+    
     func sync(_ onComplete: ((_ result: Int) -> Void)? = nil) {
-        syncQueue.async(execute: {
-            let lastSyncTime = UserDefaults.standard.object(forKey: KumulosUserDefaultsKey.MESSAGES_LAST_SYNC_TIME.rawValue) as? NSDate
-            var after = ""
+        syncQueue.async {
+            let syncBarrier = DispatchSemaphore(value: 0)
             
-            if lastSyncTime != nil {
+            let mostRecentUpdate = UserDefaults.standard.object(forKey: KumulosUserDefaultsKey.IN_APP_LAST_SYNCED_AT.rawValue) as? NSDate
+            var after = ""
+
+            if let mostRecentUpdate = mostRecentUpdate {
                 let formatter = DateFormatter()
                 formatter.timeStyle = .full
                 formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
                 formatter.timeZone = NSTimeZone(forSecondsFromGMT: 0) as TimeZone
                 formatter.locale = Locale(identifier: "en_US_POSIX")
-                if let lastSyncTime = lastSyncTime {
-                    after = "?after=\(KSHttpUtil.urlEncode(formatter.string(from: lastSyncTime as Date))!)" ;
-                }
+                after = "?after=\(KSHttpUtil.urlEncode(formatter.string(from: mostRecentUpdate as Date))!)"
             }
-            
+
             let encodedIdentifier = KSHttpUtil.urlEncode(KumulosHelper.currentUserIdentifier)
             let path = "/v1/users/\(encodedIdentifier!)/messages\(after)"
             
             Kumulos.sharedInstance.pushHttpClient.sendRequest(.GET, toPath: path, data: nil, onSuccess: { response, decodedBody in
+                defer {
+                    UserDefaults.standard.set(Date(), forKey: KumulosUserDefaultsKey.IN_APP_LAST_SYNCED_AT.rawValue)
+                    syncBarrier.signal()
+                }
+
                 let messagesToPersist = decodedBody as? [[AnyHashable : Any]]
                 if (messagesToPersist == nil || messagesToPersist!.count == 0) {
-                    if onComplete != nil {
-                        onComplete?(0)
-                    }
-                    
-                    self.syncBarrier.signal()
+                    onComplete?(0)
                     return
                 }
                 
                 self.persistInAppMessages(messages: messagesToPersist!)
-                
-                if onComplete != nil {
-                    onComplete?(1)
-                }
-                
-                DispatchQueue.main.async(execute: {
+                onComplete?(1)
+
+                DispatchQueue.main.async {
                     if UIApplication.shared.applicationState != .active {
                         return
                     }
-                    
+                       
                     DispatchQueue.global(qos: .default).async(execute: {
                         let messagesToPresent = self.getMessagesToPresent([InAppPresented.IMMEDIATELY.rawValue])
                         self.presenter.queueMessagesForPresentation(messages: messagesToPresent, tickleIds: self.pendingTickleIds)
                     })
-                })
-                
-                self.syncBarrier.signal()
-                
-            }, onFailure: { response, error, data in
-                if onComplete != nil {
-                    onComplete?(-1)
                 }
-                
-                self.syncBarrier.signal()
+            }, onFailure: { response, error, data in
+                onComplete?(-1)
+                syncBarrier.signal()
             })
-        })
-        _ = syncBarrier.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(20))
+
+            syncBarrier.wait()
+        }
     }
+    
     
     private func persistInAppMessages(messages: [[AnyHashable : Any]]) {
         messagesContext!.performAndWait({
@@ -318,7 +309,7 @@ internal class InAppHelper {
                 return
             }
             
-            var lastSyncTime = NSDate(timeIntervalSince1970: 0)
+            var mostRecentUpdate = NSDate(timeIntervalSince1970: 0)
             let dateParser = DateFormatter()
             dateParser.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
             dateParser.locale = Locale(identifier: "en_US_POSIX")
@@ -386,8 +377,8 @@ internal class InAppHelper {
                 
                 model.expiresAt = dateParser.date(from: message["expiresAt"] as? String ?? "") as NSDate?
                 
-                if (model.updatedAt.timeIntervalSince1970 > lastSyncTime.timeIntervalSince1970) {
-                    lastSyncTime = model.updatedAt
+                if (model.updatedAt.timeIntervalSince1970 > mostRecentUpdate.timeIntervalSince1970) {
+                    mostRecentUpdate = model.updatedAt
                 }
             }
             
@@ -421,7 +412,7 @@ internal class InAppHelper {
                 removeNotificationTickle(id: idEvicted)
             }
             
-            UserDefaults.standard.set(lastSyncTime, forKey: KumulosUserDefaultsKey.MESSAGES_LAST_SYNC_TIME.rawValue)
+            UserDefaults.standard.set(mostRecentUpdate, forKey: KumulosUserDefaultsKey.IN_APP_MOST_RECENT_UPDATED_AT.rawValue)
             
             trackMessageDelivery(messages: messages)
             
